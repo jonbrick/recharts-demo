@@ -28,25 +28,35 @@ export default function App() {
       ? calculateAverageData(data, selectedTable)
       : calculateSumData(data, selectedTable);
 
-  // ADD these two functions above your App component:
+  console.log("Operator:", operator);
+  console.log("AllTimeData:", allTimeData);
+  console.log("Selected metric:", selectedMetric);
+  console.log("Value:", allTimeData[0][selectedMetric]);
+
+  // REPLACE the calculateAverageData and calculateSumData functions with this:
   function calculateAverageData(data, selectedTable) {
+    console.log("CALCULATING AVERAGE"); // ADD THIS
+
     const config = dataSourceConfig[selectedTable];
     const result = { name: "All Time" };
 
     [...config.metrics, config.overlayMetric].forEach((metric) => {
       const sum = data.reduce((sum, row) => sum + (row[metric.key] || 0), 0);
-      result[metric.key] = sum / data.length;
+      result[metric.key] = sum / data.length; // Always average
     });
 
     return [result];
   }
 
   function calculateSumData(data, selectedTable) {
+    console.log("CALCULATING SUM"); // ADD THIS
+
     const config = dataSourceConfig[selectedTable];
     const result = { name: "All Time" };
 
     [...config.metrics, config.overlayMetric].forEach((metric) => {
       result[metric.key] = data.reduce(
+        // Always sum
         (sum, row) => sum + (row[metric.key] || 0),
         0
       );
@@ -96,6 +106,7 @@ export default function App() {
         </div>
 
         <MetricsSummary
+          key={`${operator}-${selectedMetric}`} // ADD THIS LINE
           selectedTable={selectedTable}
           currentData={currentData}
           granularity={granularity}

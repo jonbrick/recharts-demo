@@ -15,7 +15,15 @@ export function MetricsSummary({
     (m) => m.key === selectedMetric
   );
 
-  const value = currentData[0][selectedMetric]; // CHANGED: direct access since data is pre-calculated
+  const value =
+    granularity === "monthly"
+      ? operator === "average"
+        ? currentData.reduce(
+            (sum, row) => sum + (row[selectedMetric] || 0),
+            0
+          ) / currentData.length
+        : currentData.reduce((sum, row) => sum + (row[selectedMetric] || 0), 0)
+      : currentData[0]?.[selectedMetric] || 0;
 
   const label =
     granularity === "monthly"
