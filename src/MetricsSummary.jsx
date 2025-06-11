@@ -2,6 +2,7 @@
 
 import React from "react";
 import { dataSourceConfig } from "./chartConfig.js";
+import { calculateMetricValue } from "./utils.js";
 
 export function MetricsSummary({
   selectedTable,
@@ -15,15 +16,12 @@ export function MetricsSummary({
     (m) => m.key === selectedMetric
   );
 
-  const value =
-    granularity === "monthly"
-      ? operator === "average"
-        ? currentData.reduce(
-            (sum, row) => sum + (row[selectedMetric] || 0),
-            0
-          ) / currentData.length
-        : currentData.reduce((sum, row) => sum + (row[selectedMetric] || 0), 0)
-      : currentData[0]?.[selectedMetric] || 0;
+  const value = calculateMetricValue(
+    currentData,
+    selectedMetric,
+    granularity,
+    operator
+  );
 
   const label =
     granularity === "monthly"

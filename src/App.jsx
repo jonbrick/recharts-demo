@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { ControlsContainer, ChartTypeSelector } from "./ChartControls.jsx";
 import { MetricsSummary } from "./MetricsSummary.jsx";
 import { ChartRenderer } from "./ChartRenderer.jsx";
 import { dataSourceConfig } from "./chartConfig.js";
 import { githubActionsData, pagerDutyData, githubPRData } from "./data.js";
+import { calculateAverageData, calculateSumData } from "./utils.js";
 
 export default function App() {
   const [chartType, setChartType] = useState("area");
@@ -23,47 +24,16 @@ export default function App() {
   const config = dataSourceConfig[selectedTable];
 
   // Replace your existing allTimeData calculation with this:
-  const allTimeData =
-    operator === "average"
+  const allTimeData = useMemo(() => {
+    return operator === "average"
       ? calculateAverageData(data, selectedTable)
       : calculateSumData(data, selectedTable);
+  }, [data, selectedTable, operator]);
 
   console.log("Operator:", operator);
   console.log("AllTimeData:", allTimeData);
   console.log("Selected metric:", selectedMetric);
   console.log("Value:", allTimeData[0][selectedMetric]);
-
-  // REPLACE the calculateAverageData and calculateSumData functions with this:
-  function calculateAverageData(data, selectedTable) {
-    console.log("CALCULATING AVERAGE"); // ADD THIS
-
-    const config = dataSourceConfig[selectedTable];
-    const result = { name: "All Time" };
-
-    [...config.metrics, config.overlayMetric].forEach((metric) => {
-      const sum = data.reduce((sum, row) => sum + (row[metric.key] || 0), 0);
-      result[metric.key] = sum / data.length; // Always average
-    });
-
-    return [result];
-  }
-
-  function calculateSumData(data, selectedTable) {
-    console.log("CALCULATING SUM"); // ADD THIS
-
-    const config = dataSourceConfig[selectedTable];
-    const result = { name: "All Time" };
-
-    [...config.metrics, config.overlayMetric].forEach((metric) => {
-      result[metric.key] = data.reduce(
-        // Always sum
-        (sum, row) => sum + (row[metric.key] || 0),
-        0
-      );
-    });
-
-    return [result];
-  }
 
   // Get the current dataset based on granularity
   const currentData = granularity === "monthly" ? data : allTimeData;
