@@ -10,6 +10,7 @@ export default function App() {
   const [granularity, setGranularity] = useState("monthly");
   const [selectedTable, setSelectedTable] = useState("githubActions");
   const [selectedMetric, setSelectedMetric] = useState("deployments");
+  const [operator, setOperator] = useState("average");
 
   // Available data tables
   const dataTables = {
@@ -21,40 +22,39 @@ export default function App() {
   const data = dataTables[selectedTable];
   const config = dataSourceConfig[selectedTable];
 
-  // Calculate all-time aggregated data
-  const allTimeData = [
-    {
-      name: "All Time",
-      deployments: data.reduce((sum, row) => sum + (row.deployments || 0), 0),
-      successRate:
-        data.reduce((sum, row) => sum + (row.successRate || 0), 0) /
-        data.length,
-      buildTimeMinutes:
-        data.reduce((sum, row) => sum + (row.buildTimeMinutes || 0), 0) /
-        data.length,
-      testsRun: data.reduce((sum, row) => sum + (row.testsRun || 0), 0),
-      incidents: data.reduce((sum, row) => sum + (row.incidents || 0), 0),
-      mttrMinutes:
-        data.reduce((sum, row) => sum + (row.mttrMinutes || 0), 0) /
-        data.length,
-      criticalIncidents: data.reduce(
-        (sum, row) => sum + (row.criticalIncidents || 0),
+  // Replace your existing allTimeData calculation with this:
+  const allTimeData =
+    operator === "average"
+      ? calculateAverageData(data, selectedTable)
+      : calculateSumData(data, selectedTable);
+
+  // ADD these two functions above your App component:
+  function calculateAverageData(data, selectedTable) {
+    const config = dataSourceConfig[selectedTable];
+    const result = { name: "All Time" };
+
+    [...config.metrics, config.overlayMetric].forEach((metric) => {
+      const sum = data.reduce((sum, row) => sum + (row[metric.key] || 0), 0);
+      result[metric.key] = sum / data.length;
+    });
+
+    return [result];
+  }
+
+  function calculateSumData(data, selectedTable) {
+    const config = dataSourceConfig[selectedTable];
+    const result = { name: "All Time" };
+
+    [...config.metrics, config.overlayMetric].forEach((metric) => {
+      result[metric.key] = data.reduce(
+        (sum, row) => sum + (row[metric.key] || 0),
         0
-      ),
-      usersAffected: data.reduce(
-        (sum, row) => sum + (row.usersAffected || 0),
-        0
-      ),
-      // Add PR metrics
-      pullRequests: data.reduce((sum, row) => sum + (row.pullRequests || 0), 0),
-      mergeRate:
-        data.reduce((sum, row) => sum + (row.mergeRate || 0), 0) / data.length,
-      avgReviewTime:
-        data.reduce((sum, row) => sum + (row.avgReviewTime || 0), 0) /
-        data.length,
-      linesChanged: data.reduce((sum, row) => sum + (row.linesChanged || 0), 0),
-    },
-  ];
+      );
+    });
+
+    return [result];
+  }
+
   // Get the current dataset based on granularity
   const currentData = granularity === "monthly" ? data : allTimeData;
 
@@ -69,9 +69,11 @@ export default function App() {
     <div className="w-full max-w-6xl mx-auto p-6 bg-gray-50 min-h-screen">
       <ControlsContainer
         selectedTable={selectedTable}
-        onTableChange={handleTableChange} // Changed from setSelectedTable
+        onTableChange={handleTableChange}
         selectedMetric={selectedMetric}
         onMetricChange={setSelectedMetric}
+        operator={operator}
+        onOperatorChange={setOperator}
         granularity={granularity}
         onGranularityChange={setGranularity}
       />
@@ -98,6 +100,7 @@ export default function App() {
           currentData={currentData}
           granularity={granularity}
           selectedMetric={selectedMetric}
+          operator={operator}
         />
         <ChartRenderer
           chartType={chartType}
