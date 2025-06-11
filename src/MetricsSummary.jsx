@@ -7,33 +7,37 @@ export function MetricsSummary({
   selectedTable,
   currentData,
   granularity,
-  isStacked,
+  selectedMetric,
 }) {
-  if (!isStacked) return null;
-
   const config = dataSourceConfig[selectedTable];
+  const metric = [...config.metrics, config.overlayMetric].find(
+    (m) => m.key === selectedMetric
+  );
 
-  // Calculate total based on data source
-  const total = currentData.reduce((sum, row) => {
-    if (selectedTable === "githubActions") {
-      return sum + (row.deployments || 0) + (row.testsRun || 0) / 100;
-    } else {
-      return sum + (row.incidents || 0) + (row.usersAffected || 0) / 100;
-    }
+  // Calculate based on granularity
+  const sum = currentData.reduce((sum, row) => {
+    return sum + (row[selectedMetric] || 0);
   }, 0);
+
+  const displayValue =
+    granularity === "monthly"
+      ? sum / currentData.length // Daily average: 45.1 per day
+      : sum; // All time total: 1354.7
+
+  const label = granularity === "monthly" ? "Daily Average" : "All Time Total";
 
   return (
     <div className="mb-6">
       <div className="text-sm text-gray-600 font-medium">
-        {config.name} - Total Activity
+        {metric.label} - {label}
       </div>
       <div className="text-3xl font-bold text-gray-800">
-        {total.toLocaleString()}
+        {displayValue.toFixed(1)}
       </div>
       <div className="text-xs text-gray-500">
         {granularity === "monthly"
-          ? "Sum of all metrics across all days"
-          : "Sum of all metrics for the full period"}
+          ? "Average per day"
+          : "Total for entire period"}
       </div>
     </div>
   );

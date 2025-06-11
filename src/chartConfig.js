@@ -82,6 +82,45 @@ export const dataSourceConfig = {
       { key: "usersAffected", label: "Users Affected", format: "number" },
     ],
   },
+
+  githubPR: {
+    name: "GitHub PRs",
+    icon: "🔀",
+    title: "GitHub Pull Request Activity",
+    description: "Pull request and code review metrics for May 2025",
+    metrics: [
+      {
+        key: "pullRequests",
+        label: "Pull Requests",
+        color: "#8884d8",
+        description: "Daily PR count",
+      },
+      {
+        key: "mergeRate",
+        label: "Merge Rate",
+        color: "#82ca9d",
+        description: "Percentage of PRs merged",
+      },
+      {
+        key: "avgReviewTime",
+        label: "Review Time",
+        color: "#ffc658",
+        description: "Average review time in hours",
+      },
+    ],
+    overlayMetric: {
+      key: "linesChanged",
+      label: "Lines Changed",
+      color: "#1e40af",
+      description: "Total lines of code changed",
+    },
+    tableColumns: [
+      { key: "pullRequests", label: "Pull Requests", format: "number" },
+      { key: "mergeRate", label: "Merge Rate (%)", format: "percentage" },
+      { key: "avgReviewTime", label: "Review Time (hrs)", format: "decimal" },
+      { key: "linesChanged", label: "Lines Changed", format: "number" },
+    ],
+  },
 };
 
 export const chartTypeConfig = {

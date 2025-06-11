@@ -68,16 +68,16 @@ export function StackingToggle({ isStacked, onStackingChange }) {
   );
 }
 
-export function GranularityToggle({ granularity, onGranularityChange }) {
+export function GranularitySelector({ granularity, onGranularityChange }) {
   return (
-    <button
-      onClick={() =>
-        onGranularityChange(granularity === "monthly" ? "all-time" : "monthly")
-      }
-      className="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 shadow-lg"
+    <select
+      value={granularity}
+      onChange={(e) => onGranularityChange(e.target.value)}
+      className="bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg font-semibold focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors duration-200 shadow-sm"
     >
-      Switch to {granularity === "monthly" ? "All Time" : "Monthly"} View
-    </button>
+      <option value="monthly">Daily View</option>
+      <option value="all-time">All Time View</option>
+    </select>
   );
 }
 
@@ -120,7 +120,8 @@ export function ControlsContainer({
           selectedMetric={selectedMetric}
           onMetricChange={onMetricChange}
         />
-        <GranularityToggle
+        <OperatorSelector />
+        <GranularitySelector
           granularity={granularity}
           onGranularityChange={onGranularityChange}
         />

@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { githubActionsData, pagerDutyData } from "./data.js";
 import { ControlsContainer, ChartTypeSelector } from "./ChartControls.jsx";
 import { MetricsSummary } from "./MetricsSummary.jsx";
 import { ChartRenderer } from "./ChartRenderer.jsx";
 import { dataSourceConfig } from "./chartConfig.js";
+import { githubActionsData, pagerDutyData, githubPRData } from "./data.js";
 
 export default function App() {
   const [chartType, setChartType] = useState("area");
@@ -15,6 +15,7 @@ export default function App() {
   const dataTables = {
     githubActions: githubActionsData,
     pagerDuty: pagerDutyData,
+    githubPR: githubPRData,
   };
 
   const data = dataTables[selectedTable];
@@ -44,42 +45,47 @@ export default function App() {
         (sum, row) => sum + (row.usersAffected || 0),
         0
       ),
+      // Add PR metrics
+      pullRequests: data.reduce((sum, row) => sum + (row.pullRequests || 0), 0),
+      mergeRate:
+        data.reduce((sum, row) => sum + (row.mergeRate || 0), 0) / data.length,
+      avgReviewTime:
+        data.reduce((sum, row) => sum + (row.avgReviewTime || 0), 0) /
+        data.length,
+      linesChanged: data.reduce((sum, row) => sum + (row.linesChanged || 0), 0),
     },
   ];
-
   // Get the current dataset based on granularity
   const currentData = granularity === "monthly" ? data : allTimeData;
+
+  const handleTableChange = (newTable) => {
+    setSelectedTable(newTable);
+    // Reset to first metric of new data source
+    const newConfig = dataSourceConfig[newTable];
+    setSelectedMetric(newConfig.metrics[0].key);
+  };
 
   return (
     <div className="w-full max-w-6xl mx-auto p-6 bg-gray-50 min-h-screen">
       <ControlsContainer
         selectedTable={selectedTable}
-        onTableChange={setSelectedTable}
+        onTableChange={handleTableChange} // Changed from setSelectedTable
         selectedMetric={selectedMetric}
         onMetricChange={setSelectedMetric}
         granularity={granularity}
         onGranularityChange={setGranularity}
-        chartType={chartType}
-        onChartTypeChange={setChartType}
       />
 
-      <MetricsSummary
-        selectedTable={selectedTable}
-        currentData={currentData}
-        granularity={granularity}
-        isStacked={chartType === "area"}
-      />
-
-      <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex-1">
-            <h2 className="text-2xl font-semibold text-gray-700 mb-2">
+      <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col gap-2">
+        <div className="flex justify-between items-start">
+          <div className="flex-1 flex flex-col">
+            <h2 className="text-2xl font-semibold text-gray-700">
               {config.title}
             </h2>
-            <p className="text-gray-600 mb-6">{config.description}</p>
+            <p className="text-gray-600">{config.description}</p>
           </div>
 
-          <div className="ml-4">
+          <div className="ml-4 flex flex-col gap-4">
             <ChartTypeSelector
               chartType={chartType}
               onChartTypeChange={setChartType}
@@ -87,6 +93,12 @@ export default function App() {
           </div>
         </div>
 
+        <MetricsSummary
+          selectedTable={selectedTable}
+          currentData={currentData}
+          granularity={granularity}
+          selectedMetric={selectedMetric}
+        />
         <ChartRenderer
           chartType={chartType}
           currentData={currentData}
@@ -96,16 +108,16 @@ export default function App() {
         />
       </div>
 
-      <div className="bg-white rounded-xl shadow-lg p-6">
+      <div className="bg-white rounded-xl shadow-lg p-6 mt-8">
         <h3 className="text-xl font-semibold text-gray-700 mb-4">
           Data Source: {config.name}
         </h3>
         <div className="grid md:grid-cols-2 gap-4">
-          <div className="space-y-3">
+          <div className="flex flex-col gap-3">
             <h4 className="font-semibold text-blue-600">
               {config.icon} {config.name} Metrics:
             </h4>
-            <ul className="space-y-2 text-gray-700 text-sm">
+            <ul className="flex flex-col gap-2 text-gray-700 text-sm">
               {config.metrics.map((metric) => (
                 <li key={metric.key}>
                   • <strong>{metric.label}:</strong> {metric.description}
@@ -120,9 +132,9 @@ export default function App() {
             </ul>
           </div>
 
-          <div className="space-y-3">
+          <div className="flex flex-col gap-3">
             <h4 className="font-semibold text-green-600">📊 Pattern 1 Demo:</h4>
-            <ul className="space-y-2 text-gray-700 text-sm">
+            <ul className="flex flex-col gap-2 text-gray-700 text-sm">
               <li>• Switch between data sources using the dropdown</li>
               <li>• Toggle between stacked and overlapping views</li>
               <li>• Try different chart types for the same data</li>
