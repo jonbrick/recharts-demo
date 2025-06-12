@@ -25,6 +25,29 @@ import {
   rateMetrics,
 } from "../lib/chartConfig.js";
 
+// Common chart colors
+const CHART_COLORS = [
+  "#8884d8",
+  "#82ca9d",
+  "#ffc658",
+  "#ff7c7c",
+  "#8dd1e1",
+  "#d084d0",
+  "#ffb347",
+  "#87ceeb",
+];
+
+const commonChartProps = {
+  margin: { top: 20, right: 30, left: 20, bottom: 5 },
+};
+
+const commonTooltipStyle = {
+  backgroundColor: "#fff",
+  border: "1px solid #ccc",
+  borderRadius: "8px",
+  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+};
+
 function CustomTooltip({
   active,
   payload,
@@ -39,18 +62,6 @@ function CustomTooltip({
   // Get all possible series from the data point
   const dataPoint = payload[0]?.payload;
   if (!dataPoint) return null;
-
-  // Color array that matches what the charts use
-  const colors = [
-    "#8884d8",
-    "#82ca9d",
-    "#ffc658",
-    "#ff7c7c",
-    "#8dd1e1",
-    "#d084d0",
-    "#ffb347",
-    "#87ceeb",
-  ];
 
   // Determine which keys to show in the tooltip
   let keysToShow;
@@ -74,7 +85,8 @@ function CustomTooltip({
 
         // Try to find color from payload first, fallback to index-based color
         const payloadEntry = payload.find((p) => p.dataKey === seriesKey);
-        const color = payloadEntry?.color || colors[index % colors.length];
+        const color =
+          payloadEntry?.color || CHART_COLORS[index % CHART_COLORS.length];
 
         // Check if this is a rate metric
         const isRateMetric =
@@ -99,36 +111,12 @@ function CustomTooltip({
   );
 }
 
-const commonChartProps = {
-  margin: { top: 20, right: 30, left: 20, bottom: 5 },
-};
-
-const commonTooltipStyle = {
-  backgroundColor: "#fff",
-  border: "1px solid #ccc",
-  borderRadius: "8px",
-  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-};
-
-function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
+export function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
     ? Object.keys(currentData[0]).filter((key) => key !== "name")
     : [selectedMetric];
-
-  console.log("AreaChart seriesKeys:", seriesKeys);
-
-  const colors = [
-    "#8884d8",
-    "#82ca9d",
-    "#ffc658",
-    "#ff7c7c",
-    "#8dd1e1",
-    "#d084d0",
-    "#ffb347",
-    "#87ceeb",
-  ];
 
   return (
     <ResponsiveContainer width="100%" height={400}>
@@ -157,8 +145,8 @@ function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
               key={key}
               type="monotone"
               dataKey={isMultiSeries ? key : selectedMetric}
-              stroke={colors[index % colors.length]}
-              fill={colors[index % colors.length]}
+              stroke={CHART_COLORS[index % CHART_COLORS.length]}
+              fill={CHART_COLORS[index % CHART_COLORS.length]}
               fillOpacity={0.8}
               strokeWidth={2}
               name={isMultiSeries ? key : "Organization"}
@@ -173,22 +161,12 @@ function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
   );
 }
 
-function LineChartComponent({ currentData, selectedMetric, groupBy }) {
+export function LineChartComponent({ currentData, selectedMetric, groupBy }) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
     ? Object.keys(currentData[0]).filter((key) => key !== "name")
     : [selectedMetric];
-  const colors = [
-    "#8884d8",
-    "#82ca9d",
-    "#ffc658",
-    "#ff7c7c",
-    "#8dd1e1",
-    "#d084d0",
-    "#ffb347",
-    "#87ceeb",
-  ];
 
   return (
     <ResponsiveContainer width="100%" height={400}>
@@ -217,10 +195,10 @@ function LineChartComponent({ currentData, selectedMetric, groupBy }) {
               key={key}
               type="monotone"
               dataKey={isMultiSeries ? key : selectedMetric}
-              stroke={colors[index % colors.length]}
+              stroke={CHART_COLORS[index % CHART_COLORS.length]}
               strokeWidth={3}
               dot={{
-                fill: colors[index % colors.length],
+                fill: CHART_COLORS[index % CHART_COLORS.length],
                 strokeWidth: 2,
                 r: 4,
               }}
@@ -236,23 +214,16 @@ function LineChartComponent({ currentData, selectedMetric, groupBy }) {
   );
 }
 
-function VerticalBarChartComponent({ currentData, selectedMetric, groupBy }) {
+export function VerticalBarChartComponent({
+  currentData,
+  selectedMetric,
+  groupBy,
+}) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
     ? Object.keys(currentData[0]).filter((key) => key !== "name")
     : [selectedMetric];
-
-  const colors = [
-    "#8884d8",
-    "#82ca9d",
-    "#ffc658",
-    "#ff7c7c",
-    "#8dd1e1",
-    "#d084d0",
-    "#ffb347",
-    "#87ceeb",
-  ];
 
   return (
     <ResponsiveContainer width="100%" height={400}>
@@ -280,7 +251,7 @@ function VerticalBarChartComponent({ currentData, selectedMetric, groupBy }) {
             <Bar
               key={key}
               dataKey={isMultiSeries ? key : selectedMetric}
-              fill={colors[index % colors.length]}
+              fill={CHART_COLORS[index % CHART_COLORS.length]}
               name={isMultiSeries ? key : "Organization"}
             />
           ))}
@@ -289,23 +260,16 @@ function VerticalBarChartComponent({ currentData, selectedMetric, groupBy }) {
   );
 }
 
-function HorizontalBarChartComponent({ currentData, selectedMetric, groupBy }) {
+export function HorizontalBarChartComponent({
+  currentData,
+  selectedMetric,
+  groupBy,
+}) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
     ? Object.keys(currentData[0]).filter((key) => key !== "name")
     : [selectedMetric];
-
-  const colors = [
-    "#8884d8",
-    "#82ca9d",
-    "#ffc658",
-    "#ff7c7c",
-    "#8dd1e1",
-    "#d084d0",
-    "#ffb347",
-    "#87ceeb",
-  ];
 
   return (
     <ResponsiveContainer width="100%" height={400}>
@@ -343,7 +307,7 @@ function HorizontalBarChartComponent({ currentData, selectedMetric, groupBy }) {
             <Bar
               key={key}
               dataKey={isMultiSeries ? key : selectedMetric}
-              fill={colors[index % colors.length]}
+              fill={CHART_COLORS[index % CHART_COLORS.length]}
               name={isMultiSeries ? key : "Organization"}
             />
           ))}
@@ -352,7 +316,7 @@ function HorizontalBarChartComponent({ currentData, selectedMetric, groupBy }) {
   );
 }
 
-function TableComponent({
+export function TableComponent({
   currentData,
   selectedTable,
   selectedMetric,
@@ -405,7 +369,7 @@ function TableComponent({
 }
 
 // Add Tremor chart components
-function TremorAreaChartComponent({
+export function TremorAreaChartComponent({
   currentData,
   selectedTable,
   selectedMetric,
@@ -432,7 +396,7 @@ function TremorAreaChartComponent({
   );
 }
 
-function TremorLineChartComponent({
+export function TremorLineChartComponent({
   currentData,
   selectedTable,
   selectedMetric,

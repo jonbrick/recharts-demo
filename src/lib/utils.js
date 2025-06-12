@@ -9,7 +9,7 @@ export const POC_END_DATE = "2025-05-30";
  * Generates an array of all dates in the POC range
  * @returns {string[]} Array of date strings in YYYY-MM-DD format
  */
-function getFullDateRange() {
+export function getFullDateRange() {
   const dates = [];
   const start = new Date(POC_START_DATE);
   const end = new Date(POC_END_DATE);
