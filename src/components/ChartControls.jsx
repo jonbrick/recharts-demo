@@ -2,6 +2,7 @@
 
 import React from "react";
 import { dataSourceConfig, chartTypeConfig } from "../lib/chartConfig.js";
+import { POC_START_DATE, POC_END_DATE } from "../lib/utils.js";
 import {
   Select,
   SelectContent,
@@ -120,9 +121,20 @@ export function ChartTypeSelector({ chartType, onChartTypeChange }) {
 }
 
 export function DatePickerSelector({ onDateChange }) {
+  const startDate = new Date(POC_START_DATE).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  const endDate = new Date(POC_END_DATE).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
   return (
     <Select
-      value="2025-05-17 to 2025-05-30"
+      value={`${POC_START_DATE} to ${POC_END_DATE}`}
       onValueChange={onDateChange}
       disabled
     >
@@ -130,8 +142,8 @@ export function DatePickerSelector({ onDateChange }) {
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="2025-05-17 to 2025-05-30">
-          May 17, 2025 - May 30, 2025
+        <SelectItem value={`${POC_START_DATE} to ${POC_END_DATE}`}>
+          {startDate} - {endDate}
         </SelectItem>
       </SelectContent>
     </Select>

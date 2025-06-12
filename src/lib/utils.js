@@ -2,8 +2,8 @@
 import { dataSourceConfig } from "./chartConfig.js";
 
 // Date range for POC data
-const POC_START_DATE = "2025-05-17";
-const POC_END_DATE = "2025-05-30";
+export const POC_START_DATE = "2025-05-17";
+export const POC_END_DATE = "2025-05-30";
 
 /**
  * Generates an array of all dates in the POC range
