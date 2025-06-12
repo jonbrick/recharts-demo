@@ -51,11 +51,7 @@ export default function HomePage() {
     } else {
       return groupEventsByType(data, selectedTable, groupBy, selectedMetric);
     }
-  }, [data, selectedTable, groupBy, granularity, allTimeData]);
-
-  console.log("groupBy:", groupBy);
-  console.log("currentData after calculation:", currentData);
-  console.log("currentData sample:", currentData[0]);
+  }, [data, selectedTable, groupBy, granularity, allTimeData, selectedMetric]);
 
   const handleTableChange = (newTable: string) => {
     setSelectedTable(newTable);

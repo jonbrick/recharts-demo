@@ -1,6 +1,6 @@
 // ChartRenderer.jsx - Unified chart rendering component
 
-import React from "react";
+import React, { useMemo } from "react";
 import {
   AreaChart,
   Area,
@@ -57,9 +57,10 @@ const commonTooltipStyle = {
 function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
-  const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0]).filter((key) => key !== "name")
-    : [selectedMetric];
+  const seriesKeys = useMemo(() => {
+    if (!currentData || currentData.length === 0) return [];
+    return Object.keys(currentData[0]).filter((key) => key !== "name");
+  }, [currentData]);
 
   console.log("AreaChart seriesKeys:", seriesKeys);
 
@@ -91,7 +92,7 @@ function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
           <Area
             key={key}
             type="monotone"
-            dataKey={key}
+            dataKey={isMultiSeries ? key : selectedMetric}
             stroke={colors[index % colors.length]}
             fill={colors[index % colors.length]}
             fillOpacity={0.8}
