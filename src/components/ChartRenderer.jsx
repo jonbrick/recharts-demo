@@ -88,18 +88,20 @@ function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
         <Tooltip content={<CustomTooltip />} />
         <Legend />
 
-        {seriesKeys.map((key, index) => (
-          <Area
-            key={key}
-            type="monotone"
-            dataKey={isMultiSeries ? key : selectedMetric}
-            stroke={colors[index % colors.length]}
-            fill={colors[index % colors.length]}
-            fillOpacity={0.8}
-            strokeWidth={2}
-            name={key}
-          />
-        ))}
+        {seriesKeys
+          .filter((key) => !key.endsWith("_hasData"))
+          .map((key, index) => (
+            <Area
+              key={key}
+              type="monotone"
+              dataKey={isMultiSeries ? key : selectedMetric}
+              stroke={colors[index % colors.length]}
+              fill={colors[index % colors.length]}
+              fillOpacity={0.8}
+              strokeWidth={2}
+              name={key}
+            />
+          ))}
       </AreaChart>
     </ResponsiveContainer>
   );
@@ -140,17 +142,23 @@ function LineChartComponent({
         <Tooltip content={<CustomTooltip />} />
         <Legend />
 
-        {seriesKeys.map((key, index) => (
-          <Line
-            key={key}
-            type="monotone"
-            dataKey={isMultiSeries ? key : selectedMetric}
-            stroke={colors[index % colors.length]}
-            strokeWidth={3}
-            dot={{ fill: colors[index % colors.length], strokeWidth: 2, r: 4 }}
-            name={key}
-          />
-        ))}
+        {seriesKeys
+          .filter((key) => !key.endsWith("_hasData"))
+          .map((key, index) => (
+            <Line
+              key={key}
+              type="monotone"
+              dataKey={isMultiSeries ? key : selectedMetric}
+              stroke={colors[index % colors.length]}
+              strokeWidth={3}
+              dot={{
+                fill: colors[index % colors.length],
+                strokeWidth: 2,
+                r: 4,
+              }}
+              name={key}
+            />
+          ))}
       </LineChart>
     </ResponsiveContainer>
   );
