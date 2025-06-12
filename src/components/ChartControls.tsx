@@ -163,6 +163,19 @@ export function ControlsContainer({
   onGroupByChange,
   onDateChange,
   title = "Interactive Chart Demo",
+}: {
+  selectedTable: string,
+  onTableChange: (newTable: string) => void,
+  selectedMetric: string,
+  onMetricChange: (newMetric: string) => void,
+  operator: string,
+  onOperatorChange: (newOperator: string) => void,
+  granularity: string,
+  onGranularityChange: (newGranularity: string) => void,
+  groupBy: string,
+  onGroupByChange: (newGroupBy: string) => void,
+  onDateChange?: (date: string) => void,
+  title?: string,
 }) {
   return (
     <div className="text-center mb-8">
@@ -191,7 +204,7 @@ export function ControlsContainer({
           granularity={granularity}
           onGranularityChange={onGranularityChange}
         />
-        <DatePickerSelector onDateChange={onDateChange} />
+        {onDateChange && <DatePickerSelector onDateChange={onDateChange} />}
       </div>
     </div>
   );
