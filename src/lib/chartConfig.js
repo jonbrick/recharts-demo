@@ -129,6 +129,8 @@ export const chartTypeConfig = {
   "vertical-bar": { label: "📊 Vertical Bars", icon: "📊" },
   "horizontal-bar": { label: "📊 Horizontal Bars", icon: "📊" },
   table: { label: "📋 Table View", icon: "📋" },
+  "tremor-area": { label: "🔥 Tremor Area", icon: "🔥" },
+  "tremor-line": { label: "🔥 Tremor Line", icon: "🔥" },
 };
 
 // Helper functions
