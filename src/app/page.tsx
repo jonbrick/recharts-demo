@@ -9,7 +9,12 @@ import { MetricsSummary } from "../components/MetricsSummary";
 import { ChartRenderer } from "../components/ChartRenderer";
 import { dataSourceConfig } from "../lib/chartConfig";
 import { githubActionsData, pagerDutyData, githubPRData } from "../lib/data";
-import { calculateAverageData, calculateSumData } from "../lib/utils";
+import {
+  calculateAverageData,
+  calculateSumData,
+  groupEventsByDate,
+  groupEventsByType,
+} from "../lib/utils";
 import { Card } from "../components/Card";
 
 export default function HomePage() {
@@ -18,6 +23,7 @@ export default function HomePage() {
   const [selectedTable, setSelectedTable] = useState("githubActions");
   const [selectedMetric, setSelectedMetric] = useState("deployments");
   const [operator, setOperator] = useState("average");
+  const [groupBy, setGroupBy] = useState("org");
 
   // Available data tables
   const dataTables = {
@@ -37,13 +43,33 @@ export default function HomePage() {
   }, [data, selectedTable, operator]);
 
   // Get the current dataset based on granularity
-  const currentData = granularity === "monthly" ? data : allTimeData;
+  const currentData = useMemo(() => {
+    if (groupBy === "org") {
+      return granularity === "monthly"
+        ? groupEventsByDate(data, selectedTable)
+        : allTimeData;
+    } else {
+      return groupEventsByType(data, selectedTable, groupBy, selectedMetric);
+    }
+  }, [data, selectedTable, groupBy, granularity, allTimeData]);
+
+  console.log("groupBy:", groupBy);
+  console.log("currentData after calculation:", currentData);
+  console.log("currentData sample:", currentData[0]);
 
   const handleTableChange = (newTable: string) => {
     setSelectedTable(newTable);
     // Reset to first metric of new data source
     const newConfig = dataSourceConfig[newTable];
     setSelectedMetric(newConfig.metrics[0].key);
+  };
+
+  const handleGroupByChange = (newGroupBy: string) => {
+    setGroupBy(newGroupBy);
+    // Reset granularity when switching away from org grouping
+    if (newGroupBy !== "org") {
+      setGranularity("monthly");
+    }
   };
 
   return (
@@ -57,6 +83,8 @@ export default function HomePage() {
         onOperatorChange={setOperator}
         granularity={granularity}
         onGranularityChange={setGranularity}
+        groupBy={groupBy}
+        onGroupByChange={handleGroupByChange}
       />
 
       <Card className="flex flex-col gap-2">
@@ -77,12 +105,13 @@ export default function HomePage() {
         </div>
 
         <MetricsSummary
-          key={`${operator}-${selectedMetric}`}
+          key={`${operator}-${selectedMetric}-${groupBy}`}
           selectedTable={selectedTable}
           currentData={currentData}
           granularity={granularity}
           selectedMetric={selectedMetric}
           operator={operator}
+          groupBy={groupBy}
         />
         <ChartRenderer
           chartType={chartType}
@@ -90,6 +119,7 @@ export default function HomePage() {
           selectedTable={selectedTable}
           selectedMetric={selectedMetric}
           granularity={granularity}
+          groupBy={groupBy}
         />
       </Card>
     </div>

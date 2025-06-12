@@ -6,6 +6,11 @@ export const dataSourceConfig = {
     icon: "📊",
     title: "GitHub Actions CI/CD Pipeline",
     description: "Deployment and build metrics for May 2025",
+    groupByOptions: [
+      { value: "org", label: "🏢 Org View", icon: "🏢" },
+      { value: "team", label: "👥 By Team", icon: "👥" },
+      { value: "repo", label: "📦 By Repository", icon: "📦" },
+    ],
     metrics: [
       {
         key: "deployments",
@@ -45,6 +50,11 @@ export const dataSourceConfig = {
     icon: "🚨",
     title: "PagerDuty Incident Management",
     description: "Incident response and reliability metrics for May 2025",
+    groupByOptions: [
+      { value: "org", label: "🏢 Org View", icon: "🏢" },
+      { value: "team", label: "👥 By Team", icon: "👥" },
+      { value: "service", label: "🔧 By Service", icon: "🔧" },
+    ],
     metrics: [
       {
         key: "incidents",
@@ -88,6 +98,11 @@ export const dataSourceConfig = {
     icon: "🔀",
     title: "GitHub Pull Request Activity",
     description: "Pull request and code review metrics for May 2025",
+    groupByOptions: [
+      { value: "org", label: "🏢 Org View", icon: "🏢" },
+      { value: "team", label: "👥 By Team", icon: "👥" },
+      { value: "person", label: "👤 By Individual", icon: "👤" },
+    ],
     metrics: [
       {
         key: "pullRequests",
@@ -124,13 +139,13 @@ export const dataSourceConfig = {
 };
 
 export const chartTypeConfig = {
-  area: { label: "📈 Area Chart", icon: "📈" },
-  line: { label: "📊 Line Chart", icon: "📊" },
-  "vertical-bar": { label: "📊 Vertical Bars", icon: "📊" },
-  "horizontal-bar": { label: "📊 Horizontal Bars", icon: "📊" },
-  table: { label: "📋 Table View", icon: "📋" },
+  area: { label: "📈 Recharts Area", icon: "📈" },
+  line: { label: "📊 Recharts Line", icon: "📊" },
+  "vertical-bar": { label: "📊 Recharts Vertical Bar", icon: "📊" },
+  "horizontal-bar": { label: "📊 Recharts Horizontal Bar", icon: "📊" },
   "tremor-area": { label: "🔥 Tremor Area", icon: "🔥" },
   "tremor-line": { label: "🔥 Tremor Line", icon: "🔥" },
+  table: { label: "📋 Table", icon: "📋" },
 };
 
 // Helper functions

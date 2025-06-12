@@ -2,24 +2,47 @@
 
 import React from "react";
 import { dataSourceConfig } from "../lib/chartConfig.js";
-import { calculateMetricValue } from "../lib/utils.js";
 
 export function MetricsSummary({
   selectedTable,
-  currentData,
+  currentData, // We'll ignore this for calculation
   granularity,
   selectedMetric,
   operator,
 }) {
+  // Always calculate from raw events - import the raw data
+  const {
+    githubActionsData,
+    pagerDutyData,
+    githubPRData,
+  } = require("../lib/data.js");
+
+  const dataTables = {
+    githubActions: githubActionsData,
+    pagerDuty: pagerDutyData,
+    githubPR: githubPRData,
+  };
+
+  const rawEvents = dataTables[selectedTable];
   const config = dataSourceConfig[selectedTable];
   const metric = [...config.metrics, config.overlayMetric].find(
     (m) => m.key === selectedMetric
   );
 
+  // Import calculation function
+  const { calculateMetricValue } = require("../lib/utils.js");
+
+  // Calculate org-level data once
+  const { calculateAverageData, calculateSumData } = require("../lib/utils.js");
+  const orgData =
+    operator === "average"
+      ? calculateAverageData(rawEvents, selectedTable)
+      : calculateSumData(rawEvents, selectedTable);
+
   const value = calculateMetricValue(
-    currentData,
+    orgData,
     selectedMetric,
-    granularity,
+    "all-time", // Always use all-time since orgData is already aggregated
     operator
   );
 

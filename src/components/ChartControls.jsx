@@ -82,6 +82,26 @@ export function GranularitySelector({ granularity, onGranularityChange }) {
   );
 }
 
+export function GroupBySelector({ groupBy, onGroupByChange, selectedTable }) {
+  const config = dataSourceConfig[selectedTable];
+  const groupByOptions = config.groupByOptions || [];
+
+  return (
+    <Select value={groupBy} onValueChange={onGroupByChange}>
+      <SelectTrigger>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {groupByOptions.map((option) => (
+          <SelectItem key={option.value} value={option.value}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
 export function ChartTypeSelector({ chartType, onChartTypeChange }) {
   return (
     <Select value={chartType} onValueChange={onChartTypeChange}>
@@ -98,6 +118,7 @@ export function ChartTypeSelector({ chartType, onChartTypeChange }) {
     </Select>
   );
 }
+
 export function ControlsContainer({
   selectedTable,
   onTableChange,
@@ -107,6 +128,8 @@ export function ControlsContainer({
   onOperatorChange,
   granularity,
   onGranularityChange,
+  groupBy,
+  onGroupByChange,
   title = "Interactive Chart Demo",
 }) {
   return (
@@ -122,6 +145,11 @@ export function ControlsContainer({
           selectedTable={selectedTable}
           selectedMetric={selectedMetric}
           onMetricChange={onMetricChange}
+        />
+        <GroupBySelector
+          groupBy={groupBy}
+          onGroupByChange={onGroupByChange}
+          selectedTable={selectedTable}
         />
         <OperatorSelector
           operator={operator}
