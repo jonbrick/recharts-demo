@@ -1,9 +1,5 @@
+import React from "react";
 import "./globals.css";
-
-export const metadata = {
-  title: "Recharts Dashboard",
-  description: "Interactive dashboard with recharts",
-};
 
 export default function RootLayout({
   children,
