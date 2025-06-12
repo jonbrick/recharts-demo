@@ -10,6 +10,7 @@ import { ChartRenderer } from "../components/ChartRenderer";
 import { dataSourceConfig } from "../lib/chartConfig";
 import { githubActionsData, pagerDutyData, githubPRData } from "../lib/data";
 import { calculateAverageData, calculateSumData } from "../lib/utils";
+import { Card } from "../components/Card";
 
 export default function HomePage() {
   const [chartType, setChartType] = useState("area");
@@ -63,7 +64,7 @@ export default function HomePage() {
         onGranularityChange={setGranularity}
       />
 
-      <div className="bg-white rounded-xl shadow-lg p-6 flex flex-col gap-2">
+      <Card className="flex flex-col gap-2">
         <div className="flex justify-between items-start">
           <div className="flex-1 flex flex-col">
             <h2 className="text-2xl font-semibold text-gray-700">
@@ -95,7 +96,7 @@ export default function HomePage() {
           selectedMetric={selectedMetric}
           granularity={granularity}
         />
-      </div>
+      </Card>
 
       <div className="bg-white rounded-xl shadow-lg p-6 mt-8">
         <h3 className="text-xl font-semibold text-gray-700 mb-4">
