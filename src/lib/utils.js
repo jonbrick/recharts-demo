@@ -258,9 +258,7 @@ export function groupEventsByType(events, dataSource, groupBy, selectedMetric) {
 
         // Use undefined for missing data (clean chart gaps)
         dayData[displayName] =
-          metrics[selectedMetric] === null
-            ? undefined
-            : metrics[selectedMetric] || 0;
+          metrics[selectedMetric] === null ? null : metrics[selectedMetric];
 
         // Add flag for tooltip logic
         dayData[`${displayName}_hasData`] =

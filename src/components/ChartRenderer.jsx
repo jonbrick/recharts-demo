@@ -22,25 +22,51 @@ import {
 import { dataSourceConfig, formatValue } from "../lib/chartConfig.js";
 
 function CustomTooltip({ active, payload, label }) {
-  if (active && payload && payload.length) {
-    return (
-      <div style={commonTooltipStyle}>
-        <p className="font-medium">{`${label}`}</p>
-        {payload.map((entry, index) => {
-          const hasDataKey = `${entry.name}_hasData`;
-          const hasData = entry.payload[hasDataKey];
-          return (
-            <p key={index} style={{ color: entry.color }}>
-              {`${entry.name}: ${
-                hasData === false ? "no results" : entry.value
-              }`}
-            </p>
-          );
-        })}
-      </div>
-    );
+  if (!active || !payload || !payload.length) {
+    return null;
   }
-  return null;
+
+  // Get all possible series from the data point
+  const dataPoint = payload[0]?.payload;
+  if (!dataPoint) return null;
+
+  // Color array that matches what the charts use
+  const colors = [
+    "#8884d8",
+    "#82ca9d",
+    "#ffc658",
+    "#ff7c7c",
+    "#8dd1e1",
+    "#d084d0",
+    "#ffb347",
+    "#87ceeb",
+  ];
+
+  // Find all series keys (excluding 'name' and '_hasData' suffixes)
+  const allSeriesKeys = Object.keys(dataPoint)
+    .filter((key) => key !== "name" && !key.endsWith("_hasData"))
+    .sort(); // Sort for consistent color assignment
+
+  return (
+    <div style={commonTooltipStyle}>
+      <p className="font-medium">{label}</p>
+      {allSeriesKeys.map((seriesKey, index) => {
+        const hasDataKey = `${seriesKey}_hasData`;
+        const hasData = dataPoint[hasDataKey];
+        const value = dataPoint[seriesKey];
+
+        // Try to find color from payload first, fallback to index-based color
+        const payloadEntry = payload.find((p) => p.dataKey === seriesKey);
+        const color = payloadEntry?.color || colors[index % colors.length];
+
+        return (
+          <p key={index} style={{ color }}>
+            {`${seriesKey}: ${hasData === false ? "no results" : value}`}
+          </p>
+        );
+      })}
+    </div>
+  );
 }
 
 const commonChartProps = {
@@ -99,6 +125,7 @@ function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
               fillOpacity={0.8}
               strokeWidth={2}
               name={isMultiSeries ? key : "Organization"}
+              connectNulls={false}
             />
           ))}
       </AreaChart>
@@ -156,6 +183,7 @@ function LineChartComponent({
                 r: 4,
               }}
               name={isMultiSeries ? key : "Organization"}
+              connectNulls={false}
             />
           ))}
       </LineChart>
