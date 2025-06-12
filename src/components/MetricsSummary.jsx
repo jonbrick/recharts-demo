@@ -7,6 +7,7 @@ import {
   calculateAverageData,
   calculateSumData,
 } from "../lib/utils.js";
+import { dataSourceConfig } from "../lib/chartConfig.js";
 
 export function MetricsSummary({ selectedTable, selectedMetric, operator }) {
   // Always calculate from raw events - import the raw data
@@ -31,10 +32,22 @@ export function MetricsSummary({ selectedTable, selectedMetric, operator }) {
     operator
   );
 
+  // Get the metric label from config
+  const config = dataSourceConfig[selectedTable];
+  const allMetrics = [...config.metrics];
+  if (config.overlayMetric) {
+    allMetrics.push(config.overlayMetric);
+  }
+  const metricConfig = allMetrics.find((m) => m.key === selectedMetric);
+  const metricLabel = metricConfig?.label || selectedMetric;
+
+  // Format the operator text
+  const operatorText = operator === "average" ? "Average per day" : "Total";
+
   return (
     <div className="mb-6">
       <div className="text-sm text-gray-600 font-medium">
-        {operator === "average" ? "All Time Average" : "All Time Total"}
+        {`${metricLabel} ${operatorText}`}
       </div>
       <div className="text-3xl font-bold text-gray-800">{value.toFixed(1)}</div>
     </div>
