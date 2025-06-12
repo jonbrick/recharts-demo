@@ -158,3 +158,12 @@ export const formatValue = (value, format) => {
       return value.toLocaleString();
   }
 };
+
+// Rate metrics that should show "No results" instead of 0 when no data
+export const rateMetrics = [
+  "mergeRate",
+  "successRate",
+  "mttrMinutes",
+  "avgReviewTime",
+  "buildTimeMinutes",
+];

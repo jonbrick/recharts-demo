@@ -1,6 +1,26 @@
 // utils.js - Shared calculation utilities for raw event data
 import { dataSourceConfig } from "./chartConfig.js";
 
+// Date range for POC data
+const POC_START_DATE = "2025-05-17";
+const POC_END_DATE = "2025-05-30";
+
+/**
+ * Generates an array of all dates in the POC range
+ * @returns {string[]} Array of date strings in YYYY-MM-DD format
+ */
+function getFullDateRange() {
+  const dates = [];
+  const start = new Date(POC_START_DATE);
+  const end = new Date(POC_END_DATE);
+
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    dates.push(d.toISOString().split("T")[0]);
+  }
+
+  return dates;
+}
+
 /**
  * Extracts the event date in YYYY-MM-DD format based on the data source.
  * @param {Object} event - The event object.
@@ -198,50 +218,40 @@ function calculateMetricsFromEvents(events, dataSource) {
 }
 
 /**
- * Groups events by a specified key and aggregates metrics for each group.
+ * Groups events by date (daily granularity) and aggregates metrics for each day.
+ * Shows all dates in POC range, with zeros/nulls for days with no data.
  * @param {Object[]} events - Array of event objects.
  * @param {string} dataSource - The data source type.
- * @param {string} groupBy - The grouping type.
- * @returns {Object[]} Array of grouped and aggregated metric objects.
+ * @returns {Object[]} Array of daily grouped and aggregated metric objects.
  */
-function groupEventsByKey(events, dataSource, groupBy) {
+export function groupEventsByDate(events, dataSource) {
+  const fullDateRange = getFullDateRange();
   const grouped = {};
 
+  // Group existing events by date
   events.forEach((event) => {
-    const key = getGroupingKey(event, dataSource, groupBy);
+    const key = getEventDate(event, dataSource);
     if (!grouped[key]) {
       grouped[key] = [];
     }
     grouped[key].push(event);
   });
 
-  // Convert to array format with calculated metrics
-  return Object.entries(grouped)
-    .map(([key, groupEvents]) => ({
-      name: getDisplayName(key, dataSource, groupBy),
-      ...calculateMetricsFromEvents(groupEvents, dataSource),
-    }))
-    .sort((a, b) => {
-      // Sort by time for time grouping, alphabetically for others
-      if (groupBy === "time") {
-        return new Date(a.name) - new Date(b.name);
-      }
-      return a.name.localeCompare(b.name);
-    });
-}
+  // Create entry for every date in range
+  return fullDateRange.map((date) => {
+    const eventsForDate = grouped[date] || [];
+    const metrics = calculateMetricsFromEvents(eventsForDate, dataSource);
 
-/**
- * Groups events by date (daily granularity) and aggregates metrics for each day.
- * @param {Object[]} events - Array of event objects.
- * @param {string} dataSource - The data source type.
- * @returns {Object[]} Array of daily grouped and aggregated metric objects.
- */
-export function groupEventsByDate(events, dataSource) {
-  return groupEventsByKey(events, dataSource, "time");
+    return {
+      name: getDisplayName(date, dataSource, "time"),
+      ...metrics,
+    };
+  });
 }
 
 /**
  * Groups events by a specified type (e.g., person, team) and by date within each group, supporting multi-series data for charts.
+ * Shows all dates in POC range for all series.
  * @param {Object[]} events - Array of event objects.
  * @param {string} dataSource - The data source type.
  * @param {string} groupBy - The grouping type ('org', 'person', 'team', etc.).
@@ -251,9 +261,9 @@ export function groupEventsByDate(events, dataSource) {
 export function groupEventsByType(events, dataSource, groupBy, selectedMetric) {
   if (groupBy === "org") {
     // Org view - single series, same as groupEventsByDate
-    return groupEventsByKey(events, dataSource, "time");
+    return groupEventsByDate(events, dataSource);
   } else {
-    // Multi-series view - group by the specified key, then by date within each group
+    const fullDateRange = getFullDateRange();
     const grouped = {};
 
     // First pass: discover ALL possible series from the entire dataset
@@ -263,6 +273,7 @@ export function groupEventsByType(events, dataSource, groupBy, selectedMetric) {
       allSeries.add(groupKey);
     });
 
+    // Group events by series and date
     events.forEach((event) => {
       const groupKey = getGroupingKey(event, dataSource, groupBy);
       const dateKey = getEventDate(event, dataSource);
@@ -276,13 +287,8 @@ export function groupEventsByType(events, dataSource, groupBy, selectedMetric) {
       grouped[groupKey][dateKey].push(event);
     });
 
-    // Get all unique dates across all groups
-    const allDates = [
-      ...new Set(events.map((event) => getEventDate(event, dataSource))),
-    ].sort();
-
-    // Create time series data with multiple series
-    return allDates.map((date) => {
+    // Create time series data with ALL dates for ALL series
+    return fullDateRange.map((date) => {
       const dayData = {
         name: new Date(date).toLocaleDateString("en-US", {
           month: "short",
@@ -290,19 +296,17 @@ export function groupEventsByType(events, dataSource, groupBy, selectedMetric) {
         }),
       };
 
-      // Add data for EVERY possible series (not just ones with data)
+      // Add data for EVERY possible series for EVERY date
       allSeries.forEach((groupKey) => {
         const displayName = getDisplayName(groupKey, dataSource, groupBy);
         const eventsForDate = grouped[groupKey]?.[date] || [];
         const metrics = calculateMetricsFromEvents(eventsForDate, dataSource);
 
-        // Use undefined for missing data (clean chart gaps)
-        dayData[displayName] =
-          metrics[selectedMetric] === null ? null : metrics[selectedMetric];
+        // Use null for rate metrics when no data, actual value otherwise
+        dayData[displayName] = metrics[selectedMetric];
 
         // Add flag for tooltip logic
-        dayData[`${displayName}_hasData`] =
-          metrics[selectedMetric] !== null && eventsForDate.length > 0;
+        dayData[`${displayName}_hasData`] = eventsForDate.length > 0;
       });
 
       return dayData;

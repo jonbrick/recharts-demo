@@ -119,14 +119,20 @@ export function ChartTypeSelector({ chartType, onChartTypeChange }) {
   );
 }
 
-export function DatePickerSelector({ date, onDateChange }) {
+export function DatePickerSelector({ onDateChange }) {
   return (
-    <Select value={date} onValueChange={onDateChange} disabled>
+    <Select
+      value="2025-05-17 to 2025-05-30"
+      onValueChange={onDateChange}
+      disabled
+    >
       <SelectTrigger>
-        <SelectValue placeholder="Select Date" />
+        <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="placeholder">Select Date</SelectItem>
+        <SelectItem value="2025-05-17 to 2025-05-30">
+          May 17, 2025 - May 30, 2025
+        </SelectItem>
       </SelectContent>
     </Select>
   );
@@ -143,7 +149,6 @@ export function ControlsContainer({
   onGranularityChange,
   groupBy,
   onGroupByChange,
-  date,
   onDateChange,
   title = "Interactive Chart Demo",
 }) {
@@ -174,7 +179,7 @@ export function ControlsContainer({
           granularity={granularity}
           onGranularityChange={onGranularityChange}
         />
-        <DatePickerSelector date={date} onDateChange={onDateChange} />
+        <DatePickerSelector onDateChange={onDateChange} />
       </div>
     </div>
   );

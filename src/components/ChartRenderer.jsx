@@ -19,7 +19,11 @@ import {
   AreaChart as TremorAreaChart,
   LineChart as TremorLineChart,
 } from "@tremor/react";
-import { dataSourceConfig, formatValue } from "../lib/chartConfig.js";
+import {
+  dataSourceConfig,
+  formatValue,
+  rateMetrics,
+} from "../lib/chartConfig.js";
 
 function CustomTooltip({
   active,
@@ -58,30 +62,36 @@ function CustomTooltip({
     keysToShow = [selectedMetric];
   }
 
-  // Check if the metric is a rate metric
-  const isRateMetric =
-    selectedMetric === "mergeRate" || selectedMetric === "successRate";
-
   return (
     <div style={commonTooltipStyle}>
       <p className="font-medium">{label}</p>
       {keysToShow.map((seriesKey, index) => {
         const hasDataKey = `${seriesKey}_hasData`;
-        const hasData = dataPoint[hasDataKey];
+        const hasData = isMultiSeries
+          ? dataPoint[hasDataKey]
+          : dataPoint[seriesKey] !== null;
         const value = dataPoint[seriesKey];
 
         // Try to find color from payload first, fallback to index-based color
         const payloadEntry = payload.find((p) => p.dataKey === seriesKey);
         const color = payloadEntry?.color || colors[index % colors.length];
 
-        // For rate metrics, show "No results" when there's no data
-        // For other metrics, show 0 when there's no data
+        // Check if this is a rate metric
+        const isRateMetric =
+          rateMetrics.includes(selectedMetric) ||
+          rateMetrics.includes(seriesKey);
+
+        // Show "No results" for rate metrics when no data, 0 for count metrics
         const displayValue =
-          hasData === false ? (isRateMetric ? "No results" : "0") : value;
+          !hasData || value === null
+            ? isRateMetric
+              ? "No results"
+              : "0"
+            : value;
 
         return (
           <p key={index} style={{ color }}>
-            {`${seriesKey}: ${displayValue}`}
+            {`${isMultiSeries ? seriesKey : "Organization"}: ${displayValue}`}
           </p>
         );
       })}
@@ -120,10 +130,6 @@ function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
     "#87ceeb",
   ];
 
-  // Check if the metric is a rate metric
-  const isRateMetric =
-    selectedMetric === "mergeRate" || selectedMetric === "successRate";
-
   return (
     <ResponsiveContainer width="100%" height={400}>
       <AreaChart data={currentData} {...commonChartProps}>
@@ -156,7 +162,10 @@ function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
               fillOpacity={0.8}
               strokeWidth={2}
               name={isMultiSeries ? key : "Organization"}
-              connectNulls={!isRateMetric}
+              connectNulls={
+                !rateMetrics.includes(selectedMetric) &&
+                !rateMetrics.includes(key)
+              }
             />
           ))}
       </AreaChart>
@@ -180,10 +189,6 @@ function LineChartComponent({ currentData, selectedMetric, groupBy }) {
     "#ffb347",
     "#87ceeb",
   ];
-
-  // Check if the metric is a rate metric
-  const isRateMetric =
-    selectedMetric === "mergeRate" || selectedMetric === "successRate";
 
   return (
     <ResponsiveContainer width="100%" height={400}>
@@ -220,7 +225,10 @@ function LineChartComponent({ currentData, selectedMetric, groupBy }) {
                 r: 4,
               }}
               name={isMultiSeries ? key : "Organization"}
-              connectNulls={!isRateMetric}
+              connectNulls={
+                !rateMetrics.includes(selectedMetric) &&
+                !rateMetrics.includes(key)
+              }
             />
           ))}
       </LineChart>
