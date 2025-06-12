@@ -45,8 +45,8 @@ export function MetricsSummary({ selectedTable, selectedMetric, operator }) {
   const operatorText = operator === "average" ? "Average per day" : "Total";
 
   return (
-    <div className="mb-6">
-      <div className="text-sm text-gray-600 font-medium">
+    <div className="flex flex-col gap-2">
+      <div className="text-md text-gray-600 font-medium">
         {`${metricLabel} ${operatorText}`}
       </div>
       <div className="text-3xl font-bold text-gray-800">{value.toFixed(1)}</div>

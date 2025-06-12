@@ -164,22 +164,22 @@ export function ControlsContainer({
   onDateChange,
   title = "Interactive Chart Demo",
 }: {
-  selectedTable: string,
-  onTableChange: (newTable: string) => void,
-  selectedMetric: string,
-  onMetricChange: (newMetric: string) => void,
-  operator: string,
-  onOperatorChange: (newOperator: string) => void,
-  granularity: string,
-  onGranularityChange: (newGranularity: string) => void,
-  groupBy: string,
-  onGroupByChange: (newGroupBy: string) => void,
-  onDateChange?: (date: string) => void,
-  title?: string,
+  selectedTable: string;
+  onTableChange: (newTable: string) => void;
+  selectedMetric: string;
+  onMetricChange: (newMetric: string) => void;
+  operator?: string;
+  onOperatorChange?: (newOperator: string) => void;
+  granularity?: string;
+  onGranularityChange?: (newGranularity: string) => void;
+  groupBy: string;
+  onGroupByChange: (newGroupBy: string) => void;
+  onDateChange?: (date: string) => void;
+  title?: string;
 }) {
   return (
-    <div className="text-center mb-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">{title}</h1>
+    <div className="flex flex-col gap-6">
+      <h1 className="text-3xl font-bold text-gray-800">{title}</h1>
 
       <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
         <DataSourceSelector
@@ -196,14 +196,18 @@ export function ControlsContainer({
           onGroupByChange={onGroupByChange}
           selectedTable={selectedTable}
         />
-        <OperatorSelector
-          operator={operator}
-          onOperatorChange={onOperatorChange}
-        />
-        <GranularitySelector
-          granularity={granularity}
-          onGranularityChange={onGranularityChange}
-        />
+        {operator && onOperatorChange && (
+          <OperatorSelector
+            operator={operator}
+            onOperatorChange={onOperatorChange}
+          />
+        )}
+        {granularity && onGranularityChange && (
+          <GranularitySelector
+            granularity={granularity}
+            onGranularityChange={onGranularityChange}
+          />
+        )}
         {onDateChange && <DatePickerSelector onDateChange={onDateChange} />}
       </div>
     </div>

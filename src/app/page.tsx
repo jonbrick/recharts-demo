@@ -4,6 +4,8 @@ import React, { useState, useMemo, useEffect } from "react";
 import {
   ControlsContainer,
   ChartTypeSelector,
+  OperatorSelector,
+  GranularitySelector,
 } from "../components/ChartControls";
 import { MetricsSummary } from "../components/MetricsSummary";
 import { ChartRenderer } from "../components/ChartRenderer";
@@ -95,52 +97,72 @@ export default function HomePage() {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-6 bg-gray-50 min-h-screen">
-      <ControlsContainer
-        selectedTable={selectedTable}
-        onTableChange={handleTableChange}
-        selectedMetric={selectedMetric}
-        onMetricChange={setSelectedMetric}
-        operator={operator}
-        onOperatorChange={setOperator}
-        granularity={granularity}
-        onGranularityChange={setGranularity}
-        groupBy={groupBy}
-        onGroupByChange={handleGroupByChange}
-      />
-
-      <Card className="flex flex-col gap-2">
-        <div className="flex justify-between items-start">
-          <div className="flex-1 flex flex-col">
-            <h2 className="text-2xl font-semibold text-gray-700">
-              {config.title}
-            </h2>
-            <p className="text-gray-600">{config.description}</p>
-          </div>
-
-          <div className="ml-4 flex flex-col gap-4">
-            <ChartTypeSelector
-              chartType={chartType}
-              onChartTypeChange={setChartType}
-            />
-          </div>
-        </div>
-
-        <MetricsSummary
-          key={`${operator}-${selectedMetric}-${groupBy}`}
+    <div className="w-full max-w-7xl mx-auto p-4 sm:p-12">
+      <div className="flex flex-col gap-8">
+        <ControlsContainer
           selectedTable={selectedTable}
+          onTableChange={handleTableChange}
           selectedMetric={selectedMetric}
-          operator={operator}
-        />
-        <ChartRenderer
-          chartType={chartType}
-          currentData={currentData}
-          selectedTable={selectedTable}
-          selectedMetric={selectedMetric}
-          granularity={granularity}
+          onMetricChange={setSelectedMetric}
           groupBy={groupBy}
+          onGroupByChange={handleGroupByChange}
         />
-      </Card>
+
+        <div className="flex flex-col gap-6">
+          <h2 className="text-2xl font-semibold text-gray-700">
+            {config.title}
+          </h2>
+
+          {/* Operator and Metrics Card */}
+          <Card className="flex gap-4 justify-between">
+            <MetricsSummary
+              key={`${operator}-${selectedMetric}-${groupBy}`}
+              selectedTable={selectedTable}
+              selectedMetric={selectedMetric}
+              operator={operator}
+            />
+            <div className="flex flex-col gap-4">
+              <OperatorSelector
+                operator={operator}
+                onOperatorChange={setOperator}
+              />
+            </div>
+          </Card>
+
+          {/* Chart Card */}
+          <Card className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+              <h3 className="text-sm text-gray-600 font-medium w-full sm:w-auto">
+                {config.metrics.find((m) => m.key === selectedMetric)?.label ||
+                  (config.overlayMetric?.key === selectedMetric
+                    ? config.overlayMetric.label
+                    : selectedMetric)}{" "}
+                over time
+              </h3>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
+                <div className="w-full sm:w-40">
+                  <GranularitySelector
+                    granularity={granularity}
+                    onGranularityChange={setGranularity}
+                  />
+                </div>
+                <ChartTypeSelector
+                  chartType={chartType}
+                  onChartTypeChange={setChartType}
+                />
+              </div>
+            </div>
+            <ChartRenderer
+              chartType={chartType}
+              currentData={currentData}
+              selectedTable={selectedTable}
+              selectedMetric={selectedMetric}
+              granularity={granularity}
+              groupBy={groupBy}
+            />
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
