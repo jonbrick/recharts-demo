@@ -60,7 +60,7 @@ export function MetricSelector({
       <SelectContent>
         {allMetrics.map((metric) => (
           <SelectItem key={metric.key} value={metric.key}>
-            📊 {metric.label}
+            {metric.label}
           </SelectItem>
         ))}
       </SelectContent>

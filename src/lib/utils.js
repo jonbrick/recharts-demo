@@ -1,7 +1,12 @@
 // utils.js - Shared calculation utilities for raw event data
 import { dataSourceConfig } from "./chartConfig.js";
 
-// Helper function to extract date from different timestamp fields
+/**
+ * Extracts the event date in YYYY-MM-DD format based on the data source.
+ * @param {Object} event - The event object.
+ * @param {string} dataSource - The data source type (e.g., 'githubPR', 'githubActions', 'pagerDuty').
+ * @returns {string} The event date in YYYY-MM-DD format.
+ */
 function getEventDate(event, dataSource) {
   let timestamp;
   switch (dataSource) {
@@ -20,7 +25,13 @@ function getEventDate(event, dataSource) {
   return new Date(timestamp).toISOString().split("T")[0]; // YYYY-MM-DD format
 }
 
-// Helper function to get grouping key from event
+/**
+ * Returns the grouping key for an event based on the groupBy type.
+ * @param {Object} event - The event object.
+ * @param {string} dataSource - The data source type.
+ * @param {string} groupBy - The grouping type ('time', 'person', 'team', etc.).
+ * @returns {string} The grouping key value.
+ */
 function getGroupingKey(event, dataSource, groupBy) {
   switch (groupBy) {
     case "time":
@@ -38,7 +49,13 @@ function getGroupingKey(event, dataSource, groupBy) {
   }
 }
 
-// Helper function to get display name for grouping key
+/**
+ * Returns a display-friendly name for a grouping key.
+ * @param {string} key - The grouping key value.
+ * @param {string} dataSource - The data source type.
+ * @param {string} groupBy - The grouping type.
+ * @returns {string} The display name for the key.
+ */
 function getDisplayName(key, dataSource, groupBy) {
   // Convert author ID to display name
   const nameMap = {
@@ -70,7 +87,12 @@ function getDisplayName(key, dataSource, groupBy) {
   }
 }
 
-// Helper function to calculate metrics from raw events
+/**
+ * Calculates metrics from an array of raw event objects for a given data source.
+ * @param {Object[]} events - Array of event objects.
+ * @param {string} dataSource - The data source type.
+ * @returns {Object} An object containing calculated metrics for the data source.
+ */
 function calculateMetricsFromEvents(events, dataSource) {
   if (events.length === 0) {
     // Return null for all metrics when no events
@@ -175,7 +197,13 @@ function calculateMetricsFromEvents(events, dataSource) {
   }
 }
 
-// Group events by specified grouping and aggregate metrics
+/**
+ * Groups events by a specified key and aggregates metrics for each group.
+ * @param {Object[]} events - Array of event objects.
+ * @param {string} dataSource - The data source type.
+ * @param {string} groupBy - The grouping type.
+ * @returns {Object[]} Array of grouped and aggregated metric objects.
+ */
 function groupEventsByKey(events, dataSource, groupBy) {
   const grouped = {};
 
@@ -202,12 +230,24 @@ function groupEventsByKey(events, dataSource, groupBy) {
     });
 }
 
-// Group events by date and aggregate metrics for daily view
+/**
+ * Groups events by date (daily granularity) and aggregates metrics for each day.
+ * @param {Object[]} events - Array of event objects.
+ * @param {string} dataSource - The data source type.
+ * @returns {Object[]} Array of daily grouped and aggregated metric objects.
+ */
 export function groupEventsByDate(events, dataSource) {
   return groupEventsByKey(events, dataSource, "time");
 }
 
-// New function to handle all grouping types including multi-series
+/**
+ * Groups events by a specified type (e.g., person, team) and by date within each group, supporting multi-series data for charts.
+ * @param {Object[]} events - Array of event objects.
+ * @param {string} dataSource - The data source type.
+ * @param {string} groupBy - The grouping type ('org', 'person', 'team', etc.).
+ * @param {string} selectedMetric - The metric key to extract for each group/date.
+ * @returns {Object[]} Array of objects representing time series data for each group.
+ */
 export function groupEventsByType(events, dataSource, groupBy, selectedMetric) {
   if (groupBy === "org") {
     // Org view - single series, same as groupEventsByDate
@@ -270,6 +310,12 @@ export function groupEventsByType(events, dataSource, groupBy, selectedMetric) {
   }
 }
 
+/**
+ * Calculates average values for all metrics over the time period, normalized per day.
+ * @param {Object[]} events - Array of event objects.
+ * @param {string} selectedTable - The data source type.
+ * @returns {Object[]} Array with a single object containing average metrics per day.
+ */
 export function calculateAverageData(events, selectedTable) {
   const metrics = calculateMetricsFromEvents(events, selectedTable);
   const config = dataSourceConfig[selectedTable];
@@ -288,6 +334,12 @@ export function calculateAverageData(events, selectedTable) {
   return [result];
 }
 
+/**
+ * Calculates the sum of all metrics over the time period.
+ * @param {Object[]} events - Array of event objects.
+ * @param {string} selectedTable - The data source type.
+ * @returns {Object[]} Array with a single object containing summed metrics.
+ */
 export function calculateSumData(events, selectedTable) {
   const metrics = calculateMetricsFromEvents(events, selectedTable);
   const config = dataSourceConfig[selectedTable];
@@ -300,6 +352,14 @@ export function calculateSumData(events, selectedTable) {
   return [result];
 }
 
+/**
+ * Calculates a metric value from aggregated data, supporting different granularities and operators.
+ * @param {Object[]} currentData - Array of aggregated data objects (e.g., per month).
+ * @param {string} selectedMetric - The metric key to extract.
+ * @param {string} granularity - The granularity ('monthly', etc.).
+ * @param {string} operator - The operator to use ('average', 'sum', etc.).
+ * @returns {number} The calculated metric value.
+ */
 export function calculateMetricValue(
   currentData,
   selectedMetric,

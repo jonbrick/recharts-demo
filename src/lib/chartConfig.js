@@ -3,9 +3,7 @@
 export const dataSourceConfig = {
   githubActions: {
     name: "GitHub Actions",
-    icon: "📊",
-    title: "GitHub Actions CI/CD Pipeline",
-    description: "Deployment and build metrics for May 2025",
+    title: "Deployments",
     groupByOptions: [
       { value: "org", label: "🏢 Org View", icon: "🏢" },
       { value: "team", label: "👥 By Team", icon: "👥" },
@@ -47,9 +45,7 @@ export const dataSourceConfig = {
 
   pagerDuty: {
     name: "PagerDuty",
-    icon: "🚨",
-    title: "PagerDuty Incident Management",
-    description: "Incident response and reliability metrics for May 2025",
+    title: "Incidents",
     groupByOptions: [
       { value: "org", label: "🏢 Org View", icon: "🏢" },
       { value: "team", label: "👥 By Team", icon: "👥" },
@@ -95,9 +91,7 @@ export const dataSourceConfig = {
 
   githubPR: {
     name: "GitHub PRs",
-    icon: "🔀",
-    title: "GitHub Pull Request Activity",
-    description: "Pull request and code review metrics for May 2025",
+    title: "Pull Requests",
     groupByOptions: [
       { value: "org", label: "🏢 Org View", icon: "🏢" },
       { value: "team", label: "👥 By Team", icon: "👥" },
