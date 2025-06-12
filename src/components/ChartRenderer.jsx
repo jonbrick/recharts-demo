@@ -228,15 +228,23 @@ function LineChartComponent({ currentData, selectedMetric, groupBy }) {
   );
 }
 
-function VerticalBarChartComponent({
-  currentData,
-  selectedTable,
-  selectedMetric,
-}) {
-  const config = dataSourceConfig[selectedTable];
-  const metric = [...config.metrics, config.overlayMetric].find(
-    (m) => m.key === selectedMetric
-  );
+function VerticalBarChartComponent({ currentData, selectedMetric, groupBy }) {
+  // Check if this is multi-series data
+  const isMultiSeries = groupBy !== "org" && currentData.length > 0;
+  const seriesKeys = isMultiSeries
+    ? Object.keys(currentData[0]).filter((key) => key !== "name")
+    : [selectedMetric];
+
+  const colors = [
+    "#8884d8",
+    "#82ca9d",
+    "#ffc658",
+    "#ff7c7c",
+    "#8dd1e1",
+    "#d084d0",
+    "#ffb347",
+    "#87ceeb",
+  ];
 
   return (
     <ResponsiveContainer width="100%" height={400}>
@@ -248,24 +256,48 @@ function VerticalBarChartComponent({
           axisLine={{ stroke: "#ccc" }}
         />
         <YAxis tick={{ fill: "#666" }} axisLine={{ stroke: "#ccc" }} />
-        <Tooltip contentStyle={commonTooltipStyle} />
+        <Tooltip
+          content={
+            <CustomTooltip
+              selectedMetric={selectedMetric}
+              isMultiSeries={isMultiSeries}
+            />
+          }
+        />
         <Legend />
 
-        <Bar dataKey={selectedMetric} fill={metric.color} name={metric.label} />
+        {seriesKeys
+          .filter((key) => !key.endsWith("_hasData"))
+          .map((key, index) => (
+            <Bar
+              key={key}
+              dataKey={isMultiSeries ? key : selectedMetric}
+              fill={colors[index % colors.length]}
+              name={isMultiSeries ? key : "Organization"}
+            />
+          ))}
       </BarChart>
     </ResponsiveContainer>
   );
 }
 
-function HorizontalBarChartComponent({
-  currentData,
-  selectedTable,
-  selectedMetric,
-}) {
-  const config = dataSourceConfig[selectedTable];
-  const metric = [...config.metrics, config.overlayMetric].find(
-    (m) => m.key === selectedMetric
-  );
+function HorizontalBarChartComponent({ currentData, selectedMetric, groupBy }) {
+  // Check if this is multi-series data
+  const isMultiSeries = groupBy !== "org" && currentData.length > 0;
+  const seriesKeys = isMultiSeries
+    ? Object.keys(currentData[0]).filter((key) => key !== "name")
+    : [selectedMetric];
+
+  const colors = [
+    "#8884d8",
+    "#82ca9d",
+    "#ffc658",
+    "#ff7c7c",
+    "#8dd1e1",
+    "#d084d0",
+    "#ffb347",
+    "#87ceeb",
+  ];
 
   return (
     <ResponsiveContainer width="100%" height={400}>
@@ -287,10 +319,26 @@ function HorizontalBarChartComponent({
           axisLine={{ stroke: "#ccc" }}
           width={70}
         />
-        <Tooltip contentStyle={commonTooltipStyle} />
+        <Tooltip
+          content={
+            <CustomTooltip
+              selectedMetric={selectedMetric}
+              isMultiSeries={isMultiSeries}
+            />
+          }
+        />
         <Legend />
 
-        <Bar dataKey={selectedMetric} fill={metric.color} name={metric.label} />
+        {seriesKeys
+          .filter((key) => !key.endsWith("_hasData"))
+          .map((key, index) => (
+            <Bar
+              key={key}
+              dataKey={isMultiSeries ? key : selectedMetric}
+              fill={colors[index % colors.length]}
+              name={isMultiSeries ? key : "Organization"}
+            />
+          ))}
       </BarChart>
     </ResponsiveContainer>
   );
