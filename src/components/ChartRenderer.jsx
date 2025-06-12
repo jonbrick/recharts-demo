@@ -22,7 +22,6 @@ import {
 import {
   dataSourceConfig,
   formatValue,
-  mathMetrics,
   isMathMetric,
 } from "../lib/chartConfig.js";
 
