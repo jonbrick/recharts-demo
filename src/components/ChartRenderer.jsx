@@ -252,7 +252,6 @@ export function VerticalBarChartComponent({
               key={key}
               dataKey={isMultiSeries ? key : selectedMetric}
               fill={CHART_COLORS[index % CHART_COLORS.length]}
-              name={isMultiSeries ? key : "Organization"}
             />
           ))}
       </BarChart>
@@ -308,7 +307,6 @@ export function HorizontalBarChartComponent({
               key={key}
               dataKey={isMultiSeries ? key : selectedMetric}
               fill={CHART_COLORS[index % CHART_COLORS.length]}
-              name={isMultiSeries ? key : "Organization"}
             />
           ))}
       </BarChart>
