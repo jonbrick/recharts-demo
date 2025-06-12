@@ -38,8 +38,12 @@ const CHART_COLORS = [
   "#87ceeb",
 ];
 
+// Global animation settings
+const DISABLE_ANIMATIONS = true;
+
 const commonChartProps = {
   margin: { top: 20, right: 30, left: 20, bottom: 5 },
+  isAnimationActive: false,
 };
 
 const commonTooltipStyle = {
@@ -162,11 +166,7 @@ export function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <AreaChart
-        data={filteredData}
-        {...commonChartProps}
-        animationDuration={3000}
-      >
+      <AreaChart data={filteredData} {...commonChartProps}>
         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
         <XAxis
           dataKey="name"
@@ -201,6 +201,7 @@ export function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
               strokeWidth={2}
               name={isMultiSeries ? key : "Organization"}
               connectNulls={false}
+              isAnimationActive={false}
               dot={{
                 fill: CHART_COLORS[index % CHART_COLORS.length],
                 strokeWidth: 2,
@@ -240,11 +241,7 @@ export function LineChartComponent({ currentData, selectedMetric, groupBy }) {
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <LineChart
-        data={filteredData}
-        {...commonChartProps}
-        animationDuration={3000}
-      >
+      <LineChart data={filteredData} {...commonChartProps}>
         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
         <XAxis
           dataKey="name"
@@ -275,6 +272,7 @@ export function LineChartComponent({ currentData, selectedMetric, groupBy }) {
               dataKey={isMultiSeries ? key : selectedMetric}
               stroke={CHART_COLORS[index % CHART_COLORS.length]}
               strokeWidth={3}
+              isAnimationActive={false}
               dot={{
                 fill: CHART_COLORS[index % CHART_COLORS.length],
                 strokeWidth: 2,
@@ -312,11 +310,7 @@ export function VerticalBarChartComponent({
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <BarChart
-        data={currentData}
-        {...commonChartProps}
-        animationDuration={3000}
-      >
+      <BarChart data={currentData} {...commonChartProps}>
         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
         <XAxis
           dataKey="name"
@@ -345,6 +339,7 @@ export function VerticalBarChartComponent({
               key={key}
               dataKey={isMultiSeries ? key : selectedMetric}
               fill={CHART_COLORS[index % CHART_COLORS.length]}
+              isAnimationActive={false}
             />
           ))}
       </BarChart>
@@ -369,7 +364,7 @@ export function HorizontalBarChartComponent({
         layout="vertical"
         data={currentData}
         margin={{ top: 20, right: 30, left: 80, bottom: 5 }}
-        animationDuration={3000}
+        isAnimationActive={false}
       >
         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
         <XAxis
@@ -401,6 +396,7 @@ export function HorizontalBarChartComponent({
               key={key}
               dataKey={isMultiSeries ? key : selectedMetric}
               fill={CHART_COLORS[index % CHART_COLORS.length]}
+              isAnimationActive={false}
             />
           ))}
       </BarChart>
@@ -480,7 +476,7 @@ export function TremorAreaChartComponent({
         colors={["blue"]}
         valueFormatter={(value) => value.toFixed(1)}
         className="h-full"
-        animationDuration={3000}
+        isAnimationActive={!DISABLE_ANIMATIONS}
       />
       <div className="mt-4 text-sm text-gray-600 text-center">
         🔥 Tremor Area Chart - {metric.label}
@@ -508,7 +504,7 @@ export function TremorLineChartComponent({
         colors={["emerald"]}
         valueFormatter={(value) => value.toFixed(1)}
         className="h-full"
-        animationDuration={3000}
+        isAnimationActive={!DISABLE_ANIMATIONS}
       />
       <div className="mt-4 text-sm text-gray-600 text-center">
         🔥 Tremor Line Chart - {metric.label}
