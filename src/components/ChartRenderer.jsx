@@ -120,6 +120,10 @@ function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
     "#87ceeb",
   ];
 
+  // Check if the metric is a rate metric
+  const isRateMetric =
+    selectedMetric === "mergeRate" || selectedMetric === "successRate";
+
   return (
     <ResponsiveContainer width="100%" height={400}>
       <AreaChart data={currentData} {...commonChartProps}>
@@ -152,7 +156,7 @@ function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
               fillOpacity={0.8}
               strokeWidth={2}
               name={isMultiSeries ? key : "Organization"}
-              connectNulls={false}
+              connectNulls={!isRateMetric}
             />
           ))}
       </AreaChart>
@@ -176,6 +180,10 @@ function LineChartComponent({ currentData, selectedMetric, groupBy }) {
     "#ffb347",
     "#87ceeb",
   ];
+
+  // Check if the metric is a rate metric
+  const isRateMetric =
+    selectedMetric === "mergeRate" || selectedMetric === "successRate";
 
   return (
     <ResponsiveContainer width="100%" height={400}>
@@ -212,7 +220,7 @@ function LineChartComponent({ currentData, selectedMetric, groupBy }) {
                 r: 4,
               }}
               name={isMultiSeries ? key : "Organization"}
-              connectNulls={false}
+              connectNulls={!isRateMetric}
             />
           ))}
       </LineChart>
