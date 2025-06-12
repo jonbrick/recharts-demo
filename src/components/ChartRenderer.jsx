@@ -59,7 +59,9 @@ function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = useMemo(() => {
     if (!currentData || currentData.length === 0) return [];
-    return Object.keys(currentData[0]).filter((key) => key !== "name");
+    return Object.keys(currentData[0]).filter(
+      (key) => key !== "name" && !key.endsWith("_hasData")
+    );
   }, [currentData]);
 
   console.log("AreaChart seriesKeys:", seriesKeys);
@@ -118,7 +120,6 @@ function LineChartComponent({
         (key) => key !== "name" && !key.endsWith("_hasData")
       )
     : [selectedMetric];
-
   const colors = [
     "#8884d8",
     "#82ca9d",
