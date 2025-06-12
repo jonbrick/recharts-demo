@@ -162,7 +162,11 @@ export function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <AreaChart data={filteredData} {...commonChartProps}>
+      <AreaChart
+        data={filteredData}
+        {...commonChartProps}
+        animationDuration={3000}
+      >
         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
         <XAxis
           dataKey="name"
@@ -197,6 +201,11 @@ export function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
               strokeWidth={2}
               name={isMultiSeries ? key : "Organization"}
               connectNulls={false}
+              dot={{
+                fill: CHART_COLORS[index % CHART_COLORS.length],
+                strokeWidth: 2,
+                r: 4,
+              }}
             />
           ))}
       </AreaChart>
@@ -231,7 +240,11 @@ export function LineChartComponent({ currentData, selectedMetric, groupBy }) {
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <LineChart data={filteredData} {...commonChartProps}>
+      <LineChart
+        data={filteredData}
+        {...commonChartProps}
+        animationDuration={3000}
+      >
         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
         <XAxis
           dataKey="name"
@@ -299,7 +312,11 @@ export function VerticalBarChartComponent({
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <BarChart data={currentData} {...commonChartProps}>
+      <BarChart
+        data={currentData}
+        {...commonChartProps}
+        animationDuration={3000}
+      >
         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
         <XAxis
           dataKey="name"
@@ -352,6 +369,7 @@ export function HorizontalBarChartComponent({
         layout="vertical"
         data={currentData}
         margin={{ top: 20, right: 30, left: 80, bottom: 5 }}
+        animationDuration={3000}
       >
         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
         <XAxis
@@ -462,6 +480,7 @@ export function TremorAreaChartComponent({
         colors={["blue"]}
         valueFormatter={(value) => value.toFixed(1)}
         className="h-full"
+        animationDuration={3000}
       />
       <div className="mt-4 text-sm text-gray-600 text-center">
         🔥 Tremor Area Chart - {metric.label}
@@ -489,6 +508,7 @@ export function TremorLineChartComponent({
         colors={["emerald"]}
         valueFormatter={(value) => value.toFixed(1)}
         className="h-full"
+        animationDuration={3000}
       />
       <div className="mt-4 text-sm text-gray-600 text-center">
         🔥 Tremor Line Chart - {metric.label}

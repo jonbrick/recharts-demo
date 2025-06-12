@@ -1489,14 +1489,23 @@ export const pagerDutyData = [
     id: "inc-002",
     created_at: "2025-05-21T14:30:00Z",
     resolved_at: "2025-05-21T15:10:00Z",
-    severity: "medium",
-    users_affected: 120,
+    severity: "critical",
+    users_affected: 800,
     assigned_team: "product",
     service: "frontend-app",
   },
-  // Week 2
   {
     id: "inc-003",
+    created_at: "2025-05-22T11:20:00Z",
+    resolved_at: "2025-05-22T12:45:00Z",
+    severity: "medium",
+    users_affected: 150,
+    assigned_team: "platform",
+    service: "data-pipeline",
+  },
+  // Week 2
+  {
+    id: "inc-004",
     created_at: "2025-05-26T09:45:00Z",
     resolved_at: "2025-05-26T10:30:00Z",
     severity: "low",
@@ -1505,7 +1514,7 @@ export const pagerDutyData = [
     service: "user-auth",
   },
   {
-    id: "inc-004",
+    id: "inc-005",
     created_at: "2025-05-28T16:00:00Z",
     resolved_at: "2025-05-28T17:20:00Z",
     severity: "medium",
@@ -1513,9 +1522,17 @@ export const pagerDutyData = [
     assigned_team: "product",
     service: "mobile-app",
   },
-  // Rare critical
   {
-    id: "inc-005",
+    id: "inc-006",
+    created_at: "2025-05-29T08:30:00Z",
+    resolved_at: "2025-05-29T10:15:00Z",
+    severity: "low",
+    users_affected: 75,
+    assigned_team: "platform",
+    service: "api-service",
+  },
+  {
+    id: "inc-007",
     created_at: "2025-05-30T18:00:00Z",
     resolved_at: "2025-05-30T19:30:00Z",
     severity: "critical",
