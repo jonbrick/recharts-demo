@@ -1,6 +1,6 @@
 // ChartRenderer.jsx - Unified chart rendering component
 
-import React, { useMemo } from "react";
+import React from "react";
 import {
   AreaChart,
   Area,
@@ -21,7 +21,13 @@ import {
 } from "@tremor/react";
 import { dataSourceConfig, formatValue } from "../lib/chartConfig.js";
 
-function CustomTooltip({ active, payload, label }) {
+function CustomTooltip({
+  active,
+  payload,
+  label,
+  selectedMetric,
+  isMultiSeries,
+}) {
   if (!active || !payload || !payload.length) {
     return null;
   }
@@ -42,15 +48,20 @@ function CustomTooltip({ active, payload, label }) {
     "#87ceeb",
   ];
 
-  // Find all series keys (excluding 'name' and '_hasData' suffixes)
-  const allSeriesKeys = Object.keys(dataPoint)
-    .filter((key) => key !== "name" && !key.endsWith("_hasData"))
-    .sort(); // Sort for consistent color assignment
+  // Determine which keys to show in the tooltip
+  let keysToShow;
+  if (isMultiSeries) {
+    keysToShow = Object.keys(dataPoint)
+      .filter((key) => key !== "name" && !key.endsWith("_hasData"))
+      .sort();
+  } else {
+    keysToShow = [selectedMetric];
+  }
 
   return (
     <div style={commonTooltipStyle}>
       <p className="font-medium">{label}</p>
-      {allSeriesKeys.map((seriesKey, index) => {
+      {keysToShow.map((seriesKey, index) => {
         const hasDataKey = `${seriesKey}_hasData`;
         const hasData = dataPoint[hasDataKey];
         const value = dataPoint[seriesKey];
@@ -110,7 +121,14 @@ function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
           axisLine={{ stroke: "#ccc" }}
         />
         <YAxis tick={{ fill: "#666" }} axisLine={{ stroke: "#ccc" }} />
-        <Tooltip content={<CustomTooltip />} />
+        <Tooltip
+          content={
+            <CustomTooltip
+              selectedMetric={selectedMetric}
+              isMultiSeries={isMultiSeries}
+            />
+          }
+        />
         <Legend />
 
         {seriesKeys
@@ -133,12 +151,7 @@ function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
   );
 }
 
-function LineChartComponent({
-  currentData,
-  selectedTable,
-  selectedMetric,
-  groupBy,
-}) {
+function LineChartComponent({ currentData, selectedMetric, groupBy }) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
@@ -165,7 +178,14 @@ function LineChartComponent({
           axisLine={{ stroke: "#ccc" }}
         />
         <YAxis tick={{ fill: "#666" }} axisLine={{ stroke: "#ccc" }} />
-        <Tooltip content={<CustomTooltip />} />
+        <Tooltip
+          content={
+            <CustomTooltip
+              selectedMetric={selectedMetric}
+              isMultiSeries={isMultiSeries}
+            />
+          }
+        />
         <Legend />
 
         {seriesKeys
@@ -195,7 +215,6 @@ function VerticalBarChartComponent({
   currentData,
   selectedTable,
   selectedMetric,
-  groupBy,
 }) {
   const config = dataSourceConfig[selectedTable];
   const metric = [...config.metrics, config.overlayMetric].find(
@@ -225,7 +244,6 @@ function HorizontalBarChartComponent({
   currentData,
   selectedTable,
   selectedMetric,
-  groupBy,
 }) {
   const config = dataSourceConfig[selectedTable];
   const metric = [...config.metrics, config.overlayMetric].find(
@@ -266,7 +284,6 @@ function TableComponent({
   selectedTable,
   selectedMetric,
   granularity,
-  groupBy,
 }) {
   const config = dataSourceConfig[selectedTable];
   const metric = [...config.metrics, config.overlayMetric].find(
@@ -319,7 +336,6 @@ function TremorAreaChartComponent({
   currentData,
   selectedTable,
   selectedMetric,
-  groupBy,
 }) {
   const config = dataSourceConfig[selectedTable];
   const metric = [...config.metrics, config.overlayMetric].find(
@@ -347,7 +363,6 @@ function TremorLineChartComponent({
   currentData,
   selectedTable,
   selectedMetric,
-  groupBy,
 }) {
   const config = dataSourceConfig[selectedTable];
   const metric = [...config.metrics, config.overlayMetric].find(
