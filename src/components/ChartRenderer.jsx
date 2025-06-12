@@ -57,10 +57,9 @@ const commonTooltipStyle = {
 function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
-  const seriesKeys = useMemo(() => {
-    if (!currentData || currentData.length === 0) return [];
-    return Object.keys(currentData[0]).filter((key) => key !== "name");
-  }, [currentData]);
+  const seriesKeys = isMultiSeries
+    ? Object.keys(currentData[0]).filter((key) => key !== "name")
+    : [selectedMetric];
 
   console.log("AreaChart seriesKeys:", seriesKeys);
 
@@ -99,7 +98,7 @@ function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
               fill={colors[index % colors.length]}
               fillOpacity={0.8}
               strokeWidth={2}
-              name={key}
+              name={isMultiSeries ? key : "Organization"}
             />
           ))}
       </AreaChart>
@@ -156,7 +155,7 @@ function LineChartComponent({
                 strokeWidth: 2,
                 r: 4,
               }}
-              name={key}
+              name={isMultiSeries ? key : "Organization"}
             />
           ))}
       </LineChart>
