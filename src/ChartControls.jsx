@@ -1,7 +1,7 @@
 // ChartControls.jsx - All chart control components
 
 import React from "react";
-import { dataSourceConfig, chartTypeConfig } from "./chartConfig.js";
+import { dataSourceConfig, chartTypeConfig } from "../lib/chartConfig.js";
 
 export function DataSourceSelector({ selectedTable, onTableChange }) {
   return (

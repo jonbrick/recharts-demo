@@ -1,8 +1,8 @@
 // MetricsSummary.jsx - Metrics summary display
 
 import React from "react";
-import { dataSourceConfig } from "./chartConfig.js";
-import { calculateMetricValue } from "./utils.js";
+import { dataSourceConfig } from "./lib/chartConfig.js";
+import { calculateMetricValue } from "./lib/utils.js";
 
 export function MetricsSummary({
   selectedTable,
