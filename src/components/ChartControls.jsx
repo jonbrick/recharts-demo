@@ -68,17 +68,6 @@ export function MetricSelector({
   );
 }
 
-export function StackingToggle({ isStacked, onStackingChange }) {
-  return (
-    <button
-      onClick={() => onStackingChange(!isStacked)}
-      className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 shadow-lg"
-    >
-      Switch to {isStacked ? "Overlapping" : "Stacked"} View
-    </button>
-  );
-}
-
 export function GranularitySelector({ granularity, onGranularityChange }) {
   return (
     <Select value={granularity} onValueChange={onGranularityChange}>
@@ -105,8 +94,6 @@ export function ChartTypeSelector({ chartType, onChartTypeChange }) {
             {config.label}
           </SelectItem>
         ))}
-        <SelectItem value="tremor-area">🔥 Tremor Area</SelectItem>
-        <SelectItem value="tremor-line">🔥 Tremor Line</SelectItem>
       </SelectContent>
     </Select>
   );

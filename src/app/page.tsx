@@ -36,11 +36,6 @@ export default function HomePage() {
       : calculateSumData(data, selectedTable);
   }, [data, selectedTable, operator]);
 
-  console.log("Operator:", operator);
-  console.log("AllTimeData:", allTimeData);
-  console.log("Selected metric:", selectedMetric);
-  console.log("Value:", allTimeData[0][selectedMetric]);
-
   // Get the current dataset based on granularity
   const currentData = granularity === "monthly" ? data : allTimeData;
 
@@ -97,50 +92,6 @@ export default function HomePage() {
           granularity={granularity}
         />
       </Card>
-
-      <div className="bg-white rounded-xl shadow-lg p-6 mt-8">
-        <h3 className="text-xl font-semibold text-gray-700 mb-4">
-          Data Source: {config.name}
-        </h3>
-        <div className="grid md:grid-cols-2 gap-4">
-          <div className="flex flex-col gap-3">
-            <h4 className="font-semibold text-blue-600">
-              {config.icon} {config.name} Metrics:
-            </h4>
-            <ul className="flex flex-col gap-2 text-gray-700 text-sm">
-              {config.metrics.map((metric) => (
-                <li key={metric.key}>
-                  • <strong>{metric.label}:</strong> {metric.description}
-                </li>
-              ))}
-              {config.overlayMetric && (
-                <li>
-                  • <strong>{config.overlayMetric.label}:</strong>{" "}
-                  {config.overlayMetric.description}
-                </li>
-              )}
-            </ul>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            <h4 className="font-semibold text-green-600">📊 Pattern 1 Demo:</h4>
-            <ul className="flex flex-col gap-2 text-gray-700 text-sm">
-              <li>• Switch between data sources using the dropdown</li>
-              <li>• Toggle between stacked and overlapping views</li>
-              <li>• Try different chart types for the same data</li>
-              <li>• Observe correlations in the data patterns</li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-          <p className="text-blue-800 text-sm">
-            <strong>💡 Next Steps:</strong> This demonstrates Pattern 1 (Single
-            Source Time Series). Pattern 2 will combine multiple sources, and
-            Pattern 3 will add scatter plot correlations.
-          </p>
-        </div>
-      </div>
     </div>
   );
 }

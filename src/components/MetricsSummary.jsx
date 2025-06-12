@@ -9,7 +9,7 @@ export function MetricsSummary({
   currentData,
   granularity,
   selectedMetric,
-  operator, // ADD THIS PARAMETER
+  operator,
 }) {
   const config = dataSourceConfig[selectedTable];
   const metric = [...config.metrics, config.overlayMetric].find(

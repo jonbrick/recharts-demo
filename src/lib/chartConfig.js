@@ -149,7 +149,3 @@ export const formatValue = (value, format) => {
       return value.toLocaleString();
   }
 };
-
-export const getDataSourceKeys = () => Object.keys(dataSourceConfig);
-
-export const getChartTypeKeys = () => Object.keys(chartTypeConfig);

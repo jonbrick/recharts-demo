@@ -14,7 +14,6 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  ComposedChart,
 } from "recharts";
 import {
   AreaChart as TremorAreaChart,
@@ -218,6 +217,61 @@ function TableComponent({
   );
 }
 
+// Add Tremor chart components
+function TremorAreaChartComponent({
+  currentData,
+  selectedTable,
+  selectedMetric,
+}) {
+  const config = dataSourceConfig[selectedTable];
+  const metric = [...config.metrics, config.overlayMetric].find(
+    (m) => m.key === selectedMetric
+  );
+
+  return (
+    <div className="h-96">
+      <TremorAreaChart
+        data={currentData}
+        index="name"
+        categories={[selectedMetric]}
+        colors={["blue"]}
+        valueFormatter={(value) => value.toFixed(1)}
+        className="h-full"
+      />
+      <div className="mt-4 text-sm text-gray-600 text-center">
+        🔥 Tremor Area Chart - {metric.label}
+      </div>
+    </div>
+  );
+}
+
+function TremorLineChartComponent({
+  currentData,
+  selectedTable,
+  selectedMetric,
+}) {
+  const config = dataSourceConfig[selectedTable];
+  const metric = [...config.metrics, config.overlayMetric].find(
+    (m) => m.key === selectedMetric
+  );
+
+  return (
+    <div className="h-96">
+      <TremorLineChart
+        data={currentData}
+        index="name"
+        categories={[selectedMetric]}
+        colors={["emerald"]}
+        valueFormatter={(value) => value.toFixed(1)}
+        className="h-full"
+      />
+      <div className="mt-4 text-sm text-gray-600 text-center">
+        🔥 Tremor Line Chart - {metric.label}
+      </div>
+    </div>
+  );
+}
+
 export function ChartRenderer({
   chartType,
   currentData,
@@ -225,61 +279,6 @@ export function ChartRenderer({
   selectedMetric,
   granularity,
 }) {
-  // Add Tremor chart components
-  function TremorAreaChartComponent({
-    currentData,
-    selectedTable,
-    selectedMetric,
-  }) {
-    const config = dataSourceConfig[selectedTable];
-    const metric = [...config.metrics, config.overlayMetric].find(
-      (m) => m.key === selectedMetric
-    );
-
-    return (
-      <div className="h-96">
-        <TremorAreaChart
-          data={currentData}
-          index="name"
-          categories={[selectedMetric]}
-          colors={["blue"]}
-          valueFormatter={(value) => value.toFixed(1)}
-          className="h-full"
-        />
-        <div className="mt-4 text-sm text-gray-600 text-center">
-          🔥 Tremor Area Chart - {metric.label}
-        </div>
-      </div>
-    );
-  }
-
-  function TremorLineChartComponent({
-    currentData,
-    selectedTable,
-    selectedMetric,
-  }) {
-    const config = dataSourceConfig[selectedTable];
-    const metric = [...config.metrics, config.overlayMetric].find(
-      (m) => m.key === selectedMetric
-    );
-
-    return (
-      <div className="h-96">
-        <TremorLineChart
-          data={currentData}
-          index="name"
-          categories={[selectedMetric]}
-          colors={["emerald"]}
-          valueFormatter={(value) => value.toFixed(1)}
-          className="h-full"
-        />
-        <div className="mt-4 text-sm text-gray-600 text-center">
-          🔥 Tremor Line Chart - {metric.label}
-        </div>
-      </div>
-    );
-  }
-
   const chartComponents = {
     area: AreaChartComponent,
     line: LineChartComponent,
