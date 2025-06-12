@@ -58,6 +58,10 @@ function CustomTooltip({
     keysToShow = [selectedMetric];
   }
 
+  // Check if the metric is a rate metric
+  const isRateMetric =
+    selectedMetric === "mergeRate" || selectedMetric === "successRate";
+
   return (
     <div style={commonTooltipStyle}>
       <p className="font-medium">{label}</p>
@@ -70,9 +74,14 @@ function CustomTooltip({
         const payloadEntry = payload.find((p) => p.dataKey === seriesKey);
         const color = payloadEntry?.color || colors[index % colors.length];
 
+        // For rate metrics, show "No results" when there's no data
+        // For other metrics, show 0 when there's no data
+        const displayValue =
+          hasData === false ? (isRateMetric ? "No results" : "0") : value;
+
         return (
           <p key={index} style={{ color }}>
-            {`${seriesKey}: ${hasData === false ? "no results" : value}`}
+            {`${seriesKey}: ${displayValue}`}
           </p>
         );
       })}
