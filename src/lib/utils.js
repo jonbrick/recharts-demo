@@ -2,7 +2,7 @@
 import { dataSourceConfig } from "./chartConfig.js";
 
 // Date range for POC data
-export const POC_START_DATE = "2025-05-17";
+export const POC_START_DATE = "2025-05-15";
 export const POC_END_DATE = "2025-05-30";
 
 /**
@@ -11,11 +11,16 @@ export const POC_END_DATE = "2025-05-30";
  */
 export function getFullDateRange() {
   const dates = [];
-  const start = new Date(POC_START_DATE);
-  const end = new Date(POC_END_DATE);
+  const start = new Date(POC_START_DATE + "T00:00:00Z");
+  const end = new Date(POC_END_DATE + "T00:00:00Z");
 
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    dates.push(d.toISOString().split("T")[0]);
+  for (let d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
+    dates.push(
+      `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(
+        2,
+        "0"
+      )}-${String(d.getUTCDate()).padStart(2, "0")}`
+    );
   }
 
   return dates;
@@ -42,7 +47,12 @@ function getEventDate(event, dataSource) {
     default:
       timestamp = event.created_at;
   }
-  return new Date(timestamp).toISOString().split("T")[0]; // YYYY-MM-DD format
+  // Use UTC date to avoid timezone issues
+  const date = new Date(timestamp);
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(
+    2,
+    "0"
+  )}-${String(date.getUTCDate()).padStart(2, "0")}`;
 }
 
 /**
@@ -89,11 +99,15 @@ function getDisplayName(key, dataSource, groupBy) {
     lisa_taylor: "Lisa Taylor",
   };
 
+  let date;
   switch (groupBy) {
     case "time":
-      return new Date(key).toLocaleDateString("en-US", {
+      // Use UTC date to avoid timezone issues
+      date = new Date(key + "T00:00:00Z");
+      return date.toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
+        timeZone: "UTC",
       });
     case "person":
       return nameMap[key] || key;
@@ -390,8 +404,8 @@ export function calculateMetricValue(
  * @returns {Array} Filtered array.
  */
 export function filterEventsByDate(events, start, end, dateField) {
-  const startDate = new Date(start);
-  const endDate = new Date(end);
+  const startDate = new Date(start + "T00:00:00Z");
+  const endDate = new Date(end + "T23:59:59Z");
   return events.filter((event) => {
     const eventDate = new Date(event[dateField]);
     return eventDate >= startDate && eventDate <= endDate;

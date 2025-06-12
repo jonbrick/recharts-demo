@@ -30,19 +30,19 @@ export default function HomePage() {
   const dataTables = {
     githubActions: filterEventsByDate(
       githubActionsData,
-      "2025-05-17",
+      "2025-05-15",
       "2025-05-30",
       "deployed_at"
     ),
     pagerDuty: filterEventsByDate(
       pagerDutyData,
-      "2025-05-17",
+      "2025-05-15",
       "2025-05-30",
       "created_at"
     ),
     githubPR: filterEventsByDate(
       githubPRData,
-      "2025-05-17",
+      "2025-05-15",
       "2025-05-30",
       "created_at"
     ),
