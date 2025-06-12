@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   ControlsContainer,
   ChartTypeSelector,
@@ -14,6 +14,7 @@ import {
   calculateSumData,
   groupEventsByDate,
   groupEventsByType,
+  filterEventsByDate,
 } from "../lib/utils";
 import { Card } from "../components/Card";
 
@@ -27,13 +28,38 @@ export default function HomePage() {
 
   // Available data tables
   const dataTables = {
-    githubActions: githubActionsData,
-    pagerDuty: pagerDutyData,
-    githubPR: githubPRData,
+    githubActions: filterEventsByDate(
+      githubActionsData,
+      "2025-05-17",
+      "2025-05-30",
+      "deployed_at"
+    ),
+    pagerDuty: filterEventsByDate(
+      pagerDutyData,
+      "2025-05-17",
+      "2025-05-30",
+      "created_at"
+    ),
+    githubPR: filterEventsByDate(
+      githubPRData,
+      "2025-05-17",
+      "2025-05-30",
+      "created_at"
+    ),
   };
 
   const data = dataTables[selectedTable];
   const config = dataSourceConfig[selectedTable];
+
+  // Ensure groupBy is valid for the selectedTable, otherwise default to 'org'
+  useEffect(() => {
+    const validGroupBys = (
+      dataSourceConfig[selectedTable]?.groupByOptions || []
+    ).map((opt) => opt.value);
+    if (!validGroupBys.includes(groupBy)) {
+      setGroupBy("org");
+    }
+  }, [selectedTable, groupBy]);
 
   // Replace your existing allTimeData calculation with this:
   const allTimeData = useMemo(() => {
@@ -103,11 +129,8 @@ export default function HomePage() {
         <MetricsSummary
           key={`${operator}-${selectedMetric}-${groupBy}`}
           selectedTable={selectedTable}
-          currentData={currentData}
-          granularity={granularity}
           selectedMetric={selectedMetric}
           operator={operator}
-          groupBy={groupBy}
         />
         <ChartRenderer
           chartType={chartType}

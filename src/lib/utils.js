@@ -376,3 +376,20 @@ export function calculateMetricValue(
     return currentData[0]?.[selectedMetric] || 0;
   }
 }
+
+/**
+ * Filters events to only those within the given date range (inclusive).
+ * @param {Array} events - The array of event objects (must have a date field).
+ * @param {string} start - Start date in YYYY-MM-DD format.
+ * @param {string} end - End date in YYYY-MM-DD format.
+ * @param {string} dateField - The field to use for date comparison.
+ * @returns {Array} Filtered array.
+ */
+export function filterEventsByDate(events, start, end, dateField) {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  return events.filter((event) => {
+    const eventDate = new Date(event[dateField]);
+    return eventDate >= startDate && eventDate <= endDate;
+  });
+}
