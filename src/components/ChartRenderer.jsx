@@ -73,6 +73,31 @@ function CustomTooltip({
     keysToShow = [selectedMetric];
   }
 
+  // Format value based on metric type
+  const formatValue = (value, key) => {
+    if (value === null || value === undefined) return "No results";
+
+    // Format MTTR in minutes to hours and minutes
+    if (key === "mttrMinutes") {
+      const hours = Math.floor(value / 60);
+      const minutes = Math.round(value % 60);
+      return `${hours}h ${minutes}m`;
+    }
+
+    // Format percentage values
+    if (key === "successRate" || key === "mergeRate") {
+      return `${value.toFixed(1)}%`;
+    }
+
+    // Format time values
+    if (key === "buildTimeMinutes" || key === "avgReviewTime") {
+      return `${value.toFixed(1)} min`;
+    }
+
+    // Default number formatting
+    return typeof value === "number" ? value.toFixed(1) : value;
+  };
+
   return (
     <div style={commonTooltipStyle}>
       <p className="font-medium">{label}</p>
@@ -93,13 +118,13 @@ function CustomTooltip({
           rateMetrics.includes(selectedMetric) ||
           rateMetrics.includes(seriesKey);
 
-        // Show "No results" for rate metrics when no data, 0 for count metrics
+        // Format the display value
         const displayValue =
           !hasData || value === null
             ? isRateMetric
               ? "No results"
               : "0"
-            : value;
+            : formatValue(value, seriesKey);
 
         return (
           <p key={index} style={{ color }}>
@@ -118,16 +143,37 @@ export function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
     ? Object.keys(currentData[0]).filter((key) => key !== "name")
     : [selectedMetric];
 
+  // Format Y-axis tick for MTTR
+  const formatYTick = (value) => {
+    if (selectedMetric === "mttrMinutes") {
+      const hours = Math.floor(value / 60);
+      const minutes = Math.round(value % 60);
+      return `${hours}h ${minutes}m`;
+    }
+    return value;
+  };
+
+  // Filter out null values for MTTR
+  const filteredData = currentData.map((point) => ({
+    ...point,
+    [selectedMetric]:
+      point[selectedMetric] === null ? undefined : point[selectedMetric],
+  }));
+
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <AreaChart data={currentData} {...commonChartProps}>
+      <AreaChart data={filteredData} {...commonChartProps}>
         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
         <XAxis
           dataKey="name"
           tick={{ fill: "#666" }}
           axisLine={{ stroke: "#ccc" }}
         />
-        <YAxis tick={{ fill: "#666" }} axisLine={{ stroke: "#ccc" }} />
+        <YAxis
+          tick={{ fill: "#666" }}
+          axisLine={{ stroke: "#ccc" }}
+          tickFormatter={formatYTick}
+        />
         <Tooltip
           content={
             <CustomTooltip
@@ -150,10 +196,7 @@ export function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
               fillOpacity={0.8}
               strokeWidth={2}
               name={isMultiSeries ? key : "Organization"}
-              connectNulls={
-                !rateMetrics.includes(selectedMetric) &&
-                !rateMetrics.includes(key)
-              }
+              connectNulls={false}
             />
           ))}
       </AreaChart>
@@ -168,16 +211,37 @@ export function LineChartComponent({ currentData, selectedMetric, groupBy }) {
     ? Object.keys(currentData[0]).filter((key) => key !== "name")
     : [selectedMetric];
 
+  // Format Y-axis tick for MTTR
+  const formatYTick = (value) => {
+    if (selectedMetric === "mttrMinutes") {
+      const hours = Math.floor(value / 60);
+      const minutes = Math.round(value % 60);
+      return `${hours}h ${minutes}m`;
+    }
+    return value;
+  };
+
+  // Filter out null values for MTTR
+  const filteredData = currentData.map((point) => ({
+    ...point,
+    [selectedMetric]:
+      point[selectedMetric] === null ? undefined : point[selectedMetric],
+  }));
+
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <LineChart data={currentData} {...commonChartProps}>
+      <LineChart data={filteredData} {...commonChartProps}>
         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
         <XAxis
           dataKey="name"
           tick={{ fill: "#666" }}
           axisLine={{ stroke: "#ccc" }}
         />
-        <YAxis tick={{ fill: "#666" }} axisLine={{ stroke: "#ccc" }} />
+        <YAxis
+          tick={{ fill: "#666" }}
+          axisLine={{ stroke: "#ccc" }}
+          tickFormatter={formatYTick}
+        />
         <Tooltip
           content={
             <CustomTooltip
@@ -203,10 +267,7 @@ export function LineChartComponent({ currentData, selectedMetric, groupBy }) {
                 r: 4,
               }}
               name={isMultiSeries ? key : "Organization"}
-              connectNulls={
-                !rateMetrics.includes(selectedMetric) &&
-                !rateMetrics.includes(key)
-              }
+              connectNulls={false}
             />
           ))}
       </LineChart>
@@ -225,6 +286,16 @@ export function VerticalBarChartComponent({
     ? Object.keys(currentData[0]).filter((key) => key !== "name")
     : [selectedMetric];
 
+  // Format Y-axis tick for MTTR
+  const formatYTick = (value) => {
+    if (selectedMetric === "mttrMinutes") {
+      const hours = Math.floor(value / 60);
+      const minutes = Math.round(value % 60);
+      return `${hours}h ${minutes}m`;
+    }
+    return value;
+  };
+
   return (
     <ResponsiveContainer width="100%" height={400}>
       <BarChart data={currentData} {...commonChartProps}>
@@ -234,7 +305,11 @@ export function VerticalBarChartComponent({
           tick={{ fill: "#666" }}
           axisLine={{ stroke: "#ccc" }}
         />
-        <YAxis tick={{ fill: "#666" }} axisLine={{ stroke: "#ccc" }} />
+        <YAxis
+          tick={{ fill: "#666" }}
+          axisLine={{ stroke: "#ccc" }}
+          tickFormatter={formatYTick}
+        />
         <Tooltip
           content={
             <CustomTooltip
