@@ -119,6 +119,19 @@ export function ChartTypeSelector({ chartType, onChartTypeChange }) {
   );
 }
 
+export function DatePickerSelector({ date, onDateChange }) {
+  return (
+    <Select value={date} onValueChange={onDateChange} disabled>
+      <SelectTrigger>
+        <SelectValue placeholder="Select Date" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="placeholder">Select Date</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+}
+
 export function ControlsContainer({
   selectedTable,
   onTableChange,
@@ -130,6 +143,8 @@ export function ControlsContainer({
   onGranularityChange,
   groupBy,
   onGroupByChange,
+  date,
+  onDateChange,
   title = "Interactive Chart Demo",
 }) {
   return (
@@ -159,6 +174,7 @@ export function ControlsContainer({
           granularity={granularity}
           onGranularityChange={onGranularityChange}
         />
+        <DatePickerSelector date={date} onDateChange={onDateChange} />
       </div>
     </div>
   );

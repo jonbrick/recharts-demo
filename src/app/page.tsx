@@ -25,6 +25,7 @@ export default function HomePage() {
   const [selectedMetric, setSelectedMetric] = useState("deployments");
   const [operator, setOperator] = useState("average");
   const [groupBy, setGroupBy] = useState("org");
+  const [selectedDate, setSelectedDate] = useState("");
 
   // Available data tables
   const dataTables = {
@@ -107,6 +108,8 @@ export default function HomePage() {
         onGranularityChange={setGranularity}
         groupBy={groupBy}
         onGroupByChange={handleGroupByChange}
+        date={selectedDate}
+        onDateChange={setSelectedDate}
       />
 
       <Card className="flex flex-col gap-2">
