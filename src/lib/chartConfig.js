@@ -159,11 +159,25 @@ export const formatValue = (value, format) => {
   }
 };
 
-// Rate metrics that should show "No results" instead of 0 when no data
-export const rateMetrics = [
+// Math metrics that should show "No results" when no data available
+export const mathMetrics = [
   "mergeRate",
   "successRate",
   "mttrMinutes",
   "avgReviewTime",
   "buildTimeMinutes",
 ];
+
+// Count metrics that should show 0 when no data available
+export const countMetrics = [
+  "deployments",
+  "pullRequests",
+  "incidents",
+  "criticalIncidents",
+  "testsRun",
+  "usersAffected",
+  "linesChanged",
+];
+
+// Helper function to determine if a metric is math-based
+export const isMathMetric = (metricKey) => mathMetrics.includes(metricKey);

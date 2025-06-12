@@ -22,7 +22,8 @@ import {
 import {
   dataSourceConfig,
   formatValue,
-  rateMetrics,
+  mathMetrics,
+  isMathMetric,
 } from "../lib/chartConfig.js";
 
 // Common chart colors
@@ -113,15 +114,13 @@ function CustomTooltip({
         const color =
           payloadEntry?.color || CHART_COLORS[index % CHART_COLORS.length];
 
-        // Check if this is a rate metric
-        const isRateMetric =
-          rateMetrics.includes(selectedMetric) ||
-          rateMetrics.includes(seriesKey);
+        // Check if this is a math metric (should show "No results" when null)
+        const isMathType = isMathMetric(seriesKey);
 
         // Format the display value
         const displayValue =
-          !hasData || value === null
-            ? isRateMetric
+          !hasData || value === null || value === undefined
+            ? isMathType
               ? "No results"
               : "0"
             : formatValue(value, seriesKey);
@@ -153,11 +152,12 @@ export function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
     return value;
   };
 
-  // Filter out null values for MTTR
+  // Handle null values properly - keep nulls for math metrics, convert to 0 for count metrics
   const filteredData = currentData.map((point) => ({
     ...point,
-    [selectedMetric]:
-      point[selectedMetric] === null ? undefined : point[selectedMetric],
+    [selectedMetric]: isMathMetric(selectedMetric)
+      ? point[selectedMetric] // Keep null for math metrics (chart will skip points)
+      : point[selectedMetric] ?? 0, // Convert null to 0 for count metrics
   }));
 
   return (
@@ -221,11 +221,12 @@ export function LineChartComponent({ currentData, selectedMetric, groupBy }) {
     return value;
   };
 
-  // Filter out null values for MTTR
+  // Handle null values properly - keep nulls for math metrics, convert to 0 for count metrics
   const filteredData = currentData.map((point) => ({
     ...point,
-    [selectedMetric]:
-      point[selectedMetric] === null ? undefined : point[selectedMetric],
+    [selectedMetric]: isMathMetric(selectedMetric)
+      ? point[selectedMetric] // Keep null for math metrics (chart will skip points)
+      : point[selectedMetric] ?? 0, // Convert null to 0 for count metrics
   }));
 
   return (
