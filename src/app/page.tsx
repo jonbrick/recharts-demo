@@ -99,10 +99,6 @@ export default function HomePage() {
 
   const handleGroupByChange = (newGroupBy: string) => {
     setGroupBy(newGroupBy);
-    // Reset granularity when switching away from org grouping
-    if (newGroupBy !== "org") {
-      setGranularity("monthly");
-    }
   };
 
   return (

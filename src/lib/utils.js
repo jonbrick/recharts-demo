@@ -284,6 +284,32 @@ export function groupEventsByType(
     // Org view - single series, same as groupEventsByDate
     return groupEventsByDate(events, dataSource);
   } else {
+    // For non-org views, use all-time data if specified
+    if (granularity === "all-time") {
+      const allSeries = new Set();
+      events.forEach((event) => {
+        const groupKey = getGroupingKey(event, dataSource, groupBy);
+        allSeries.add(groupKey);
+      });
+
+      const result = {
+        name: "All Time",
+      };
+
+      allSeries.forEach((groupKey) => {
+        const displayName = getDisplayName(groupKey, dataSource, groupBy);
+        const groupEvents = events.filter(
+          (event) => getGroupingKey(event, dataSource, groupBy) === groupKey
+        );
+        const metrics = calculateMetricsFromEvents(groupEvents, dataSource);
+        result[displayName] = metrics[selectedMetric];
+        result[`${displayName}_hasData`] = groupEvents.length > 0;
+      });
+
+      return [result];
+    }
+
+    // Monthly view - show time series
     const fullDateRange = getFullDateRange();
     const grouped = {};
 
@@ -381,7 +407,7 @@ export function calculateSumData(events, selectedTable) {
  * Calculates a metric value from aggregated data, supporting different granularities and operators.
  * @param {Object[]} currentData - Array of aggregated data objects (e.g., per month).
  * @param {string} selectedMetric - The metric key to extract.
- * @param {string} granularity - The granularity ('monthly', etc.).
+ * @param {string} granularity - The granularity ('monthly', 'all-time').
  * @param {string} operator - The operator to use ('average', 'sum', etc.).
  * @returns {number} The calculated metric value.
  */
@@ -391,15 +417,17 @@ export function calculateMetricValue(
   granularity,
   operator
 ) {
-  if (granularity === "monthly") {
-    const total = currentData.reduce(
-      (sum, row) => sum + (row[selectedMetric] || 0),
-      0
-    );
-    return operator === "average" ? total / currentData.length : total;
-  } else {
+  // For all-time view, we already have the aggregated value
+  if (granularity === "all-time") {
     return currentData[0]?.[selectedMetric] || 0;
   }
+
+  // For monthly view, we need to aggregate the daily values
+  const total = currentData.reduce(
+    (sum, row) => sum + (row[selectedMetric] || 0),
+    0
+  );
+  return operator === "average" ? total / currentData.length : total;
 }
 
 /**
