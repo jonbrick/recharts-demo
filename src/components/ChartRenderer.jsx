@@ -55,19 +55,25 @@ function CustomTooltip({
   selectedMetric,
   isMultiSeries,
 }) {
-  if (!active || !payload || !payload.length) {
+  if (!active) {
     return null;
   }
 
-  // Get all possible series from the data point
-  const dataPoint = payload[0]?.payload;
-  if (!dataPoint) return null;
+  // Get data point - for math metrics with no data, we might not have payload
+  const dataPoint = payload?.[0]?.payload || label;
+  if (!dataPoint && !label) return null;
+
+  // If we only have label (no dataPoint), create a minimal dataPoint for math metrics
+  const workingDataPoint = dataPoint || { name: label, [selectedMetric]: null };
 
   // Determine which keys to show in the tooltip
   let keysToShow;
   if (isMultiSeries) {
-    keysToShow = Object.keys(dataPoint)
-      .filter((key) => key !== "name" && !key.endsWith("_hasData"))
+    keysToShow = Object.keys(workingDataPoint)
+      .filter(
+        (key) =>
+          key !== "name" && !key.endsWith("_hasData") && key !== selectedMetric
+      )
       .sort();
   } else {
     keysToShow = [selectedMetric];
@@ -104,12 +110,12 @@ function CustomTooltip({
       {keysToShow.map((seriesKey, index) => {
         const hasDataKey = `${seriesKey}_hasData`;
         const hasData = isMultiSeries
-          ? dataPoint[hasDataKey]
-          : dataPoint[seriesKey] !== null;
-        const value = dataPoint[seriesKey];
+          ? workingDataPoint[hasDataKey] !== false
+          : workingDataPoint[seriesKey] !== null;
+        const value = workingDataPoint[seriesKey];
 
         // Try to find color from payload first, fallback to index-based color
-        const payloadEntry = payload.find((p) => p.dataKey === seriesKey);
+        const payloadEntry = payload?.find((p) => p.dataKey === seriesKey);
         const color =
           payloadEntry?.color || CHART_COLORS[index % CHART_COLORS.length];
 
