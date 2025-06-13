@@ -21,7 +21,7 @@ import { format, type Locale } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { tv, type VariantProps } from "tailwind-variants";
 
-import { cx, focusInput, focusRing, hasErrorInput } from "../lib/utils.js";
+import { cx, focusInput, focusRing, hasErrorInput } from "../lib/styleUtils";
 
 import { Button } from "./Button";
 import { Calendar as CalendarPrimitive, type Matcher } from "./Calendar";

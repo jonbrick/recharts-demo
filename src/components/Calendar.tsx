@@ -21,7 +21,7 @@ import {
   type Matcher,
 } from "react-day-picker";
 
-import { cx, focusRing } from "../lib/utils.js";
+import { cx, focusRing } from "../lib/styleUtils";
 
 interface NavigationButtonProps
   extends React.HTMLAttributes<HTMLButtonElement> {

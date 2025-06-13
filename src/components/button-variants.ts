@@ -1,6 +1,6 @@
 import React from "react";
 import { tv, type VariantProps } from "tailwind-variants";
-import { focusRing } from "../lib/utils.js";
+import { focusRing } from "../lib/styleUtils";
 
 export const buttonVariants = tv({
   base: [

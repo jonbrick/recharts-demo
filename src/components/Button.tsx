@@ -3,7 +3,7 @@
 import React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { RiLoader2Fill } from "@remixicon/react";
-import { cx } from "../lib/utils.js";
+import { cx } from "../lib/styleUtils";
 import { buttonVariants, type ButtonProps } from "./button-variants";
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
