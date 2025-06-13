@@ -28,6 +28,7 @@ import {
   POC_END_DATE_UTC,
 } from "../lib/dashboardUtils";
 import { Card } from "../components/Card";
+import { Button } from "../components/Button";
 
 export default function HomePage() {
   const [chartType, setChartType] = useState("line");
@@ -168,17 +169,18 @@ export default function HomePage() {
                 new Date(DEFAULT_PICKER_DATES.defaultStart).toISOString() ||
               selectedDateRange.to?.toISOString() !==
                 new Date(DEFAULT_PICKER_DATES.defaultEnd).toISOString() ? (
-                <button
+                <Button
+                  variant="ghost"
                   onClick={() => {
                     setSelectedDateRange({
                       from: new Date(DEFAULT_PICKER_DATES.defaultStart),
                       to: new Date(DEFAULT_PICKER_DATES.defaultEnd),
                     });
                   }}
-                  className="px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"
+                  className="cursor-pointer"
                 >
                   Reset range
-                </button>
+                </Button>
               ) : null}
             </div>
           </div>
