@@ -1,5 +1,5 @@
 // utils.js - Shared calculation utilities for raw event data
-import { dataSourceConfig } from "./chartConfig.js";
+import { dataSourceConfig, isMathMetric } from "./chartConfig.js";
 
 // Date range for POC data
 export const POC_START_DATE = "2025-05-15";
@@ -353,12 +353,18 @@ export function groupEventsByType(
       const eventsForDate = grouped[groupKey]?.[date] || [];
       const metrics = calculateMetricsFromEvents(eventsForDate, dataSource);
 
-      // Use null for rate metrics when no data, actual value otherwise
-      dayData[displayName] = metrics[selectedMetric];
+      // For math metrics with no data, use null; for count metrics, use 0
+      if (eventsForDate.length === 0) {
+        dayData[displayName] = isMathMetric(selectedMetric) ? null : 0;
+      } else {
+        dayData[displayName] = metrics[selectedMetric];
+      }
 
       // Add flag for tooltip logic
       dayData[`${displayName}_hasData`] = eventsForDate.length > 0;
     });
+
+    console.log(dayData);
 
     return dayData;
   });

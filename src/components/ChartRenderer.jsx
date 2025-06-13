@@ -120,15 +120,17 @@ function CustomTooltip({
           payloadEntry?.color || CHART_COLORS[index % CHART_COLORS.length];
 
         // Check if this is a math metric (should show "No results" when null)
-        const isMathType = isMathMetric(seriesKey);
+        const isMathType = isMathMetric(selectedMetric);
 
         // Format the display value
-        const displayValue =
-          !hasData || value === null || value === undefined
-            ? isMathType
-              ? "No results"
-              : "0"
-            : formatValue(value, seriesKey);
+        let displayValue;
+        if (!hasData && isMathType) {
+          displayValue = "No results";
+        } else if (!hasData) {
+          displayValue = "0";
+        } else {
+          displayValue = formatValue(value, seriesKey);
+        }
 
         return (
           <p key={index} style={{ color }}>
