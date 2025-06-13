@@ -270,9 +270,16 @@ export function groupEventsByDate(events, dataSource) {
  * @param {string} dataSource - The data source type.
  * @param {string} groupBy - The grouping type ('org', 'person', 'team', etc.).
  * @param {string} selectedMetric - The metric key to extract for each group/date.
+ * @param {string} granularity - The granularity ('monthly', 'all-time').
  * @returns {Object[]} Array of objects representing time series data for each group.
  */
-export function groupEventsByType(events, dataSource, groupBy, selectedMetric) {
+export function groupEventsByType(
+  events,
+  dataSource,
+  groupBy,
+  selectedMetric,
+  granularity
+) {
   if (groupBy === "org") {
     // Org view - single series, same as groupEventsByDate
     return groupEventsByDate(events, dataSource);

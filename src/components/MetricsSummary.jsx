@@ -9,7 +9,12 @@ import {
 } from "../lib/utils.js";
 import { dataSourceConfig } from "../lib/chartConfig.js";
 
-export function MetricsSummary({ selectedTable, selectedMetric, operator }) {
+export function MetricsSummary({
+  selectedTable,
+  selectedMetric,
+  operator,
+  granularity,
+}) {
   // Always calculate from raw events - import the raw data
   const dataTables = {
     githubActions: githubActionsData,
@@ -28,7 +33,7 @@ export function MetricsSummary({ selectedTable, selectedMetric, operator }) {
   const value = calculateMetricValue(
     orgData,
     selectedMetric,
-    "all-time", // Always use all-time since orgData is already aggregated
+    granularity,
     operator
   );
 

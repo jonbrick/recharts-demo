@@ -159,8 +159,6 @@ export function ControlsContainer({
   onOperatorChange,
   granularity,
   onGranularityChange,
-  groupBy,
-  onGroupByChange,
   onDateChange,
   title = "Interactive Chart Demo",
 }: {
@@ -172,16 +170,13 @@ export function ControlsContainer({
   onOperatorChange?: (newOperator: string) => void;
   granularity?: string;
   onGranularityChange?: (newGranularity: string) => void;
-  groupBy: string;
-  onGroupByChange: (newGroupBy: string) => void;
   onDateChange?: (date: string) => void;
   title?: string;
 }) {
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-3xl font-bold text-gray-800">{title}</h1>
-
-      <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+      <div className="flex flex-col sm:flex-row gap-4">
         <DataSourceSelector
           selectedTable={selectedTable}
           onTableChange={onTableChange}
@@ -190,11 +185,6 @@ export function ControlsContainer({
           selectedTable={selectedTable}
           selectedMetric={selectedMetric}
           onMetricChange={onMetricChange}
-        />
-        <GroupBySelector
-          groupBy={groupBy}
-          onGroupByChange={onGroupByChange}
-          selectedTable={selectedTable}
         />
         {operator && onOperatorChange && (
           <OperatorSelector

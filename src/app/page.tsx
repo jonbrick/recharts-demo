@@ -6,6 +6,7 @@ import {
   ChartTypeSelector,
   OperatorSelector,
   GranularitySelector,
+  GroupBySelector,
 } from "../components/ChartControls";
 import { MetricsSummary } from "../components/MetricsSummary";
 import { ChartRenderer } from "../components/ChartRenderer";
@@ -77,7 +78,14 @@ export default function HomePage() {
         ? groupEventsByDate(data, selectedTable)
         : allTimeData;
     } else {
-      return groupEventsByType(data, selectedTable, groupBy, selectedMetric);
+      // For non-org views, always use monthly granularity
+      return groupEventsByType(
+        data,
+        selectedTable,
+        groupBy,
+        selectedMetric,
+        granularity
+      );
     }
   }, [data, selectedTable, groupBy, granularity, allTimeData, selectedMetric]);
 
@@ -116,10 +124,11 @@ export default function HomePage() {
           {/* Operator and Metrics Card */}
           <Card className="flex gap-4 justify-between">
             <MetricsSummary
-              key={`${operator}-${selectedMetric}-${groupBy}`}
+              key={`${operator}-${selectedMetric}-${groupBy}-${granularity}`}
               selectedTable={selectedTable}
               selectedMetric={selectedMetric}
               operator={operator}
+              granularity={granularity}
             />
             <div className="flex flex-col gap-4">
               <OperatorSelector
@@ -131,21 +140,25 @@ export default function HomePage() {
 
           {/* Chart Card */}
           <Card className="flex flex-col gap-4">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-              <h3 className="text-sm text-gray-600 font-medium w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <h3 className="text-sm text-gray-600 font-medium">
+                Trend card:{" "}
                 {config.metrics.find((m) => m.key === selectedMetric)?.label ||
                   (config.overlayMetric?.key === selectedMetric
                     ? config.overlayMetric.label
                     : selectedMetric)}{" "}
                 over time
               </h3>
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
-                <div className="w-full sm:w-40">
-                  <GranularitySelector
-                    granularity={granularity}
-                    onGranularityChange={setGranularity}
-                  />
-                </div>
+              <div className="flex items-center gap-3">
+                <GranularitySelector
+                  granularity={granularity}
+                  onGranularityChange={setGranularity}
+                />
+                <GroupBySelector
+                  groupBy={groupBy}
+                  onGroupByChange={setGroupBy}
+                  selectedTable={selectedTable}
+                />
                 <ChartTypeSelector
                   chartType={chartType}
                   onChartTypeChange={setChartType}
