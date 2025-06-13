@@ -217,6 +217,86 @@ export function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
   );
 }
 
+export function StackedAreaChartComponent({
+  currentData,
+  selectedMetric,
+  groupBy,
+}) {
+  // Check if this is multi-series data
+  const isMultiSeries = groupBy !== "org" && currentData.length > 0;
+  const seriesKeys = isMultiSeries
+    ? Object.keys(currentData[0])
+        .filter((key) => key !== "name" && !key.endsWith("_hasData"))
+        .sort() // Sort alphabetically for consistent stacking order
+    : [selectedMetric];
+
+  // Format Y-axis tick for MTTR
+  const formatYTick = (value) => {
+    if (selectedMetric === "mttrMinutes") {
+      const hours = Math.floor(value / 60);
+      const minutes = Math.round(value % 60);
+      return `${hours}h ${minutes}m`;
+    }
+    return value;
+  };
+
+  // Handle null values properly - keep nulls for math metrics, convert to 0 for count metrics
+  const filteredData = currentData.map((point) => ({
+    ...point,
+    [selectedMetric]: isMathMetric(selectedMetric)
+      ? point[selectedMetric] // Keep null for math metrics (chart will skip points)
+      : point[selectedMetric] ?? 0, // Convert null to 0 for count metrics
+  }));
+
+  return (
+    <ResponsiveContainer width="100%" height={400}>
+      <AreaChart data={filteredData} {...commonChartProps}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+        <XAxis
+          dataKey="name"
+          tick={{ fill: "#666" }}
+          axisLine={{ stroke: "#ccc" }}
+        />
+        <YAxis
+          tick={{ fill: "#666" }}
+          axisLine={{ stroke: "#ccc" }}
+          tickFormatter={formatYTick}
+        />
+        <Tooltip
+          content={
+            <CustomTooltip
+              selectedMetric={selectedMetric}
+              isMultiSeries={isMultiSeries}
+            />
+          }
+        />
+        <Legend />
+
+        {seriesKeys.map((key, index) => (
+          <Area
+            key={key}
+            type="monotone"
+            dataKey={isMultiSeries ? key : selectedMetric}
+            stackId="team"
+            stroke={CHART_COLORS[index % CHART_COLORS.length]}
+            fill={CHART_COLORS[index % CHART_COLORS.length]}
+            fillOpacity={0.8}
+            strokeWidth={2}
+            name={isMultiSeries ? key : "Organization"}
+            connectNulls={false}
+            isAnimationActive={false}
+            dot={{
+              fill: CHART_COLORS[index % CHART_COLORS.length],
+              strokeWidth: 2,
+              r: 4,
+            }}
+          />
+        ))}
+      </AreaChart>
+    </ResponsiveContainer>
+  );
+}
+
 export function LineChartComponent({ currentData, selectedMetric, groupBy }) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
@@ -478,6 +558,7 @@ export function ChartRenderer({
     line: LineChartComponent,
     "vertical-bar": VerticalBarChartComponent,
     "horizontal-bar": HorizontalBarChartComponent,
+    "stacked-area": StackedAreaChartComponent,
     table: TableComponent,
   };
   const Component = chartComponents[chartType];

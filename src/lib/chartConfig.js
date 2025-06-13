@@ -135,9 +135,19 @@ export const dataSourceConfig = {
 export const chartTypeConfig = {
   line: { label: "📊 Recharts SimpleLineChart", icon: "📊" },
   area: { label: "📈 Recharts SimpleAreaChart", icon: "📈" },
+  "stacked-area": { label: "📈 Recharts StackedAreaChart", icon: "📈" },
+  "percent-area": { label: "📈 Recharts PercentAreaChart", icon: "📈" },
   "vertical-bar": { label: "📊 Recharts Vertical SimpleBarChart", icon: "📊" },
+  "stacked-vertical-bar": {
+    label: "📊 Recharts Vertical StackedBarChart",
+    icon: "📊",
+  },
   "horizontal-bar": {
     label: "📊 Recharts Horizontal SimpleBarChart",
+    icon: "📊",
+  },
+  "stacked-horizontal-bar": {
+    label: "📊 Recharts Horizontal StackedBarChart",
     icon: "📊",
   },
   table: { label: "📋 Data table", icon: "📋" },

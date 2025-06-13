@@ -364,8 +364,6 @@ export function groupEventsByType(
       dayData[`${displayName}_hasData`] = eventsForDate.length > 0;
     });
 
-    console.log(dayData);
-
     return dayData;
   });
 }
