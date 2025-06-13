@@ -22,7 +22,7 @@ export const ALLOWED_PICKER_RANGE = {
 function generateDateRange(startDate, endDate) {
   const dates = [];
   const start = new Date(startDate + "T00:00:00Z");
-  const end = new Date(endDate + "T23:59:59Z");
+  const end = new Date(endDate + "T00:00:00Z");
 
   for (let d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
     dates.push(

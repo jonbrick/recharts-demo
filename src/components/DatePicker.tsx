@@ -400,16 +400,12 @@ const formatDate = (
   const usesAmPm = !isBrowserLocaleClockType24h();
   let dateString: string;
 
-  // Add one day to the date for display purposes
-  const displayDate = new Date(date);
-  displayDate.setDate(displayDate.getDate() + 1);
-
   if (includeTime) {
     dateString = usesAmPm
-      ? format(displayDate, "dd MMM, yyyy h:mm a", { locale })
-      : format(displayDate, "dd MMM, yyyy HH:mm", { locale });
+      ? format(date, "dd MMM, yyyy h:mm a", { locale })
+      : format(date, "dd MMM, yyyy HH:mm", { locale });
   } else {
-    dateString = format(displayDate, "dd MMM, yyyy", { locale });
+    dateString = format(date, "dd MMM, yyyy", { locale });
   }
 
   return dateString;
@@ -777,18 +773,6 @@ const RangeDatePicker = ({
       }
     }
 
-    // Subtract one day from the dates received from the calendar
-    if (newRange?.from) {
-      const actualFrom = new Date(newRange.from);
-      actualFrom.setDate(actualFrom.getDate() - 1);
-      newRange.from = actualFrom;
-    }
-    if (newRange?.to) {
-      const actualTo = new Date(newRange.to);
-      actualTo.setDate(actualTo.getDate() - 1);
-      newRange.to = actualTo;
-    }
-
     setRange(newRange);
   };
 
@@ -947,29 +931,14 @@ const RangeDatePicker = ({
             <div className="overflow-x-auto">
               <CalendarPrimitive
                 mode="range"
-                selected={{
-                  from: range?.from
-                    ? new Date(range.from.getTime() + 24 * 60 * 60 * 1000)
-                    : undefined,
-                  to: range?.to
-                    ? new Date(range.to.getTime() + 24 * 60 * 60 * 1000)
-                    : undefined,
-                }}
+                selected={range}
                 onSelect={onRangeChange}
                 month={month}
                 onMonthChange={setMonth}
                 numberOfMonths={2}
                 disabled={[
-                  {
-                    before: new Date(
-                      ALLOWED_PICKER_RANGE.min.getTime() + 24 * 60 * 60 * 1000
-                    ),
-                  },
-                  {
-                    after: new Date(
-                      ALLOWED_PICKER_RANGE.max.getTime() + 24 * 60 * 60 * 1000
-                    ),
-                  },
+                  { before: ALLOWED_PICKER_RANGE.min },
+                  { after: ALLOWED_PICKER_RANGE.max },
                 ]}
                 disableNavigation={disableNavigation}
                 enableYearNavigation={enableYearNavigation}
