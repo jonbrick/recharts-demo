@@ -29,7 +29,7 @@ export default function HomePage() {
   const [granularity, setGranularity] = useState("monthly");
   const [selectedTable, setSelectedTable] = useState("githubPR");
   const [selectedMetric, setSelectedMetric] = useState("pullRequests");
-  const [operator, setOperator] = useState("average");
+  const [operator, setOperator] = useState("sum");
   const [groupBy, setGroupBy] = useState("org");
   const [selectedDateRange, setSelectedDateRange] = useState<DateRange>({
     from: new Date(ALLOWED_PICKER_RANGE.defaultStart),
@@ -89,9 +89,12 @@ export default function HomePage() {
 
   // Get the current dataset based on granularity
   const chartData = useMemo(() => {
+    const startDate = selectedDateRange.from?.toISOString().split("T")[0];
+    const endDate = selectedDateRange.to?.toISOString().split("T")[0];
+
     if (groupBy === "org") {
       return granularity === "monthly"
-        ? groupEventsByDate(data, selectedTable)
+        ? groupEventsByDate(data, selectedTable, startDate, endDate)
         : allTimeData;
     } else {
       // For non-org views, always use monthly granularity
@@ -100,10 +103,20 @@ export default function HomePage() {
         selectedTable,
         groupBy,
         selectedMetric,
-        granularity
+        granularity,
+        startDate,
+        endDate
       );
     }
-  }, [data, selectedTable, groupBy, selectedMetric, granularity, allTimeData]);
+  }, [
+    data,
+    selectedTable,
+    groupBy,
+    selectedMetric,
+    granularity,
+    allTimeData,
+    selectedDateRange,
+  ]);
 
   const handleTableChange = (newTable: string) => {
     setSelectedTable(newTable);
@@ -183,6 +196,7 @@ export default function HomePage() {
               selectedMetric={selectedMetric}
               operator={operator}
               granularity={granularity}
+              data={allTimeData}
             />
             <div className="flex flex-col gap-4">
               <OperatorSelector

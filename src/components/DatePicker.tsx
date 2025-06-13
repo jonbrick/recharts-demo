@@ -22,6 +22,7 @@ import { enUS } from "date-fns/locale";
 import { tv, type VariantProps } from "tailwind-variants";
 
 import { cx, focusInput, focusRing, hasErrorInput } from "../lib/styleUtils";
+import { ALLOWED_PICKER_RANGE } from "../lib/dashboardUtils";
 
 import { Button } from "./Button";
 import { Calendar as CalendarPrimitive, type Matcher } from "./Calendar";
@@ -399,12 +400,16 @@ const formatDate = (
   const usesAmPm = !isBrowserLocaleClockType24h();
   let dateString: string;
 
+  // Add one day to the date for display purposes
+  const displayDate = new Date(date);
+  displayDate.setDate(displayDate.getDate() + 1);
+
   if (includeTime) {
     dateString = usesAmPm
-      ? format(date, "dd MMM, yyyy h:mm a", { locale })
-      : format(date, "dd MMM, yyyy HH:mm", { locale });
+      ? format(displayDate, "dd MMM, yyyy h:mm a", { locale })
+      : format(displayDate, "dd MMM, yyyy HH:mm", { locale });
   } else {
-    dateString = format(date, "dd MMM, yyyy", { locale });
+    dateString = format(displayDate, "dd MMM, yyyy", { locale });
   }
 
   return dateString;
@@ -697,7 +702,6 @@ const RangeDatePicker = ({
   presets,
   disabled,
   disableNavigation,
-  disabledDays,
   enableYearNavigation = false,
   locale = enUS,
   showTimePicker,
@@ -771,6 +775,18 @@ const RangeDatePicker = ({
         newRange.to.setHours(endTime.hour);
         newRange.to.setMinutes(endTime.minute);
       }
+    }
+
+    // Subtract one day from the dates received from the calendar
+    if (newRange?.from) {
+      const actualFrom = new Date(newRange.from);
+      actualFrom.setDate(actualFrom.getDate() - 1);
+      newRange.from = actualFrom;
+    }
+    if (newRange?.to) {
+      const actualTo = new Date(newRange.to);
+      actualTo.setDate(actualTo.getDate() - 1);
+      newRange.to = actualTo;
     }
 
     setRange(newRange);
@@ -931,12 +947,30 @@ const RangeDatePicker = ({
             <div className="overflow-x-auto">
               <CalendarPrimitive
                 mode="range"
-                selected={range}
+                selected={{
+                  from: range?.from
+                    ? new Date(range.from.getTime() + 24 * 60 * 60 * 1000)
+                    : undefined,
+                  to: range?.to
+                    ? new Date(range.to.getTime() + 24 * 60 * 60 * 1000)
+                    : undefined,
+                }}
                 onSelect={onRangeChange}
                 month={month}
                 onMonthChange={setMonth}
                 numberOfMonths={2}
-                disabled={disabledDays}
+                disabled={[
+                  {
+                    before: new Date(
+                      ALLOWED_PICKER_RANGE.min.getTime() + 24 * 60 * 60 * 1000
+                    ),
+                  },
+                  {
+                    after: new Date(
+                      ALLOWED_PICKER_RANGE.max.getTime() + 24 * 60 * 60 * 1000
+                    ),
+                  },
+                ]}
                 disableNavigation={disableNavigation}
                 enableYearNavigation={enableYearNavigation}
                 locale={locale}

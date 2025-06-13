@@ -14,6 +14,29 @@ export const ALLOWED_PICKER_RANGE = {
 };
 
 /**
+ * Generates an array of dates between start and end (inclusive)
+ * @param {string} startDate - Start date in YYYY-MM-DD format
+ * @param {string} endDate - End date in YYYY-MM-DD format
+ * @returns {string[]} Array of date strings in YYYY-MM-DD format
+ */
+function generateDateRange(startDate, endDate) {
+  const dates = [];
+  const start = new Date(startDate + "T00:00:00Z");
+  const end = new Date(endDate + "T23:59:59Z");
+
+  for (let d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
+    dates.push(
+      `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(
+        2,
+        "0"
+      )}-${String(d.getUTCDate()).padStart(2, "0")}`
+    );
+  }
+
+  return dates;
+}
+
+/**
  * Generates an array of all dates in the POC range
  * @returns {string[]} Array of date strings in YYYY-MM-DD format
  */
@@ -240,14 +263,25 @@ function calculateMetricsFromEvents(events, dataSource) {
 }
 
 /**
- * Groups events by date (daily granularity) and aggregates metrics for each day.
- * Shows all dates in POC range, with zeros/nulls for days with no data.
+ * Groups events by date, supporting multi-series data for charts.
+ * Shows all dates in POC range for all series.
  * @param {Object[]} events - Array of event objects.
  * @param {string} dataSource - The data source type.
- * @returns {Object[]} Array of daily grouped and aggregated metric objects.
+ * @param {string} startDate - Optional start date in YYYY-MM-DD format
+ * @param {string} endDate - Optional end date in YYYY-MM-DD format
+ * @returns {Object[]} Array of objects representing time series data.
  */
-export function groupEventsByDate(events, dataSource) {
-  const fullDateRange = getFullDateRange();
+export function groupEventsByDate(
+  events,
+  dataSource,
+  startDate = null,
+  endDate = null
+) {
+  const fullDateRange =
+    startDate && endDate
+      ? generateDateRange(startDate, endDate)
+      : getFullDateRange();
+
   const grouped = {};
 
   // Group existing events by date
@@ -279,6 +313,8 @@ export function groupEventsByDate(events, dataSource) {
  * @param {string} groupBy - The grouping type ('org', 'person', 'team', etc.).
  * @param {string} selectedMetric - The metric key to extract for each group/date.
  * @param {string} granularity - The granularity ('monthly', 'all-time').
+ * @param {string} startDate - Optional start date in YYYY-MM-DD format
+ * @param {string} endDate - Optional end date in YYYY-MM-DD format
  * @returns {Object[]} Array of objects representing time series data for each group.
  */
 export function groupEventsByType(
@@ -286,11 +322,13 @@ export function groupEventsByType(
   dataSource,
   groupBy,
   selectedMetric,
-  granularity
+  granularity,
+  startDate = null,
+  endDate = null
 ) {
   if (groupBy === "org") {
     // Org view - single series, same as groupEventsByDate
-    return groupEventsByDate(events, dataSource);
+    return groupEventsByDate(events, dataSource, startDate, endDate);
   }
 
   // For non-org views, use all-time data if specified
@@ -319,7 +357,10 @@ export function groupEventsByType(
   }
 
   // Monthly view - show time series
-  const fullDateRange = getFullDateRange();
+  const fullDateRange =
+    startDate && endDate
+      ? generateDateRange(startDate, endDate)
+      : getFullDateRange();
   const grouped = {};
 
   // First pass: discover ALL possible series from the entire dataset

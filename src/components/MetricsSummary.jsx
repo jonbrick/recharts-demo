@@ -1,12 +1,7 @@
 // MetricsSummary.jsx - Metrics summary display
 
 import React from "react";
-import { githubActionsData, pagerDutyData, githubPRData } from "../lib/data.js";
-import {
-  calculateMetricValue,
-  calculateAverageData,
-  calculateSumData,
-} from "../lib/dashboardUtils";
+import { calculateMetricValue } from "../lib/dashboardUtils";
 import { dataSourceConfig } from "../lib/chartConfig.js";
 
 export function MetricsSummary({
@@ -14,21 +9,10 @@ export function MetricsSummary({
   selectedMetric,
   operator,
   granularity,
+  data,
 }) {
-  // Always calculate from raw events - import the raw data
-  const dataTables = {
-    githubActions: githubActionsData,
-    pagerDuty: pagerDutyData,
-    githubPR: githubPRData,
-  };
-
-  const rawEvents = dataTables[selectedTable];
-
   // Calculate org-level data once
-  const orgData =
-    operator === "average"
-      ? calculateAverageData(rawEvents, selectedTable)
-      : calculateSumData(rawEvents, selectedTable);
+  const orgData = data;
 
   const value = calculateMetricValue(
     orgData,
