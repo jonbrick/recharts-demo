@@ -780,7 +780,7 @@ export function ChartRenderer({
 }) {
   const chartComponents = {
     area: AreaChartComponent,
-    line: LineChartComponent,
+    line: AreaChartComponent,
     "vertical-bar": VerticalBarChartComponent,
     "horizontal-bar": HorizontalBarChartComponent,
     "stacked-area": StackedAreaChartComponent,

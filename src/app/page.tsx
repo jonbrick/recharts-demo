@@ -38,8 +38,8 @@ export default function HomePage() {
   const [operator, setOperator] = useState("sum");
   const [groupBy, setGroupBy] = useState("org");
   const [selectedDateRange, setSelectedDateRange] = useState<DateRange>({
-    from: new Date(DEFAULT_PICKER_DATES.defaultStart),
-    to: new Date(DEFAULT_PICKER_DATES.defaultEnd),
+    from: new Date(DEFAULT_PICKER_DATES.defaultStart + "T00:00:00"),
+    to: new Date(DEFAULT_PICKER_DATES.defaultEnd + "T00:00:00"),
   });
 
   // Available data tables - filtered by selected date range
@@ -166,15 +166,23 @@ export default function HomePage() {
                 className="w-64 cursor-pointer"
               />
               {selectedDateRange.from?.toISOString() !==
-                new Date(DEFAULT_PICKER_DATES.defaultStart).toISOString() ||
+                new Date(
+                  DEFAULT_PICKER_DATES.defaultStart + "T00:00:00"
+                ).toISOString() ||
               selectedDateRange.to?.toISOString() !==
-                new Date(DEFAULT_PICKER_DATES.defaultEnd).toISOString() ? (
+                new Date(
+                  DEFAULT_PICKER_DATES.defaultEnd + "T00:00:00"
+                ).toISOString() ? (
                 <Button
                   variant="ghost"
                   onClick={() => {
                     setSelectedDateRange({
-                      from: new Date(DEFAULT_PICKER_DATES.defaultStart),
-                      to: new Date(DEFAULT_PICKER_DATES.defaultEnd),
+                      from: new Date(
+                        DEFAULT_PICKER_DATES.defaultStart + "T00:00:00"
+                      ),
+                      to: new Date(
+                        DEFAULT_PICKER_DATES.defaultEnd + "T00:00:00"
+                      ),
                     });
                   }}
                   className="cursor-pointer"

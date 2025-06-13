@@ -133,24 +133,24 @@ export const dataSourceConfig = {
 };
 
 export const chartTypeConfig = {
-  line: { label: "📊 Recharts SimpleLineChart", icon: "📊" },
-  area: { label: "📈 Recharts SimpleAreaChart", icon: "📈" },
-  "stacked-area": { label: "📈 Recharts StackedAreaChart", icon: "📈" },
-  "percent-area": { label: "📈 Recharts PercentAreaChart", icon: "📈" },
-  "vertical-bar": { label: "📊 Recharts Vertical SimpleBarChart", icon: "📊" },
+  line: { label: "📈 Line Chart", icon: "📈" },
+  area: { label: "🌊 Area Chart", icon: "🌊" },
+  "stacked-area": { label: "🌊 Stacked Area Chart", icon: "🌊" },
+  "percent-area": { label: "🌊 Percent Area Chart", icon: "🌊" },
+  "vertical-bar": { label: "📊 Vertical Bar Chart", icon: "📊" },
   "stacked-vertical-bar": {
-    label: "📊 Recharts Vertical StackedBarChart",
+    label: "📊 Stacked Vertical Bar Chart",
     icon: "📊",
   },
   "horizontal-bar": {
-    label: "📊 Recharts Horizontal SimpleBarChart",
+    label: "📊 Horizontal Bar Chart",
     icon: "📊",
   },
   "stacked-horizontal-bar": {
-    label: "📊 Recharts Horizontal StackedBarChart",
+    label: "📊 Stacked Horizontal Bar Chart",
     icon: "📊",
   },
-  table: { label: "📋 Data table", icon: "📋" },
+  table: { label: "📋 Data Table", icon: "📋" },
 };
 
 // Helper functions
