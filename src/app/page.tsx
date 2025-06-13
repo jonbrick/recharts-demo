@@ -139,16 +139,34 @@ export default function HomePage() {
               selectedMetric={selectedMetric}
               onMetricChange={setSelectedMetric}
             />
-            <DateRangePicker
-              value={selectedDateRange}
-              onChange={handleDateRangeChange}
-              disabledDays={{
-                before: ALLOWED_PICKER_RANGE.min,
-                after: ALLOWED_PICKER_RANGE.max,
-              }}
-              placeholder="Select date range"
-              className="w-64"
-            />
+            <div className="flex gap-2">
+              <DateRangePicker
+                value={selectedDateRange}
+                onChange={handleDateRangeChange}
+                disabledDays={{
+                  before: ALLOWED_PICKER_RANGE.min,
+                  after: ALLOWED_PICKER_RANGE.max,
+                }}
+                placeholder="Select date range"
+                className="w-64"
+              />
+              {selectedDateRange.from?.toISOString() !==
+                new Date(ALLOWED_PICKER_RANGE.defaultStart).toISOString() ||
+              selectedDateRange.to?.toISOString() !==
+                new Date(ALLOWED_PICKER_RANGE.defaultEnd).toISOString() ? (
+                <button
+                  onClick={() =>
+                    setSelectedDateRange({
+                      from: new Date(ALLOWED_PICKER_RANGE.defaultStart),
+                      to: new Date(ALLOWED_PICKER_RANGE.defaultEnd),
+                    })
+                  }
+                  className="px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Reset dates
+                </button>
+              ) : null}
+            </div>
           </div>
         </div>
 
