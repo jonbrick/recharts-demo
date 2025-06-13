@@ -165,7 +165,7 @@ export default function HomePage() {
                 />
                 <GroupBySelector
                   groupBy={groupBy}
-                  onGroupByChange={setGroupBy}
+                  onGroupByChange={handleGroupByChange}
                   selectedTable={selectedTable}
                 />
                 <ChartTypeSelector

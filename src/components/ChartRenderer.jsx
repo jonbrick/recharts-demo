@@ -329,14 +329,17 @@ export function VerticalBarChartComponent({
 
         {seriesKeys
           .filter((key) => !key.endsWith("_hasData"))
-          .map((key, index) => (
-            <Bar
-              key={key}
-              dataKey={isMultiSeries ? key : selectedMetric}
-              fill={CHART_COLORS[index % CHART_COLORS.length]}
-              isAnimationActive={false}
-            />
-          ))}
+          .map((key, index) => {
+            const dataKey = isMultiSeries ? key : selectedMetric;
+            return (
+              <Bar
+                key={key}
+                dataKey={dataKey}
+                fill={CHART_COLORS[index % CHART_COLORS.length]}
+                isAnimationActive={false}
+              />
+            );
+          })}
       </BarChart>
     </ResponsiveContainer>
   );
@@ -386,14 +389,17 @@ export function HorizontalBarChartComponent({
 
         {seriesKeys
           .filter((key) => !key.endsWith("_hasData"))
-          .map((key, index) => (
-            <Bar
-              key={key}
-              dataKey={isMultiSeries ? key : selectedMetric}
-              fill={CHART_COLORS[index % CHART_COLORS.length]}
-              isAnimationActive={false}
-            />
-          ))}
+          .map((key, index) => {
+            const dataKey = isMultiSeries ? key : selectedMetric;
+            return (
+              <Bar
+                key={key}
+                dataKey={dataKey}
+                fill={CHART_COLORS[index % CHART_COLORS.length]}
+                isAnimationActive={false}
+              />
+            );
+          })}
       </BarChart>
     </ResponsiveContainer>
   );
