@@ -85,7 +85,7 @@ export default function HomePage() {
     return operator === "average"
       ? calculateAverageData(data, selectedTable)
       : calculateSumData(data, selectedTable);
-  }, [data, selectedTable, operator, selectedDateRange]);
+  }, [data, selectedTable, operator]);
 
   // Get the current dataset based on granularity
   const chartData = useMemo(() => {
@@ -116,6 +116,12 @@ export default function HomePage() {
     setGroupBy(newGroupBy);
   };
 
+  const handleDateRangeChange = (dateRange: DateRange | undefined) => {
+    if (dateRange) {
+      setSelectedDateRange(dateRange);
+    }
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto p-4 sm:p-12">
       <div className="flex flex-col gap-8">
@@ -135,7 +141,7 @@ export default function HomePage() {
             />
             <DateRangePicker
               value={selectedDateRange}
-              onChange={setSelectedDateRange}
+              onChange={handleDateRangeChange}
               disabledDays={{
                 before: ALLOWED_PICKER_RANGE.min,
                 after: ALLOWED_PICKER_RANGE.max,
