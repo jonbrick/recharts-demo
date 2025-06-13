@@ -5,6 +5,14 @@ import { dataSourceConfig, isMathMetric } from "./chartConfig.js";
 export const POC_START_DATE = "2025-05-15";
 export const POC_END_DATE = "2025-05-30";
 
+// Allowed date picker range for prototype
+export const ALLOWED_PICKER_RANGE = {
+  min: new Date("2025-05-15"),
+  max: new Date("2025-05-30"),
+  defaultStart: "2025-05-15",
+  defaultEnd: "2025-05-30",
+};
+
 /**
  * Generates an array of all dates in the POC range
  * @returns {string[]} Array of date strings in YYYY-MM-DD format

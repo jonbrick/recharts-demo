@@ -11,6 +11,7 @@ import {
 } from "../components/ChartControls";
 import { MetricsSummary } from "../components/MetricsSummary";
 import { ChartRenderer } from "../components/ChartRenderer";
+import { DateRangePicker, type DateRange } from "../components/DatePicker";
 import { dataSourceConfig } from "../lib/chartConfig";
 import { githubActionsData, pagerDutyData, githubPRData } from "../lib/data";
 import {
@@ -19,6 +20,7 @@ import {
   groupEventsByDate,
   groupEventsByType,
   filterEventsByDate,
+  ALLOWED_PICKER_RANGE,
 } from "../lib/dashboardUtils";
 import { Card } from "../components/Card";
 
@@ -29,28 +31,41 @@ export default function HomePage() {
   const [selectedMetric, setSelectedMetric] = useState("pullRequests");
   const [operator, setOperator] = useState("average");
   const [groupBy, setGroupBy] = useState("org");
+  const [selectedDateRange, setSelectedDateRange] = useState<DateRange>({
+    from: new Date(ALLOWED_PICKER_RANGE.defaultStart),
+    to: new Date(ALLOWED_PICKER_RANGE.defaultEnd),
+  });
 
-  // Available data tables
-  const dataTables = {
-    githubActions: filterEventsByDate(
-      githubActionsData,
-      "2025-05-15",
-      "2025-05-30",
-      "deployed_at"
-    ),
-    pagerDuty: filterEventsByDate(
-      pagerDutyData,
-      "2025-05-15",
-      "2025-05-30",
-      "created_at"
-    ),
-    githubPR: filterEventsByDate(
-      githubPRData,
-      "2025-05-15",
-      "2025-05-30",
-      "created_at"
-    ),
-  };
+  // Available data tables - filtered by selected date range
+  const dataTables = useMemo(() => {
+    const startDate =
+      selectedDateRange.from?.toISOString().split("T")[0] ??
+      ALLOWED_PICKER_RANGE.defaultStart;
+    const endDate =
+      selectedDateRange.to?.toISOString().split("T")[0] ??
+      ALLOWED_PICKER_RANGE.defaultEnd;
+
+    return {
+      githubActions: filterEventsByDate(
+        githubActionsData,
+        startDate,
+        endDate,
+        "deployed_at"
+      ),
+      pagerDuty: filterEventsByDate(
+        pagerDutyData,
+        startDate,
+        endDate,
+        "created_at"
+      ),
+      githubPR: filterEventsByDate(
+        githubPRData,
+        startDate,
+        endDate,
+        "created_at"
+      ),
+    };
+  }, [selectedDateRange]);
 
   const data = dataTables[selectedTable];
   const config = dataSourceConfig[selectedTable];
@@ -70,7 +85,7 @@ export default function HomePage() {
     return operator === "average"
       ? calculateAverageData(data, selectedTable)
       : calculateSumData(data, selectedTable);
-  }, [data, selectedTable, operator]);
+  }, [data, selectedTable, operator, selectedDateRange]);
 
   // Get the current dataset based on granularity
   const chartData = useMemo(() => {
@@ -117,6 +132,16 @@ export default function HomePage() {
               selectedTable={selectedTable}
               selectedMetric={selectedMetric}
               onMetricChange={setSelectedMetric}
+            />
+            <DateRangePicker
+              value={selectedDateRange}
+              onChange={setSelectedDateRange}
+              disabledDays={{
+                before: ALLOWED_PICKER_RANGE.min,
+                after: ALLOWED_PICKER_RANGE.max,
+              }}
+              placeholder="Select date range"
+              className="w-64"
             />
           </div>
         </div>
