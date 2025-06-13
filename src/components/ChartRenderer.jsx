@@ -657,6 +657,67 @@ export function HorizontalBarChartComponent({
   );
 }
 
+export function StackedHorizontalBarChartComponent({
+  currentData,
+  selectedMetric,
+  groupBy,
+}) {
+  // Check if this is multi-series data
+  const isMultiSeries = groupBy !== "org" && currentData.length > 0;
+  const seriesKeys = isMultiSeries
+    ? Object.keys(currentData[0])
+        .filter((key) => key !== "name" && !key.endsWith("_hasData"))
+        .sort() // Sort alphabetically for consistent stacking order
+    : [selectedMetric];
+
+  return (
+    <ResponsiveContainer width="100%" height={400}>
+      <BarChart
+        layout="vertical"
+        data={currentData}
+        margin={{ top: 20, right: 30, left: 80, bottom: 5 }}
+        isAnimationActive={false}
+      >
+        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+        <XAxis
+          type="number"
+          tick={{ fill: "#666" }}
+          axisLine={{ stroke: "#ccc" }}
+        />
+        <YAxis
+          type="category"
+          dataKey="name"
+          tick={{ fill: "#666" }}
+          axisLine={{ stroke: "#ccc" }}
+          width={70}
+        />
+        <Tooltip
+          content={
+            <CustomTooltip
+              selectedMetric={selectedMetric}
+              isMultiSeries={isMultiSeries}
+            />
+          }
+        />
+        <Legend />
+
+        {seriesKeys.map((key, index) => {
+          const dataKey = isMultiSeries ? key : selectedMetric;
+          return (
+            <Bar
+              key={key}
+              dataKey={dataKey}
+              stackId="team"
+              fill={CHART_COLORS[index % CHART_COLORS.length]}
+              isAnimationActive={false}
+            />
+          );
+        })}
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
 export function TableComponent({
   currentData,
   selectedTable,
@@ -725,6 +786,7 @@ export function ChartRenderer({
     "stacked-area": StackedAreaChartComponent,
     "percent-area": PercentAreaChartComponent,
     "stacked-vertical-bar": StackedVerticalBarChartComponent,
+    "stacked-horizontal-bar": StackedHorizontalBarChartComponent,
     table: TableComponent,
   };
   const Component = chartComponents[chartType];
