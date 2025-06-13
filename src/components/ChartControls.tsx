@@ -2,7 +2,7 @@
 
 import React from "react";
 import { dataSourceConfig, chartTypeConfig } from "../lib/chartConfig.js";
-import { POC_START_DATE, POC_END_DATE } from "../lib/utils.js";
+import { POC_START_DATE, POC_END_DATE } from "../lib/dashboardUtils.js";
 import {
   Select,
   SelectContent,

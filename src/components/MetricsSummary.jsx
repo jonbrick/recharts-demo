@@ -6,7 +6,7 @@ import {
   calculateMetricValue,
   calculateAverageData,
   calculateSumData,
-} from "../lib/utils.js";
+} from "../lib/dashboardUtils.js";
 import { dataSourceConfig } from "../lib/chartConfig.js";
 
 export function MetricsSummary({

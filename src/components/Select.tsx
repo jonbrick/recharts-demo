@@ -9,7 +9,7 @@ import {
   RiExpandUpDownLine,
 } from "@remixicon/react";
 
-import { cx, focusInput, hasErrorInput } from "../lib/tremorUtils";
+import { cx, focusInput, hasErrorInput } from "../lib/styleUtils";
 
 const Select = SelectPrimitives.Root;
 Select.displayName = "Select";

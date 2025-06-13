@@ -19,7 +19,7 @@ import {
   groupEventsByDate,
   groupEventsByType,
   filterEventsByDate,
-} from "../lib/utils";
+} from "../lib/dashboardUtils";
 import { Card } from "../components/Card";
 
 export default function HomePage() {
@@ -73,7 +73,7 @@ export default function HomePage() {
   }, [data, selectedTable, operator]);
 
   // Get the current dataset based on granularity
-  const currentData = useMemo(() => {
+  const chartData = useMemo(() => {
     if (groupBy === "org") {
       return granularity === "monthly"
         ? groupEventsByDate(data, selectedTable)
@@ -88,7 +88,7 @@ export default function HomePage() {
         granularity
       );
     }
-  }, [data, selectedTable, groupBy, granularity, allTimeData, selectedMetric]);
+  }, [data, selectedTable, groupBy, selectedMetric, granularity, allTimeData]);
 
   const handleTableChange = (newTable: string) => {
     setSelectedTable(newTable);
@@ -172,7 +172,7 @@ export default function HomePage() {
             </div>
             <ChartRenderer
               chartType={chartType}
-              currentData={currentData}
+              currentData={chartData}
               selectedTable={selectedTable}
               selectedMetric={selectedMetric}
               granularity={granularity}

@@ -3,7 +3,7 @@
 import React from "react";
 import { Slot } from "@radix-ui/react-slot";
 
-import { cx } from "../lib/tremorUtils";
+import { cx } from "../lib/styleUtils";
 
 interface CardProps extends React.ComponentPropsWithoutRef<"div"> {
   asChild?: boolean;
