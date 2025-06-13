@@ -63,6 +63,48 @@ export const githubPRData = [
     review_time_hours: null,
   },
 
+  // May 17 - Mid-week activity
+  {
+    id: "pr-061",
+    created_at: "2025-05-17T09:15:00Z",
+    merged_at: "2025-05-17T11:30:00Z",
+    author: "sarah_chen",
+    team: "platform",
+    lines_added: 245,
+    lines_removed: 52,
+    review_time_hours: 2.3,
+  },
+  {
+    id: "pr-062",
+    created_at: "2025-05-17T10:45:00Z",
+    merged_at: "2025-05-17T14:20:00Z",
+    author: "david_wilson",
+    team: "product",
+    lines_added: 178,
+    lines_removed: 34,
+    review_time_hours: 3.6,
+  },
+  {
+    id: "pr-063",
+    created_at: "2025-05-17T13:30:00Z",
+    merged_at: "2025-05-17T16:45:00Z",
+    author: "mike_johnson",
+    team: "platform",
+    lines_added: 312,
+    lines_removed: 67,
+    review_time_hours: 3.3,
+  },
+  {
+    id: "pr-064",
+    created_at: "2025-05-17T15:20:00Z",
+    merged_at: null,
+    author: "lisa_taylor",
+    team: "product",
+    lines_added: 156,
+    lines_removed: 28,
+    review_time_hours: null,
+  },
+
   // May 18 - Weekend, lighter activity
   {
     id: "pr-001",
