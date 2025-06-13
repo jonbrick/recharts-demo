@@ -14,7 +14,7 @@ import {
 export function DataSourceSelector({ selectedTable, onTableChange }) {
   return (
     <Select value={selectedTable} onValueChange={onTableChange}>
-      <SelectTrigger>
+      <SelectTrigger className="cursor-pointer">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -31,7 +31,7 @@ export function DataSourceSelector({ selectedTable, onTableChange }) {
 export function OperatorSelector({ operator, onOperatorChange }) {
   return (
     <Select value={operator} onValueChange={onOperatorChange}>
-      <SelectTrigger>
+      <SelectTrigger className="cursor-pointer">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -55,7 +55,7 @@ export function MetricSelector({
 
   return (
     <Select value={selectedMetric} onValueChange={onMetricChange}>
-      <SelectTrigger>
+      <SelectTrigger className="cursor-pointer">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -72,7 +72,7 @@ export function MetricSelector({
 export function GranularitySelector({ granularity, onGranularityChange }) {
   return (
     <Select value={granularity} onValueChange={onGranularityChange}>
-      <SelectTrigger>
+      <SelectTrigger className="cursor-pointer">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -89,7 +89,7 @@ export function GroupBySelector({ groupBy, onGroupByChange, selectedTable }) {
 
   return (
     <Select value={groupBy} onValueChange={onGroupByChange}>
-      <SelectTrigger>
+      <SelectTrigger className="cursor-pointer">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -106,7 +106,7 @@ export function GroupBySelector({ groupBy, onGroupByChange, selectedTable }) {
 export function ChartTypeSelector({ chartType, onChartTypeChange }) {
   return (
     <Select value={chartType} onValueChange={onChartTypeChange}>
-      <SelectTrigger>
+      <SelectTrigger className="cursor-pointer">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
