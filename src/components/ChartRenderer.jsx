@@ -146,7 +146,9 @@ export function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0]).filter((key) => key !== "name")
+    ? Object.keys(currentData[0]).filter(
+        (key) => key !== "name" && !key.endsWith("_hasData")
+      )
     : [selectedMetric];
 
   // Format Y-axis tick for MTTR
@@ -225,9 +227,9 @@ export function StackedAreaChartComponent({
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0])
-        .filter((key) => key !== "name" && !key.endsWith("_hasData"))
-        .sort() // Sort alphabetically for consistent stacking order
+    ? Object.keys(currentData[0]).filter(
+        (key) => key !== "name" && !key.endsWith("_hasData")
+      )
     : [selectedMetric];
 
   // Format Y-axis tick for MTTR
@@ -305,9 +307,9 @@ export function PercentAreaChartComponent({
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0])
-        .filter((key) => key !== "name" && !key.endsWith("_hasData"))
-        .sort() // Sort alphabetically for consistent stacking order
+    ? Object.keys(currentData[0]).filter(
+        (key) => key !== "name" && !key.endsWith("_hasData")
+      )
     : [selectedMetric];
 
   // Format Y-axis tick for percentages
@@ -401,7 +403,9 @@ export function LineChartComponent({ currentData, selectedMetric, groupBy }) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0]).filter((key) => key !== "name")
+    ? Object.keys(currentData[0]).filter(
+        (key) => key !== "name" && !key.endsWith("_hasData")
+      )
     : [selectedMetric];
 
   // Format Y-axis tick for MTTR
@@ -478,7 +482,9 @@ export function VerticalBarChartComponent({
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0]).filter((key) => key !== "name")
+    ? Object.keys(currentData[0]).filter(
+        (key) => key !== "name" && !key.endsWith("_hasData")
+      )
     : [selectedMetric];
 
   // Format Y-axis tick for MTTR
@@ -541,9 +547,9 @@ export function StackedVerticalBarChartComponent({
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0])
-        .filter((key) => key !== "name" && !key.endsWith("_hasData"))
-        .sort() // Sort alphabetically for consistent stacking order
+    ? Object.keys(currentData[0]).filter(
+        (key) => key !== "name" && !key.endsWith("_hasData")
+      )
     : [selectedMetric];
 
   // Format Y-axis tick for MTTR
@@ -605,7 +611,9 @@ export function HorizontalBarChartComponent({
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0]).filter((key) => key !== "name")
+    ? Object.keys(currentData[0]).filter(
+        (key) => key !== "name" && !key.endsWith("_hasData")
+      )
     : [selectedMetric];
 
   return (
@@ -665,9 +673,9 @@ export function StackedHorizontalBarChartComponent({
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0])
-        .filter((key) => key !== "name" && !key.endsWith("_hasData"))
-        .sort() // Sort alphabetically for consistent stacking order
+    ? Object.keys(currentData[0]).filter(
+        (key) => key !== "name" && !key.endsWith("_hasData")
+      )
     : [selectedMetric];
 
   return (
