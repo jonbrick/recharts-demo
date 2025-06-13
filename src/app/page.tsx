@@ -23,10 +23,10 @@ import {
 import { Card } from "../components/Card";
 
 export default function HomePage() {
-  const [chartType, setChartType] = useState("area");
+  const [chartType, setChartType] = useState("line");
   const [granularity, setGranularity] = useState("monthly");
-  const [selectedTable, setSelectedTable] = useState("githubActions");
-  const [selectedMetric, setSelectedMetric] = useState("deployments");
+  const [selectedTable, setSelectedTable] = useState("githubPR");
+  const [selectedMetric, setSelectedMetric] = useState("pullRequests");
   const [operator, setOperator] = useState("average");
   const [groupBy, setGroupBy] = useState("org");
 

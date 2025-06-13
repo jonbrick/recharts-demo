@@ -1,6 +1,48 @@
 // chartConfig.js - Configuration for charts and data sources
 
 export const dataSourceConfig = {
+  githubPR: {
+    name: "GitHub PRs",
+    title: "Pull Requests",
+    groupByOptions: [
+      { value: "org", label: "🏢 Org View", icon: "🏢" },
+      { value: "team", label: "👥 By Team", icon: "👥" },
+      { value: "person", label: "👤 By Individual", icon: "👤" },
+    ],
+    metrics: [
+      {
+        key: "pullRequests",
+        label: "Pull Requests",
+        color: "#8884d8",
+        description: "Daily PR count",
+      },
+      {
+        key: "mergeRate",
+        label: "Merge Rate",
+        color: "#82ca9d",
+        description: "Percentage of PRs merged",
+      },
+      {
+        key: "avgReviewTime",
+        label: "Review Time",
+        color: "#ffc658",
+        description: "Average review time in hours",
+      },
+    ],
+    overlayMetric: {
+      key: "linesChanged",
+      label: "Lines Changed",
+      color: "#1e40af",
+      description: "Total lines of code changed",
+    },
+    tableColumns: [
+      { key: "pullRequests", label: "Pull Requests", format: "number" },
+      { key: "mergeRate", label: "Merge Rate (%)", format: "percentage" },
+      { key: "avgReviewTime", label: "Review Time (hrs)", format: "decimal" },
+      { key: "linesChanged", label: "Lines Changed", format: "number" },
+    ],
+  },
+
   githubActions: {
     name: "GitHub Actions",
     title: "Deployments",
@@ -88,56 +130,17 @@ export const dataSourceConfig = {
       { key: "usersAffected", label: "Users Affected", format: "number" },
     ],
   },
-
-  githubPR: {
-    name: "GitHub PRs",
-    title: "Pull Requests",
-    groupByOptions: [
-      { value: "org", label: "🏢 Org View", icon: "🏢" },
-      { value: "team", label: "👥 By Team", icon: "👥" },
-      { value: "person", label: "👤 By Individual", icon: "👤" },
-    ],
-    metrics: [
-      {
-        key: "pullRequests",
-        label: "Pull Requests",
-        color: "#8884d8",
-        description: "Daily PR count",
-      },
-      {
-        key: "mergeRate",
-        label: "Merge Rate",
-        color: "#82ca9d",
-        description: "Percentage of PRs merged",
-      },
-      {
-        key: "avgReviewTime",
-        label: "Review Time",
-        color: "#ffc658",
-        description: "Average review time in hours",
-      },
-    ],
-    overlayMetric: {
-      key: "linesChanged",
-      label: "Lines Changed",
-      color: "#1e40af",
-      description: "Total lines of code changed",
-    },
-    tableColumns: [
-      { key: "pullRequests", label: "Pull Requests", format: "number" },
-      { key: "mergeRate", label: "Merge Rate (%)", format: "percentage" },
-      { key: "avgReviewTime", label: "Review Time (hrs)", format: "decimal" },
-      { key: "linesChanged", label: "Lines Changed", format: "number" },
-    ],
-  },
 };
 
 export const chartTypeConfig = {
-  area: { label: "📈 Recharts Area", icon: "📈" },
-  line: { label: "📊 Recharts Line", icon: "📊" },
-  "vertical-bar": { label: "📊 Recharts Vertical Bar", icon: "📊" },
-  "horizontal-bar": { label: "📊 Recharts Horizontal Bar", icon: "📊" },
-  table: { label: "📋 Table View", icon: "📋" },
+  line: { label: "📊 Recharts SimpleLineChart", icon: "📊" },
+  area: { label: "📈 Recharts SimpleAreaChart", icon: "📈" },
+  "vertical-bar": { label: "📊 Recharts Vertical SimpleBarChart", icon: "📊" },
+  "horizontal-bar": {
+    label: "📊 Recharts Horizontal SimpleBarChart",
+    icon: "📊",
+  },
+  table: { label: "📋 Data table", icon: "📋" },
 };
 
 // Helper functions
