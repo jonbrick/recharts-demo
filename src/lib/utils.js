@@ -283,82 +283,85 @@ export function groupEventsByType(
   if (groupBy === "org") {
     // Org view - single series, same as groupEventsByDate
     return groupEventsByDate(events, dataSource);
-  } else {
-    // For non-org views, use all-time data if specified
-    if (granularity === "all-time") {
-      const allSeries = new Set();
-      events.forEach((event) => {
-        const groupKey = getGroupingKey(event, dataSource, groupBy);
-        allSeries.add(groupKey);
-      });
+  }
 
-      const result = {
-        name: "All Time",
-      };
-
-      allSeries.forEach((groupKey) => {
-        const displayName = getDisplayName(groupKey, dataSource, groupBy);
-        const groupEvents = events.filter(
-          (event) => getGroupingKey(event, dataSource, groupBy) === groupKey
-        );
-        const metrics = calculateMetricsFromEvents(groupEvents, dataSource);
-        result[displayName] = metrics[selectedMetric];
-        result[`${displayName}_hasData`] = groupEvents.length > 0;
-      });
-
-      return [result];
-    }
-
-    // Monthly view - show time series
-    const fullDateRange = getFullDateRange();
-    const grouped = {};
-
-    // First pass: discover ALL possible series from the entire dataset
+  // For non-org views, use all-time data if specified
+  if (granularity === "all-time") {
     const allSeries = new Set();
     events.forEach((event) => {
       const groupKey = getGroupingKey(event, dataSource, groupBy);
       allSeries.add(groupKey);
     });
 
-    // Group events by series and date
-    events.forEach((event) => {
-      const groupKey = getGroupingKey(event, dataSource, groupBy);
-      const dateKey = getEventDate(event, dataSource);
+    const result = {
+      name: "All Time",
+    };
 
-      if (!grouped[groupKey]) {
-        grouped[groupKey] = {};
-      }
-      if (!grouped[groupKey][dateKey]) {
-        grouped[groupKey][dateKey] = [];
-      }
-      grouped[groupKey][dateKey].push(event);
+    allSeries.forEach((groupKey) => {
+      const displayName = getDisplayName(groupKey, dataSource, groupBy);
+      const groupEvents = events.filter(
+        (event) => getGroupingKey(event, dataSource, groupBy) === groupKey
+      );
+      const metrics = calculateMetricsFromEvents(groupEvents, dataSource);
+      result[displayName] = metrics[selectedMetric];
+      result[`${displayName}_hasData`] = groupEvents.length > 0;
     });
 
-    // Create time series data with ALL dates for ALL series
-    return fullDateRange.map((date) => {
-      const dayData = {
-        name: new Date(date).toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-        }),
-      };
-
-      // Add data for EVERY possible series for EVERY date
-      allSeries.forEach((groupKey) => {
-        const displayName = getDisplayName(groupKey, dataSource, groupBy);
-        const eventsForDate = grouped[groupKey]?.[date] || [];
-        const metrics = calculateMetricsFromEvents(eventsForDate, dataSource);
-
-        // Use null for rate metrics when no data, actual value otherwise
-        dayData[displayName] = metrics[selectedMetric];
-
-        // Add flag for tooltip logic
-        dayData[`${displayName}_hasData`] = eventsForDate.length > 0;
-      });
-
-      return dayData;
-    });
+    return [result];
   }
+
+  // Monthly view - show time series
+  const fullDateRange = getFullDateRange();
+  const grouped = {};
+
+  // First pass: discover ALL possible series from the entire dataset
+  const allSeries = new Set();
+  events.forEach((event) => {
+    const groupKey = getGroupingKey(event, dataSource, groupBy);
+    allSeries.add(groupKey);
+  });
+
+  // Group events by series and date
+  events.forEach((event) => {
+    const groupKey = getGroupingKey(event, dataSource, groupBy);
+    const dateKey = getEventDate(event, dataSource);
+
+    if (!grouped[groupKey]) {
+      grouped[groupKey] = {};
+    }
+    if (!grouped[groupKey][dateKey]) {
+      grouped[groupKey][dateKey] = [];
+    }
+    grouped[groupKey][dateKey].push(event);
+  });
+
+  // Create time series data with ALL dates for ALL series
+  return fullDateRange.map((date) => {
+    // Use UTC date to avoid timezone issues and ensure consistent formatting
+    const utcDate = new Date(date + "T00:00:00Z");
+    const dayData = {
+      name: utcDate.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        timeZone: "UTC",
+      }),
+    };
+
+    // Add data for EVERY possible series for EVERY date
+    allSeries.forEach((groupKey) => {
+      const displayName = getDisplayName(groupKey, dataSource, groupBy);
+      const eventsForDate = grouped[groupKey]?.[date] || [];
+      const metrics = calculateMetricsFromEvents(eventsForDate, dataSource);
+
+      // Use null for rate metrics when no data, actual value otherwise
+      dayData[displayName] = metrics[selectedMetric];
+
+      // Add flag for tooltip logic
+      dayData[`${displayName}_hasData`] = eventsForDate.length > 0;
+    });
+
+    return dayData;
+  });
 }
 
 /**
