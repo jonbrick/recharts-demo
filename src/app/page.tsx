@@ -2,7 +2,8 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import {
-  ControlsContainer,
+  DataSourceSelector,
+  MetricSelector,
   ChartTypeSelector,
   OperatorSelector,
   GranularitySelector,
@@ -107,14 +108,22 @@ export default function HomePage() {
   return (
     <div className="w-full max-w-7xl mx-auto p-4 sm:p-12">
       <div className="flex flex-col gap-8">
-        <ControlsContainer
-          selectedTable={selectedTable}
-          onTableChange={handleTableChange}
-          selectedMetric={selectedMetric}
-          onMetricChange={setSelectedMetric}
-          groupBy={groupBy}
-          onGroupByChange={handleGroupByChange}
-        />
+        <div className="flex flex-col gap-6">
+          <h1 className="text-3xl font-bold text-gray-800">
+            Interactive Chart Demo
+          </h1>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <DataSourceSelector
+              selectedTable={selectedTable}
+              onTableChange={handleTableChange}
+            />
+            <MetricSelector
+              selectedTable={selectedTable}
+              selectedMetric={selectedMetric}
+              onMetricChange={setSelectedMetric}
+            />
+          </div>
+        </div>
 
         <div className="flex flex-col gap-6">
           <h2 className="text-2xl font-semibold text-gray-700">
