@@ -10,8 +10,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@internationalized/date": "^3.8.2",
+    "@radix-ui/react-popover": "^1.1.14",
     "@radix-ui/react-select": "^2.2.5",
     "@radix-ui/react-slot": "^1.2.3",
+    "@react-aria/datepicker": "^3.14.5",
+    "@react-stately/datepicker": "^3.14.2",
     "@remixicon/react": "^4.6.0",
     "@tailwindcss/postcss": "^4.1.10",
     "@tremor/react": "^3.18.7",
