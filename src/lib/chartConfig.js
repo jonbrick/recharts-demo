@@ -137,9 +137,7 @@ export const chartTypeConfig = {
   line: { label: "📊 Recharts Line", icon: "📊" },
   "vertical-bar": { label: "📊 Recharts Vertical Bar", icon: "📊" },
   "horizontal-bar": { label: "📊 Recharts Horizontal Bar", icon: "📊" },
-  "tremor-area": { label: "🔥 Tremor Area", icon: "🔥" },
-  "tremor-line": { label: "🔥 Tremor Line", icon: "🔥" },
-  table: { label: "📋 Table", icon: "📋" },
+  table: { label: "📋 Table View", icon: "📋" },
 };
 
 // Helper functions

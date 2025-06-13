@@ -16,10 +16,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import {
-  AreaChart as TremorAreaChart,
-  LineChart as TremorLineChart,
-} from "@tremor/react";
-import {
   dataSourceConfig,
   formatValue,
   isMathMetric,
@@ -455,63 +451,6 @@ export function TableComponent({
   );
 }
 
-// Add Tremor chart components
-export function TremorAreaChartComponent({
-  currentData,
-  selectedTable,
-  selectedMetric,
-}) {
-  const config = dataSourceConfig[selectedTable];
-  const metric = [...config.metrics, config.overlayMetric].find(
-    (m) => m.key === selectedMetric
-  );
-
-  return (
-    <div className="h-96">
-      <TremorAreaChart
-        data={currentData}
-        index="name"
-        categories={[selectedMetric]}
-        colors={["blue"]}
-        valueFormatter={(value) => value.toFixed(1)}
-        className="h-full"
-        isAnimationActive={!DISABLE_ANIMATIONS}
-      />
-      <div className="mt-4 text-sm text-gray-600 text-center">
-        🔥 Tremor Area Chart - {metric.label}
-      </div>
-    </div>
-  );
-}
-
-export function TremorLineChartComponent({
-  currentData,
-  selectedTable,
-  selectedMetric,
-}) {
-  const config = dataSourceConfig[selectedTable];
-  const metric = [...config.metrics, config.overlayMetric].find(
-    (m) => m.key === selectedMetric
-  );
-
-  return (
-    <div className="h-96">
-      <TremorLineChart
-        data={currentData}
-        index="name"
-        categories={[selectedMetric]}
-        colors={["emerald"]}
-        valueFormatter={(value) => value.toFixed(1)}
-        className="h-full"
-        isAnimationActive={!DISABLE_ANIMATIONS}
-      />
-      <div className="mt-4 text-sm text-gray-600 text-center">
-        🔥 Tremor Line Chart - {metric.label}
-      </div>
-    </div>
-  );
-}
-
 export function ChartRenderer({
   chartType,
   currentData,
@@ -526,8 +465,6 @@ export function ChartRenderer({
     "vertical-bar": VerticalBarChartComponent,
     "horizontal-bar": HorizontalBarChartComponent,
     table: TableComponent,
-    "tremor-area": TremorAreaChartComponent,
-    "tremor-line": TremorLineChartComponent,
   };
   const Component = chartComponents[chartType];
 
