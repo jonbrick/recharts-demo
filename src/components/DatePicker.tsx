@@ -22,7 +22,6 @@ import { enUS } from "date-fns/locale";
 import { tv, type VariantProps } from "tailwind-variants";
 
 import { cx, focusInput, focusRing, hasErrorInput } from "../lib/styleUtils";
-import { ALLOWED_PICKER_RANGE } from "../lib/dashboardUtils";
 
 import { Button } from "./Button";
 import { Calendar as CalendarPrimitive, type Matcher } from "./Calendar";
@@ -434,7 +433,6 @@ type Translations = {
 interface PickerProps extends CalendarProps {
   className?: string;
   disabled?: boolean;
-  disabledDays?: Matcher | Matcher[] | undefined;
   required?: boolean;
   showTimePicker?: boolean;
   placeholder?: string;
@@ -468,7 +466,6 @@ const SingleDatePicker = ({
   onChange,
   presets,
   disabled,
-  disabledDays,
   disableNavigation,
   className,
   showTimePicker,
@@ -637,7 +634,6 @@ const SingleDatePicker = ({
                 onMonthChange={setMonth}
                 selected={date}
                 onSelect={onDateChange}
-                disabled={disabledDays}
                 locale={locale}
                 enableYearNavigation={enableYearNavigation}
                 disableNavigation={disableNavigation}
@@ -684,12 +680,12 @@ const SingleDatePicker = ({
 //#region Range Date Picker
 // ============================================================================
 
-interface RangeProps extends PickerProps {
+type RangeDatePickerProps = {
   presets?: DateRangePreset[];
   defaultValue?: DateRange;
   value?: DateRange;
   onChange?: (dateRange: DateRange | undefined) => void;
-}
+} & PickerProps;
 
 const RangeDatePicker = ({
   defaultValue,
@@ -707,7 +703,7 @@ const RangeDatePicker = ({
   align = "center",
   className,
   ...props
-}: RangeProps) => {
+}: RangeDatePickerProps) => {
   const [open, setOpen] = React.useState(false);
   const [range, setRange] = React.useState<DateRange | undefined>(
     value ?? defaultValue ?? undefined
@@ -936,10 +932,6 @@ const RangeDatePicker = ({
                 month={month}
                 onMonthChange={setMonth}
                 numberOfMonths={2}
-                disabled={[
-                  { before: ALLOWED_PICKER_RANGE.min },
-                  { after: ALLOWED_PICKER_RANGE.max },
-                ]}
                 disableNavigation={disableNavigation}
                 enableYearNavigation={enableYearNavigation}
                 locale={locale}
@@ -1017,144 +1009,14 @@ const RangeDatePicker = ({
 // ============================================================================
 
 const validatePresets = (
-  presets: DateRangePreset[] | DatePreset[],
-  rules: PickerProps
-) => {
-  const { toYear, fromYear, fromMonth, toMonth, fromDay, toDay } = rules;
-
-  if (presets && presets.length > 0) {
-    const fromYearToUse = fromYear;
-    const toYearToUse = toYear;
-
-    for (const preset of presets) {
-      if ("date" in preset) {
-        const presetYear = preset.date.getFullYear();
-
-        if (fromYear && presetYear < fromYear) {
-          throw new Error(
-            `Preset ${preset.label} is before fromYear ${fromYearToUse}.`
-          );
-        }
-
-        if (toYear && presetYear > toYear) {
-          throw new Error(
-            `Preset ${preset.label} is after toYear ${toYearToUse}.`
-          );
-        }
-
-        if (fromMonth) {
-          const presetMonth = preset.date.getMonth();
-
-          if (presetMonth < fromMonth.getMonth()) {
-            throw new Error(
-              `Preset ${preset.label} is before fromMonth ${fromMonth}.`
-            );
-          }
-        }
-
-        if (toMonth) {
-          const presetMonth = preset.date.getMonth();
-
-          if (presetMonth > toMonth.getMonth()) {
-            throw new Error(
-              `Preset ${preset.label} is after toMonth ${toMonth}.`
-            );
-          }
-        }
-
-        if (fromDay) {
-          const presetDay = preset.date.getDate();
-
-          if (presetDay < fromDay.getDate()) {
-            throw new Error(
-              `Preset ${preset.label} is before fromDay ${fromDay}.`
-            );
-          }
-        }
-
-        if (toDay) {
-          const presetDay = preset.date.getDate();
-
-          if (presetDay > toDay.getDate()) {
-            throw new Error(
-              `Preset ${preset.label} is after toDay ${format(
-                toDay,
-                "MMM dd, yyyy"
-              )}.`
-            );
-          }
-        }
-      }
-
-      if ("dateRange" in preset) {
-        const presetFromYear = preset.dateRange.from?.getFullYear();
-        const presetToYear = preset.dateRange.to?.getFullYear();
-
-        if (presetFromYear && fromYear && presetFromYear < fromYear) {
-          throw new Error(
-            `Preset ${preset.label}'s 'from' is before fromYear ${fromYearToUse}.`
-          );
-        }
-
-        if (presetToYear && toYear && presetToYear > toYear) {
-          throw new Error(
-            `Preset ${preset.label}'s 'to' is after toYear ${toYearToUse}.`
-          );
-        }
-
-        if (fromMonth) {
-          const presetMonth = preset.dateRange.from?.getMonth();
-
-          if (presetMonth && presetMonth < fromMonth.getMonth()) {
-            throw new Error(
-              `Preset ${preset.label}'s 'from' is before fromMonth ${format(
-                fromMonth,
-                "MMM, yyyy"
-              )}.`
-            );
-          }
-        }
-
-        if (toMonth) {
-          const presetMonth = preset.dateRange.to?.getMonth();
-
-          if (presetMonth && presetMonth > toMonth.getMonth()) {
-            throw new Error(
-              `Preset ${preset.label}'s 'to' is after toMonth ${format(
-                toMonth,
-                "MMM, yyyy"
-              )}.`
-            );
-          }
-        }
-
-        if (fromDay) {
-          const presetDay = preset.dateRange.from?.getDate();
-
-          if (presetDay && presetDay < fromDay.getDate()) {
-            throw new Error(
-              `Preset ${
-                preset.dateRange.from
-              }'s 'from' is before fromDay ${format(fromDay, "MMM dd, yyyy")}.`
-            );
-          }
-        }
-
-        if (toDay) {
-          const presetDay = preset.dateRange.to?.getDate();
-
-          if (presetDay && presetDay > toDay.getDate()) {
-            throw new Error(
-              `Preset ${preset.label}'s 'to' is after toDay ${format(
-                toDay,
-                "MMM dd, yyyy"
-              )}.`
-            );
-          }
-        }
-      }
-    }
+  presets: DateRangePreset[] | DatePreset[]
+): DateRangePreset[] | DatePreset[] => {
+  if (!presets || presets.length === 0) {
+    return [];
   }
+
+  // Return all presets since we no longer have date restrictions
+  return presets;
 };
 
 //#region Types & Exports
@@ -1169,7 +1031,7 @@ type SingleDatePickerProps = {
 
 const DatePicker = ({ presets, ...props }: SingleDatePickerProps) => {
   if (presets) {
-    validatePresets(presets, props);
+    validatePresets(presets);
   }
 
   return <SingleDatePicker presets={presets} {...(props as SingleProps)} />;
@@ -1177,19 +1039,14 @@ const DatePicker = ({ presets, ...props }: SingleDatePickerProps) => {
 
 DatePicker.displayName = "DatePicker";
 
-type RangeDatePickerProps = {
-  presets?: DateRangePreset[];
-  defaultValue?: DateRange;
-  value?: DateRange;
-  onChange?: (dateRange: DateRange | undefined) => void;
-} & PickerProps;
-
 const DateRangePicker = ({ presets, ...props }: RangeDatePickerProps) => {
-  if (presets) {
-    validatePresets(presets, props);
-  }
+  // Validate presets against disabled days
+  const validatedPresets = React.useMemo(
+    () => validatePresets(presets || []) as DateRangePreset[],
+    [presets]
+  );
 
-  return <RangeDatePicker presets={presets} {...(props as RangeProps)} />;
+  return <RangeDatePicker presets={validatedPresets} {...props} />;
 };
 
 DateRangePicker.displayName = "DateRangePicker";

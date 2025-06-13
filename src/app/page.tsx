@@ -20,7 +20,12 @@ import {
   groupEventsByDate,
   groupEventsByType,
   filterEventsByDate,
-  ALLOWED_PICKER_RANGE,
+  DISABLED_DAYS_RANGE,
+  DEFAULT_PICKER_DATES,
+  POC_START_DATE,
+  POC_END_DATE,
+  POC_START_DATE_UTC,
+  POC_END_DATE_UTC,
 } from "../lib/dashboardUtils";
 import { Card } from "../components/Card";
 
@@ -32,18 +37,18 @@ export default function HomePage() {
   const [operator, setOperator] = useState("sum");
   const [groupBy, setGroupBy] = useState("org");
   const [selectedDateRange, setSelectedDateRange] = useState<DateRange>({
-    from: new Date(ALLOWED_PICKER_RANGE.defaultStart),
-    to: new Date(ALLOWED_PICKER_RANGE.defaultEnd),
+    from: new Date(DEFAULT_PICKER_DATES.defaultStart),
+    to: new Date(DEFAULT_PICKER_DATES.defaultEnd),
   });
 
   // Available data tables - filtered by selected date range
   const dataTables = useMemo(() => {
     const startDate =
       selectedDateRange.from?.toISOString().split("T")[0] ??
-      ALLOWED_PICKER_RANGE.defaultStart;
+      DEFAULT_PICKER_DATES.defaultStart;
     const endDate =
       selectedDateRange.to?.toISOString().split("T")[0] ??
-      ALLOWED_PICKER_RANGE.defaultEnd;
+      DEFAULT_PICKER_DATES.defaultEnd;
 
     return {
       githubActions: filterEventsByDate(
@@ -156,27 +161,23 @@ export default function HomePage() {
               <DateRangePicker
                 value={selectedDateRange}
                 onChange={handleDateRangeChange}
-                disabledDays={{
-                  before: ALLOWED_PICKER_RANGE.min,
-                  after: ALLOWED_PICKER_RANGE.max,
-                }}
                 placeholder="Select date range"
                 className="w-64 cursor-pointer"
               />
               {selectedDateRange.from?.toISOString() !==
-                new Date(ALLOWED_PICKER_RANGE.defaultStart).toISOString() ||
+                new Date(DEFAULT_PICKER_DATES.defaultStart).toISOString() ||
               selectedDateRange.to?.toISOString() !==
-                new Date(ALLOWED_PICKER_RANGE.defaultEnd).toISOString() ? (
+                new Date(DEFAULT_PICKER_DATES.defaultEnd).toISOString() ? (
                 <button
-                  onClick={() =>
+                  onClick={() => {
                     setSelectedDateRange({
-                      from: new Date(ALLOWED_PICKER_RANGE.defaultStart),
-                      to: new Date(ALLOWED_PICKER_RANGE.defaultEnd),
-                    })
-                  }
+                      from: new Date(DEFAULT_PICKER_DATES.defaultStart),
+                      to: new Date(DEFAULT_PICKER_DATES.defaultEnd),
+                    });
+                  }}
                   className="px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"
                 >
-                  Reset dates
+                  Reset range
                 </button>
               ) : null}
             </div>

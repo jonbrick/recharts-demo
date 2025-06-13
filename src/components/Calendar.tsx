@@ -134,8 +134,6 @@ const Calendar = ({
           "aria-selected:bg-blue-500 aria-selected:text-white",
           "dark:aria-selected:bg-blue-500 dark:aria-selected:text-white"
         ),
-        day_disabled:
-          "text-gray-300! dark:text-gray-700! line-through disabled:hover:bg-transparent",
         day_outside: "text-gray-400 dark:text-gray-600",
         day_range_middle: cx(
           "rounded-none!",

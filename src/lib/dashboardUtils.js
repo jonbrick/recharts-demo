@@ -5,12 +5,20 @@ import { dataSourceConfig, isMathMetric } from "./chartConfig.js";
 export const POC_START_DATE = "2025-05-15";
 export const POC_END_DATE = "2025-05-30";
 
-// Allowed date picker range for prototype
-export const ALLOWED_PICKER_RANGE = {
-  min: new Date("2025-05-15"),
-  max: new Date("2025-05-30"),
-  defaultStart: "2025-05-15",
-  defaultEnd: "2025-05-30",
+// Default dates for the date picker
+export const DEFAULT_PICKER_DATES = {
+  defaultStart: POC_START_DATE,
+  defaultEnd: POC_END_DATE,
+};
+
+// UTC-adjusted versions for consistent initialization
+export const POC_START_DATE_UTC = new Date(POC_START_DATE).toISOString();
+export const POC_END_DATE_UTC = new Date(POC_END_DATE).toISOString();
+
+// Specific values for disabled days in the date picker
+export const DISABLED_DAYS_RANGE = {
+  before: new Date("2025-05-16"),
+  after: new Date("2025-05-31"),
 };
 
 /**
