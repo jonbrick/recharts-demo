@@ -1,6 +1,6 @@
 // ChartRenderer.tsx - Unified chart rendering component
 
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
   AreaChart,
   Area,
@@ -15,6 +15,7 @@ import {
   Legend,
   ResponsiveContainer,
   TooltipProps,
+  ComposedChart,
 } from "recharts";
 import {
   dataSourceConfig,
@@ -40,13 +41,6 @@ const DISABLE_ANIMATIONS = true;
 const commonChartProps = {
   margin: { top: 20, right: 30, left: 20, bottom: 5 },
   isAnimationActive: false,
-};
-
-const commonTooltipStyle = {
-  backgroundColor: "#fff",
-  border: "1px solid #ccc",
-  borderRadius: "8px",
-  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
 };
 
 // Add type definitions
@@ -719,6 +713,147 @@ export function TableChartComponent({
   );
 }
 
+// ComposedChart component for overlay mode
+function ComposedChartComponent({
+  mergedData,
+  selectedMetric,
+  overlayMetric,
+  chartType,
+  overlayChartType,
+  selectedTable,
+  overlayTable,
+}: {
+  mergedData: any[];
+  selectedMetric: string;
+  overlayMetric: string;
+  chartType: string;
+  overlayChartType: string;
+  selectedTable: string;
+  overlayTable: string;
+}) {
+  // Get colors from config
+  const primaryConfig = dataSourceConfig[selectedTable];
+  const overlayConfig = dataSourceConfig[overlayTable];
+
+  const primaryColor =
+    primaryConfig.metrics.find((m) => m.key === selectedMetric)?.color ||
+    "#8884d8";
+  const overlayColor =
+    overlayConfig.metrics.find((m) => m.key === overlayMetric)?.color ||
+    "#82ca9d";
+
+  console.log("🎨 ComposedChart rendering:", {
+    primaryMetric: selectedMetric,
+    overlayMetric: overlayMetric,
+    primaryType: chartType,
+    overlayType: overlayChartType,
+  });
+
+  return (
+    <ResponsiveContainer width="100%" height={400}>
+      <ComposedChart data={mergedData} {...commonChartProps}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+        <XAxis
+          dataKey="name"
+          tick={{ fill: "#666" }}
+          axisLine={{ stroke: "#ccc" }}
+        />
+        <YAxis
+          yAxisId="left"
+          tick={{ fill: "#666" }}
+          axisLine={{ stroke: "#ccc" }}
+        />
+        <YAxis
+          yAxisId="right"
+          orientation="right"
+          tick={{ fill: "#666" }}
+          axisLine={{ stroke: "#ccc" }}
+        />
+        <Tooltip />
+        <Legend />
+
+        {/* Primary dataset */}
+        {chartType === "vertical-bar" ||
+        chartType === "stacked-vertical-bar" ? (
+          <Bar
+            yAxisId="left"
+            dataKey={selectedMetric}
+            fill={primaryColor}
+            name={
+              primaryConfig.metrics.find((m) => m.key === selectedMetric)
+                ?.label || selectedMetric
+            }
+          />
+        ) : chartType === "line" ? (
+          <Line
+            yAxisId="left"
+            type="monotone"
+            dataKey={selectedMetric}
+            stroke={primaryColor}
+            strokeWidth={3}
+            dot={{ fill: primaryColor, r: 4 }}
+            name={
+              primaryConfig.metrics.find((m) => m.key === selectedMetric)
+                ?.label || selectedMetric
+            }
+          />
+        ) : (
+          <Area
+            yAxisId="left"
+            type="monotone"
+            dataKey={selectedMetric}
+            fill={primaryColor}
+            stroke={primaryColor}
+            name={
+              primaryConfig.metrics.find((m) => m.key === selectedMetric)
+                ?.label || selectedMetric
+            }
+          />
+        )}
+
+        {/* Overlay dataset */}
+        {overlayChartType === "vertical-bar" ||
+        overlayChartType === "stacked-vertical-bar" ? (
+          <Bar
+            yAxisId="right"
+            dataKey={`overlay_${overlayMetric}`}
+            fill={overlayColor}
+            name={
+              overlayConfig.metrics.find((m) => m.key === overlayMetric)
+                ?.label || overlayMetric
+            }
+          />
+        ) : overlayChartType === "line" ? (
+          <Line
+            yAxisId="right"
+            type="monotone"
+            dataKey={`overlay_${overlayMetric}`}
+            stroke={overlayColor}
+            strokeWidth={3}
+            dot={{ fill: overlayColor, r: 4 }}
+            name={
+              overlayConfig.metrics.find((m) => m.key === overlayMetric)
+                ?.label || overlayMetric
+            }
+          />
+        ) : (
+          <Area
+            yAxisId="right"
+            type="monotone"
+            dataKey={`overlay_${overlayMetric}`}
+            fill={overlayColor}
+            stroke={overlayColor}
+            name={
+              overlayConfig.metrics.find((m) => m.key === overlayMetric)
+                ?.label || overlayMetric
+            }
+          />
+        )}
+      </ComposedChart>
+    </ResponsiveContainer>
+  );
+}
+
 export function ChartRenderer({
   chartType,
   currentData,
@@ -728,8 +863,10 @@ export function ChartRenderer({
   groupBy,
   overlayActive = false,
   overlayData = null,
+  overlayTable = "",
   overlayMetric = "",
   overlayChartType = "",
+  overlayGroupBy = "",
 }: ChartRendererProps) {
   // Log overlay props
   useEffect(() => {
@@ -744,9 +881,78 @@ export function ChartRenderer({
     }
   }, [overlayActive, overlayData, overlayMetric, overlayChartType]);
 
+  // Merge primary and overlay data for ComposedChart
+  const mergedData = useMemo(() => {
+    if (!overlayActive || !overlayData || !currentData) {
+      return currentData;
+    }
+
+    console.log("🔀 Merging data for ComposedChart");
+
+    // Create a map of dates to merged data points
+    const dataMap = new Map();
+
+    // Add primary data
+    currentData.forEach((point) => {
+      dataMap.set(point.name, { ...point });
+    });
+
+    // Merge overlay data
+    overlayData.forEach((point) => {
+      const existing = dataMap.get(point.name);
+      if (existing) {
+        // Merge overlay data into existing point
+        Object.keys(point).forEach((key) => {
+          if (key !== "name") {
+            // Prefix overlay keys to avoid conflicts
+            existing[`overlay_${key}`] = point[key];
+          }
+        });
+      } else {
+        // Add new point with overlay prefix
+        const newPoint = { name: point.name };
+        Object.keys(point).forEach((key) => {
+          if (key !== "name") {
+            newPoint[`overlay_${key}`] = point[key];
+          }
+        });
+        dataMap.set(point.name, newPoint);
+      }
+    });
+
+    // Convert back to array and sort by date
+    const merged = Array.from(dataMap.values()).sort(
+      (a, b) => new Date(a.name).getTime() - new Date(b.name).getTime()
+    );
+
+    console.log("📊 Merged data sample:", merged[0]);
+    return merged;
+  }, [currentData, overlayData, overlayActive]);
+
+  // If overlay is active and it's not a table view, use ComposedChart
+  if (
+    overlayActive &&
+    chartType !== "table" &&
+    overlayChartType &&
+    mergedData
+  ) {
+    return (
+      <ComposedChartComponent
+        mergedData={mergedData}
+        selectedMetric={selectedMetric}
+        overlayMetric={overlayMetric}
+        chartType={chartType}
+        overlayChartType={overlayChartType}
+        selectedTable={selectedTable}
+        overlayTable={overlayTable}
+      />
+    );
+  }
+
+  // Otherwise use the regular chart rendering
   const chartComponents = {
     area: AreaChartComponent,
-    line: AreaChartComponent,
+    line: LineChartComponent,
     "vertical-bar": VerticalBarChartComponent,
     "horizontal-bar": HorizontalBarChartComponent,
     "stacked-area": StackedAreaChartComponent,
