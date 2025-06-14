@@ -1,19 +1,21 @@
-// ChartRenderer.jsx - Unified chart rendering component
+// ChartRenderer.tsx - Unified chart rendering component
 
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import {
   AreaChart,
   Area,
-  LineChart,
-  Line,
   BarChart,
   Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
   ResponsiveContainer,
+  TooltipProps,
+  ComposedChart,
 } from "recharts";
 import {
   dataSourceConfig,
@@ -41,148 +43,78 @@ const commonChartProps = {
   isAnimationActive: false,
 };
 
-const commonTooltipStyle = {
-  backgroundColor: "#fff",
-  border: "1px solid #ccc",
-  borderRadius: "8px",
-  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-};
+// Add type definitions
+interface ChartRendererProps {
+  chartType: string;
+  currentData: any[];
+  selectedTable: string;
+  selectedMetric: string;
+  granularity: string;
+  groupBy: string;
+  overlayActive?: boolean;
+  overlayData?: any[] | null;
+  overlayTable?: string;
+  overlayMetric?: string;
+  overlayChartType?: string;
+  overlayGroupBy?: string;
+}
 
-function CustomTooltip({
+interface CustomTooltipProps extends TooltipProps<any, any> {
+  selectedMetric: string;
+  isMultiSeries: boolean;
+}
+
+interface ChartComponentProps {
+  currentData: any[];
+  selectedMetric: string;
+  groupBy: string;
+}
+
+interface TableChartComponentProps {
+  currentData: any[];
+  selectedMetric: string;
+  selectedTable: string;
+  granularity: string;
+}
+
+// Custom tooltip component with proper types
+const CustomTooltip = ({
   active,
   payload,
   label,
   selectedMetric,
   isMultiSeries,
-}) {
-  if (!active) {
-    return null;
-  }
-
-  // Get data point - for math metrics with no data, we might not have payload
-  const dataPoint = payload?.[0]?.payload || label;
-  if (!dataPoint && !label) return null;
-
-  // If we only have label (no dataPoint), create a minimal dataPoint for math metrics
-  const workingDataPoint = dataPoint || { name: label, [selectedMetric]: null };
-
-  // Determine which keys to show in the tooltip
-  let keysToShow;
-  if (isMultiSeries) {
-    keysToShow = Object.keys(workingDataPoint)
-      .filter(
-        (key) =>
-          key !== "name" && !key.endsWith("_hasData") && key !== selectedMetric
-      )
-      .sort();
-  } else {
-    keysToShow = [selectedMetric];
-  }
-
-  // Format value based on metric type
-  const formatValue = (value, key) => {
-    if (value === null || value === undefined) return "No results";
-
-    // Format MTTR in minutes to hours and minutes
-    if (key === "mttrMinutes") {
-      const hours = Math.floor(value / 60);
-      const minutes = Math.round(value % 60);
-      return `${hours}h ${minutes}m`;
-    }
-
-    // Format percentage values
-    if (key === "successRate" || key === "mergeRate") {
-      return `${value.toFixed(1)}%`;
-    }
-
-    // Format time values
-    if (key === "buildTimeMinutes" || key === "avgReviewTime") {
-      return `${value.toFixed(1)} min`;
-    }
-
-    // Default number formatting
-    return typeof value === "number" ? value.toFixed(1) : value;
-  };
-
-  return (
-    <div style={commonTooltipStyle}>
-      <p className="font-medium">{label}</p>
-      {keysToShow.map((seriesKey, index) => {
-        const hasDataKey = `${seriesKey}_hasData`;
-        const hasData = isMultiSeries
-          ? workingDataPoint[hasDataKey] !== false
-          : workingDataPoint[seriesKey] !== null;
-        const value = workingDataPoint[seriesKey];
-
-        // Try to find color from payload first, fallback to index-based color
-        const payloadEntry = payload?.find((p) => p.dataKey === seriesKey);
-        const color =
-          payloadEntry?.color || CHART_COLORS[index % CHART_COLORS.length];
-
-        // Check if this is a math metric (should show "No results" when null)
-        const isMathType = isMathMetric(selectedMetric);
-
-        // Format the display value
-        let displayValue;
-        if (!hasData && isMathType) {
-          displayValue = "No results";
-        } else if (!hasData) {
-          displayValue = "0";
-        } else {
-          displayValue = formatValue(value, seriesKey);
-        }
-
-        return (
-          <p key={index} style={{ color }}>
-            {`${isMultiSeries ? seriesKey : "Organization"}: ${displayValue}`}
+}: CustomTooltipProps) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white p-2 border border-gray-200 rounded shadow-sm">
+        <p className="text-sm font-medium text-gray-700">{label}</p>
+        {payload.map((entry: any, index: number) => (
+          <p key={index} className="text-sm" style={{ color: entry.color }}>
+            {isMultiSeries ? entry.name : selectedMetric}: {entry.value}
           </p>
-        );
-      })}
-    </div>
-  );
-}
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
 
-export function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
-  // Check if this is multi-series data
-  const isMultiSeries = groupBy !== "org" && currentData.length > 0;
-  const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0]).filter(
-        (key) => key !== "name" && !key.endsWith("_hasData")
-      )
-    : [selectedMetric];
-
-  // Format Y-axis tick for MTTR
-  const formatYTick = (value) => {
-    if (selectedMetric === "mttrMinutes") {
-      const hours = Math.floor(value / 60);
-      const minutes = Math.round(value % 60);
-      return `${hours}h ${minutes}m`;
-    }
-    return value;
-  };
-
-  // Handle null values properly - keep nulls for math metrics, convert to 0 for count metrics
-  const filteredData = currentData.map((point) => ({
-    ...point,
-    [selectedMetric]: isMathMetric(selectedMetric)
-      ? point[selectedMetric] // Keep null for math metrics (chart will skip points)
-      : point[selectedMetric] ?? 0, // Convert null to 0 for count metrics
-  }));
-
+export function AreaChartComponent({
+  currentData,
+  selectedMetric,
+  groupBy,
+}: ChartComponentProps) {
+  const isMultiSeries = groupBy !== "org";
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <AreaChart data={filteredData} {...commonChartProps}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-        <XAxis
-          dataKey="name"
-          tick={{ fill: "#666" }}
-          axisLine={{ stroke: "#ccc" }}
-        />
-        <YAxis
-          tick={{ fill: "#666" }}
-          axisLine={{ stroke: "#ccc" }}
-          tickFormatter={formatYTick}
-        />
+      <AreaChart
+        data={currentData}
+        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+      >
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="name" />
+        <YAxis />
         <Tooltip
           content={
             <CustomTooltip
@@ -192,28 +124,27 @@ export function AreaChartComponent({ currentData, selectedMetric, groupBy }) {
           }
         />
         <Legend />
-
-        {seriesKeys
-          .filter((key) => !key.endsWith("_hasData"))
-          .map((key, index) => (
-            <Area
-              key={key}
-              type="monotone"
-              dataKey={isMultiSeries ? key : selectedMetric}
-              stroke={CHART_COLORS[index % CHART_COLORS.length]}
-              fill={CHART_COLORS[index % CHART_COLORS.length]}
-              fillOpacity={0.8}
-              strokeWidth={2}
-              name={isMultiSeries ? key : "Organization"}
-              connectNulls={false}
-              isAnimationActive={false}
-              dot={{
-                fill: CHART_COLORS[index % CHART_COLORS.length],
-                strokeWidth: 2,
-                r: 4,
-              }}
-            />
-          ))}
+        {isMultiSeries ? (
+          Object.keys(currentData[0] || {})
+            .filter((key) => key !== "name" && !key.endsWith("_hasData"))
+            .map((key, index) => (
+              <Area
+                key={key}
+                type="monotone"
+                dataKey={key}
+                stackId="1"
+                stroke={CHART_COLORS[index % CHART_COLORS.length]}
+                fill={CHART_COLORS[index % CHART_COLORS.length]}
+              />
+            ))
+        ) : (
+          <Area
+            type="monotone"
+            dataKey={selectedMetric}
+            stroke="#8884d8"
+            fill="#8884d8"
+          />
+        )}
       </AreaChart>
     </ResponsiveContainer>
   );
@@ -223,7 +154,7 @@ export function StackedAreaChartComponent({
   currentData,
   selectedMetric,
   groupBy,
-}) {
+}: ChartComponentProps) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
@@ -303,7 +234,7 @@ export function PercentAreaChartComponent({
   currentData,
   selectedMetric,
   groupBy,
-}) {
+}: ChartComponentProps) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
@@ -399,7 +330,11 @@ export function PercentAreaChartComponent({
   );
 }
 
-export function LineChartComponent({ currentData, selectedMetric, groupBy }) {
+export function LineChartComponent({
+  currentData,
+  selectedMetric,
+  groupBy,
+}: ChartComponentProps) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
@@ -478,7 +413,7 @@ export function VerticalBarChartComponent({
   currentData,
   selectedMetric,
   groupBy,
-}) {
+}: ChartComponentProps) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
@@ -543,7 +478,7 @@ export function StackedVerticalBarChartComponent({
   currentData,
   selectedMetric,
   groupBy,
-}) {
+}: ChartComponentProps) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
@@ -607,7 +542,7 @@ export function HorizontalBarChartComponent({
   currentData,
   selectedMetric,
   groupBy,
-}) {
+}: ChartComponentProps) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
@@ -669,7 +604,7 @@ export function StackedHorizontalBarChartComponent({
   currentData,
   selectedMetric,
   groupBy,
-}) {
+}: ChartComponentProps) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
@@ -726,12 +661,12 @@ export function StackedHorizontalBarChartComponent({
   );
 }
 
-export function TableComponent({
+export function TableChartComponent({
   currentData,
-  selectedTable,
   selectedMetric,
+  selectedTable,
   granularity,
-}) {
+}: TableChartComponentProps) {
   const config = dataSourceConfig[selectedTable];
   const metric = [...config.metrics, config.overlayMetric].find(
     (m) => m.key === selectedMetric
@@ -778,6 +713,147 @@ export function TableComponent({
   );
 }
 
+// ComposedChart component for overlay mode
+function ComposedChartComponent({
+  mergedData,
+  selectedMetric,
+  overlayMetric,
+  chartType,
+  overlayChartType,
+  selectedTable,
+  overlayTable,
+}: {
+  mergedData: any[];
+  selectedMetric: string;
+  overlayMetric: string;
+  chartType: string;
+  overlayChartType: string;
+  selectedTable: string;
+  overlayTable: string;
+}) {
+  // Get colors from config
+  const primaryConfig = dataSourceConfig[selectedTable];
+  const overlayConfig = dataSourceConfig[overlayTable];
+
+  const primaryColor =
+    primaryConfig.metrics.find((m) => m.key === selectedMetric)?.color ||
+    "#8884d8";
+  const overlayColor =
+    overlayConfig.metrics.find((m) => m.key === overlayMetric)?.color ||
+    "#82ca9d";
+
+  console.log("🎨 ComposedChart rendering:", {
+    primaryMetric: selectedMetric,
+    overlayMetric: overlayMetric,
+    primaryType: chartType,
+    overlayType: overlayChartType,
+  });
+
+  return (
+    <ResponsiveContainer width="100%" height={400}>
+      <ComposedChart data={mergedData} {...commonChartProps}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+        <XAxis
+          dataKey="name"
+          tick={{ fill: "#666" }}
+          axisLine={{ stroke: "#ccc" }}
+        />
+        <YAxis
+          yAxisId="left"
+          tick={{ fill: "#666" }}
+          axisLine={{ stroke: "#ccc" }}
+        />
+        <YAxis
+          yAxisId="right"
+          orientation="right"
+          tick={{ fill: "#666" }}
+          axisLine={{ stroke: "#ccc" }}
+        />
+        <Tooltip />
+        <Legend />
+
+        {/* Primary dataset */}
+        {chartType === "vertical-bar" ||
+        chartType === "stacked-vertical-bar" ? (
+          <Bar
+            yAxisId="left"
+            dataKey={selectedMetric}
+            fill={primaryColor}
+            name={
+              primaryConfig.metrics.find((m) => m.key === selectedMetric)
+                ?.label || selectedMetric
+            }
+          />
+        ) : chartType === "line" ? (
+          <Line
+            yAxisId="left"
+            type="monotone"
+            dataKey={selectedMetric}
+            stroke={primaryColor}
+            strokeWidth={3}
+            dot={{ fill: primaryColor, r: 4 }}
+            name={
+              primaryConfig.metrics.find((m) => m.key === selectedMetric)
+                ?.label || selectedMetric
+            }
+          />
+        ) : (
+          <Area
+            yAxisId="left"
+            type="monotone"
+            dataKey={selectedMetric}
+            fill={primaryColor}
+            stroke={primaryColor}
+            name={
+              primaryConfig.metrics.find((m) => m.key === selectedMetric)
+                ?.label || selectedMetric
+            }
+          />
+        )}
+
+        {/* Overlay dataset */}
+        {overlayChartType === "vertical-bar" ||
+        overlayChartType === "stacked-vertical-bar" ? (
+          <Bar
+            yAxisId="right"
+            dataKey={`overlay_${overlayMetric}`}
+            fill={overlayColor}
+            name={
+              overlayConfig.metrics.find((m) => m.key === overlayMetric)
+                ?.label || overlayMetric
+            }
+          />
+        ) : overlayChartType === "line" ? (
+          <Line
+            yAxisId="right"
+            type="monotone"
+            dataKey={`overlay_${overlayMetric}`}
+            stroke={overlayColor}
+            strokeWidth={3}
+            dot={{ fill: overlayColor, r: 4 }}
+            name={
+              overlayConfig.metrics.find((m) => m.key === overlayMetric)
+                ?.label || overlayMetric
+            }
+          />
+        ) : (
+          <Area
+            yAxisId="right"
+            type="monotone"
+            dataKey={`overlay_${overlayMetric}`}
+            fill={overlayColor}
+            stroke={overlayColor}
+            name={
+              overlayConfig.metrics.find((m) => m.key === overlayMetric)
+                ?.label || overlayMetric
+            }
+          />
+        )}
+      </ComposedChart>
+    </ResponsiveContainer>
+  );
+}
+
 export function ChartRenderer({
   chartType,
   currentData,
@@ -785,17 +861,105 @@ export function ChartRenderer({
   selectedMetric,
   granularity,
   groupBy,
-}) {
+  overlayActive = false,
+  overlayData = null,
+  overlayTable = "",
+  overlayMetric = "",
+  overlayChartType = "",
+  overlayGroupBy = "",
+}: ChartRendererProps) {
+  // Log overlay props
+  useEffect(() => {
+    if (overlayActive) {
+      console.log("📈 ChartRenderer received overlay:", {
+        active: overlayActive,
+        hasData: !!overlayData,
+        dataLength: overlayData?.length,
+        metric: overlayMetric,
+        chartType: overlayChartType,
+      });
+    }
+  }, [overlayActive, overlayData, overlayMetric, overlayChartType]);
+
+  // Merge primary and overlay data for ComposedChart
+  const mergedData = useMemo(() => {
+    if (!overlayActive || !overlayData || !currentData) {
+      return currentData;
+    }
+
+    console.log("🔀 Merging data for ComposedChart");
+
+    // Create a map of dates to merged data points
+    const dataMap = new Map();
+
+    // Add primary data
+    currentData.forEach((point) => {
+      dataMap.set(point.name, { ...point });
+    });
+
+    // Merge overlay data
+    overlayData.forEach((point) => {
+      const existing = dataMap.get(point.name);
+      if (existing) {
+        // Merge overlay data into existing point
+        Object.keys(point).forEach((key) => {
+          if (key !== "name") {
+            // Prefix overlay keys to avoid conflicts
+            existing[`overlay_${key}`] = point[key];
+          }
+        });
+      } else {
+        // Add new point with overlay prefix
+        const newPoint = { name: point.name };
+        Object.keys(point).forEach((key) => {
+          if (key !== "name") {
+            newPoint[`overlay_${key}`] = point[key];
+          }
+        });
+        dataMap.set(point.name, newPoint);
+      }
+    });
+
+    // Convert back to array and sort by date
+    const merged = Array.from(dataMap.values()).sort(
+      (a, b) => new Date(a.name).getTime() - new Date(b.name).getTime()
+    );
+
+    console.log("📊 Merged data sample:", merged[0]);
+    return merged;
+  }, [currentData, overlayData, overlayActive]);
+
+  // If overlay is active and it's not a table view, use ComposedChart
+  if (
+    overlayActive &&
+    chartType !== "table" &&
+    overlayChartType &&
+    mergedData
+  ) {
+    return (
+      <ComposedChartComponent
+        mergedData={mergedData}
+        selectedMetric={selectedMetric}
+        overlayMetric={overlayMetric}
+        chartType={chartType}
+        overlayChartType={overlayChartType}
+        selectedTable={selectedTable}
+        overlayTable={overlayTable}
+      />
+    );
+  }
+
+  // Otherwise use the regular chart rendering
   const chartComponents = {
     area: AreaChartComponent,
-    line: AreaChartComponent,
+    line: LineChartComponent,
     "vertical-bar": VerticalBarChartComponent,
     "horizontal-bar": HorizontalBarChartComponent,
     "stacked-area": StackedAreaChartComponent,
     "percent-area": PercentAreaChartComponent,
     "stacked-vertical-bar": StackedVerticalBarChartComponent,
     "stacked-horizontal-bar": StackedHorizontalBarChartComponent,
-    table: TableComponent,
+    table: TableChartComponent,
   };
   const Component = chartComponents[chartType];
 

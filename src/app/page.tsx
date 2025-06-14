@@ -42,6 +42,49 @@ export default function HomePage() {
     to: new Date(DEFAULT_PICKER_DATES.defaultEnd + "T00:00:00"),
   });
 
+  // Overlay Configuration State (what user is building)
+  const [overlayConfiguring, setOverlayConfiguring] = useState(false);
+  const [overlayConfigTable, setOverlayConfigTable] = useState("");
+  const [overlayConfigMetric, setOverlayConfigMetric] = useState("");
+  const [overlayConfigGroupBy, setOverlayConfigGroupBy] = useState("org");
+  const [overlayConfigChartType, setOverlayConfigChartType] = useState("line");
+
+  // Overlay Active State (what's displayed on chart)
+  const [overlayActive, setOverlayActive] = useState(false);
+  const [overlayActiveTable, setOverlayActiveTable] = useState("");
+  const [overlayActiveMetric, setOverlayActiveMetric] = useState("");
+  const [overlayActiveGroupBy, setOverlayActiveGroupBy] = useState("org");
+  const [overlayActiveChartType, setOverlayActiveChartType] = useState("line");
+
+  // Console log to verify states
+  useEffect(() => {
+    console.log("🔧 Overlay Config States:", {
+      configuring: overlayConfiguring,
+      table: overlayConfigTable,
+      metric: overlayConfigMetric,
+      groupBy: overlayConfigGroupBy,
+      chartType: overlayConfigChartType,
+    });
+    console.log("✅ Overlay Active States:", {
+      active: overlayActive,
+      table: overlayActiveTable,
+      metric: overlayActiveMetric,
+      groupBy: overlayActiveGroupBy,
+      chartType: overlayActiveChartType,
+    });
+  }, [
+    overlayConfiguring,
+    overlayConfigTable,
+    overlayConfigMetric,
+    overlayConfigGroupBy,
+    overlayConfigChartType,
+    overlayActive,
+    overlayActiveTable,
+    overlayActiveMetric,
+    overlayActiveGroupBy,
+    overlayActiveChartType,
+  ]);
+
   // Available data tables - filtered by selected date range
   const dataTables = useMemo(() => {
     const startDate =
@@ -124,6 +167,63 @@ export default function HomePage() {
     selectedDateRange,
   ]);
 
+  // Process overlay data when active
+  const overlayData = useMemo(() => {
+    if (!overlayActive || !overlayActiveTable) {
+      return null;
+    }
+
+    console.log("🔄 Processing overlay data:", {
+      table: overlayActiveTable,
+      metric: overlayActiveMetric,
+      groupBy: overlayActiveGroupBy,
+    });
+
+    const overlayDataSource = dataTables[overlayActiveTable];
+    const startDate = selectedDateRange.from?.toISOString().split("T")[0];
+    const endDate = selectedDateRange.to?.toISOString().split("T")[0];
+
+    if (overlayActiveGroupBy === "org") {
+      return granularity === "monthly"
+        ? groupEventsByDate(
+            overlayDataSource,
+            overlayActiveTable,
+            startDate,
+            endDate
+          )
+        : operator === "average"
+        ? calculateAverageData(overlayDataSource, overlayActiveTable)
+        : calculateSumData(overlayDataSource, overlayActiveTable);
+    } else {
+      // For non-org views, always use monthly granularity
+      return groupEventsByType(
+        overlayDataSource,
+        overlayActiveTable,
+        overlayActiveGroupBy,
+        overlayActiveMetric,
+        granularity,
+        startDate,
+        endDate
+      );
+    }
+  }, [
+    overlayActive,
+    overlayActiveTable,
+    overlayActiveMetric,
+    overlayActiveGroupBy,
+    dataTables,
+    selectedDateRange,
+    granularity,
+    operator,
+  ]);
+
+  // Log the processed data
+  useEffect(() => {
+    if (overlayData) {
+      console.log("📊 Overlay data processed:", overlayData);
+    }
+  }, [overlayData]);
+
   const handleTableChange = (newTable: string) => {
     setSelectedTable(newTable);
     // Reset to first metric of new data source
@@ -158,6 +258,176 @@ export default function HomePage() {
               selectedMetric={selectedMetric}
               onMetricChange={setSelectedMetric}
             />
+            {/* Add Overlay Button */}
+            {!overlayConfiguring && !overlayActive && (
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  console.log("🎯 Add Overlay clicked!");
+                  console.log("📊 Primary chart type:", chartType);
+
+                  // Check if overlay is supported for current chart type
+                  const unsupportedTypes = [
+                    "horizontal-bar",
+                    "stacked-horizontal-bar",
+                    "table",
+                  ];
+                  if (unsupportedTypes.includes(chartType)) {
+                    console.log(
+                      "❌ Overlay not supported for chart type:",
+                      chartType
+                    );
+                    alert(
+                      `Overlay not supported for ${chartType}. Please select a different chart type.`
+                    );
+                    return;
+                  }
+
+                  setOverlayConfiguring(true);
+                  // Initialize config with defaults
+                  setOverlayConfigTable("pagerDuty"); // Default to different data source
+                  setOverlayConfigMetric("incidents"); // Default first metric
+                  setOverlayConfigGroupBy("org");
+
+                  // Set compatible default chart type based on primary
+                  if (
+                    ["vertical-bar", "stacked-vertical-bar"].includes(chartType)
+                  ) {
+                    setOverlayConfigChartType("line");
+                  } else if (
+                    ["line", "area", "stacked-area"].includes(chartType)
+                  ) {
+                    setOverlayConfigChartType("vertical-bar");
+                  }
+                }}
+                className="whitespace-nowrap"
+              >
+                <span className="mr-1">+</span> Add Overlay
+              </Button>
+            )}
+
+            {/* Overlay Configuration Controls */}
+            {overlayConfiguring && (
+              <>
+                <DataSourceSelector
+                  selectedTable={overlayConfigTable}
+                  onTableChange={(value) => {
+                    console.log("📊 Overlay data source changed to:", value);
+                    setOverlayConfigTable(value);
+                    // Reset metric to first available for new data source
+                    const firstMetric =
+                      dataSourceConfig[value]?.metrics[0]?.key || "";
+                    setOverlayConfigMetric(firstMetric);
+                  }}
+                />
+                <MetricSelector
+                  selectedTable={overlayConfigTable}
+                  selectedMetric={overlayConfigMetric}
+                  onMetricChange={(value) => {
+                    console.log("📈 Overlay metric changed to:", value);
+                    setOverlayConfigMetric(value);
+                  }}
+                />
+                {/* Config phase chart controls */}
+                <GroupBySelector
+                  groupBy={overlayConfigGroupBy}
+                  onGroupByChange={(value) => {
+                    console.log(
+                      "🔄 Config: Overlay groupBy changed to:",
+                      value
+                    );
+                    setOverlayConfigGroupBy(value);
+                  }}
+                  selectedTable={overlayConfigTable}
+                />
+                <ChartTypeSelector
+                  chartType={overlayConfigChartType}
+                  onChartTypeChange={(value) => {
+                    console.log(
+                      "📊 Config: Overlay chart type changed to:",
+                      value
+                    );
+
+                    // Validate during config too
+                    const validTypes = [
+                      "vertical-bar",
+                      "stacked-vertical-bar",
+                    ].includes(chartType)
+                      ? ["line", "area", "stacked-area"]
+                      : ["line", "area", "stacked-area"].includes(chartType)
+                      ? ["vertical-bar", "stacked-vertical-bar"]
+                      : [];
+
+                    if (!validTypes.includes(value)) {
+                      console.log(
+                        "❌ Config: Invalid overlay chart type:",
+                        value
+                      );
+                      alert(`Cannot use ${value} as overlay with ${chartType}`);
+                      return;
+                    }
+
+                    setOverlayConfigChartType(value);
+                  }}
+                />
+                <div className="flex gap-2">
+                  <Button
+                    variant="primary"
+                    onClick={() => {
+                      console.log("💾 Save overlay clicked!");
+                      // Copy config to active
+                      setOverlayActive(true);
+                      setOverlayActiveTable(overlayConfigTable);
+                      setOverlayActiveMetric(overlayConfigMetric);
+                      setOverlayActiveGroupBy(overlayConfigGroupBy);
+                      setOverlayActiveChartType(overlayConfigChartType);
+                      // Exit config mode
+                      setOverlayConfiguring(false);
+                    }}
+                    className="px-4"
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      console.log("❌ Cancel overlay clicked!");
+                      // Clear config and exit
+                      setOverlayConfiguring(false);
+                      setOverlayConfigTable("");
+                      setOverlayConfigMetric("");
+                    }}
+                    className="px-4"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {/* Clear Overlay Button */}
+            {overlayActive && !overlayConfiguring && (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  console.log("🧹 Clear overlay clicked!");
+                  // Clear all overlay states
+                  setOverlayActive(false);
+                  setOverlayActiveTable("");
+                  setOverlayActiveMetric("");
+                  setOverlayActiveGroupBy("org");
+                  setOverlayActiveChartType("line");
+                  // Also clear config states
+                  setOverlayConfigTable("");
+                  setOverlayConfigMetric("");
+                  setOverlayConfigGroupBy("org");
+                  setOverlayConfigChartType("line");
+                }}
+                className="whitespace-nowrap"
+              >
+                <span className="mr-1">×</span> Clear Overlay
+              </Button>
+            )}
             <div className="flex gap-2">
               <DateRangePicker
                 value={selectedDateRange}
@@ -244,6 +514,46 @@ export default function HomePage() {
                 />
               </div>
             </div>
+            {/* Overlay Chart Controls */}
+            {overlayActive && (
+              <div className="flex items-center gap-3 mt-3">
+                <span className="text-sm text-gray-600 font-medium">
+                  Overlay Dataset:
+                </span>
+                <GroupBySelector
+                  groupBy={overlayActiveGroupBy}
+                  onGroupByChange={(value) => {
+                    console.log("🔄 Overlay groupBy changed to:", value);
+                    setOverlayActiveGroupBy(value);
+                  }}
+                  selectedTable={overlayActiveTable}
+                />
+                <ChartTypeSelector
+                  chartType={overlayActiveChartType}
+                  onChartTypeChange={(value) => {
+                    console.log("📊 Overlay chart type changed to:", value);
+
+                    // Validate the selection against primary chart type
+                    const validTypes = [
+                      "vertical-bar",
+                      "stacked-vertical-bar",
+                    ].includes(chartType)
+                      ? ["line", "area", "stacked-area"]
+                      : ["line", "area", "stacked-area"].includes(chartType)
+                      ? ["vertical-bar", "stacked-vertical-bar"]
+                      : [];
+
+                    if (!validTypes.includes(value)) {
+                      console.log("❌ Invalid overlay chart type:", value);
+                      alert(`Cannot use ${value} as overlay with ${chartType}`);
+                      return;
+                    }
+
+                    setOverlayActiveChartType(value);
+                  }}
+                />
+              </div>
+            )}
             <ChartRenderer
               chartType={chartType}
               currentData={chartData}
@@ -251,6 +561,13 @@ export default function HomePage() {
               selectedMetric={selectedMetric}
               granularity={granularity}
               groupBy={groupBy}
+              // Overlay props
+              overlayActive={overlayActive}
+              overlayData={overlayData}
+              overlayTable={overlayActiveTable}
+              overlayMetric={overlayActiveMetric}
+              overlayChartType={overlayActiveChartType}
+              overlayGroupBy={overlayActiveGroupBy}
             />
           </Card>
         </div>
