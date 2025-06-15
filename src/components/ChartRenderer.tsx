@@ -56,7 +56,6 @@ interface ChartRendererProps {
   overlayTable?: string;
   overlayMetric?: string;
   overlayChartType?: string;
-  overlayGroupBy?: string;
 }
 
 interface CustomTooltipProps extends TooltipProps<any, any> {
@@ -907,7 +906,6 @@ export function ChartRenderer({
   overlayTable = "",
   overlayMetric = "",
   overlayChartType = "",
-  overlayGroupBy = "",
 }: ChartRendererProps) {
   // Log overlay props
   useEffect(() => {
