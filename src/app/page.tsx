@@ -138,6 +138,7 @@ export default function HomePage() {
 
   // Get the current dataset based on granularity
   const chartData = useMemo(() => {
+    console.log("📊 PRIMARY chartData recalculating with groupBy:", groupBy);
     const startDate = selectedDateRange.from?.toISOString().split("T")[0];
     const endDate = selectedDateRange.to?.toISOString().split("T")[0];
 
@@ -232,6 +233,7 @@ export default function HomePage() {
   };
 
   const handleGroupByChange = (newGroupBy: string) => {
+    console.log("🎯 PRIMARY groupBy changed from:", groupBy, "to:", newGroupBy);
     setGroupBy(newGroupBy);
   };
 

@@ -722,6 +722,7 @@ function ComposedChartComponent({
   overlayChartType,
   selectedTable,
   overlayTable,
+  groupBy,
 }: {
   mergedData: any[];
   selectedMetric: string;
@@ -730,14 +731,12 @@ function ComposedChartComponent({
   overlayChartType: string;
   selectedTable: string;
   overlayTable: string;
+  groupBy: string;
 }) {
   // Get colors from config
   const primaryConfig = dataSourceConfig[selectedTable];
   const overlayConfig = dataSourceConfig[overlayTable];
 
-  const primaryColor =
-    primaryConfig.metrics.find((m) => m.key === selectedMetric)?.color ||
-    "#8884d8";
   const overlayColor =
     overlayConfig.metrics.find((m) => m.key === overlayMetric)?.color ||
     "#82ca9d";
@@ -747,6 +746,23 @@ function ComposedChartComponent({
     overlayMetric: overlayMetric,
     primaryType: chartType,
     overlayType: overlayChartType,
+  });
+
+  // Check if primary chart is multi-series
+  const isMultiSeries = groupBy !== "org" && mergedData.length > 0;
+  const seriesKeys = isMultiSeries
+    ? Object.keys(mergedData[0]).filter(
+        (key) =>
+          key !== "name" &&
+          !key.startsWith("overlay_") &&
+          !key.endsWith("_hasData")
+      )
+    : [selectedMetric];
+
+  console.log("📊 ComposedChart series detection:", {
+    isMultiSeries,
+    seriesKeys,
+    groupBy,
   });
 
   return (
@@ -773,43 +789,68 @@ function ComposedChartComponent({
         <Legend />
 
         {/* Primary dataset */}
-        {chartType === "vertical-bar" ||
-        chartType === "stacked-vertical-bar" ? (
-          <Bar
-            yAxisId="left"
-            dataKey={selectedMetric}
-            fill={primaryColor}
-            name={
-              primaryConfig.metrics.find((m) => m.key === selectedMetric)
-                ?.label || selectedMetric
-            }
-          />
-        ) : chartType === "line" ? (
-          <Line
-            yAxisId="left"
-            type="monotone"
-            dataKey={selectedMetric}
-            stroke={primaryColor}
-            strokeWidth={3}
-            dot={{ fill: primaryColor, r: 4 }}
-            name={
-              primaryConfig.metrics.find((m) => m.key === selectedMetric)
-                ?.label || selectedMetric
-            }
-          />
-        ) : (
-          <Area
-            yAxisId="left"
-            type="monotone"
-            dataKey={selectedMetric}
-            fill={primaryColor}
-            stroke={primaryColor}
-            name={
-              primaryConfig.metrics.find((m) => m.key === selectedMetric)
-                ?.label || selectedMetric
-            }
-          />
-        )}
+        {seriesKeys.map((key, index) => {
+          const dataKey = isMultiSeries ? key : selectedMetric;
+          const color = CHART_COLORS[index % CHART_COLORS.length];
+
+          if (
+            chartType === "vertical-bar" ||
+            chartType === "stacked-vertical-bar"
+          ) {
+            return (
+              <Bar
+                key={key}
+                yAxisId="left"
+                dataKey={dataKey}
+                fill={color}
+                name={
+                  isMultiSeries
+                    ? key
+                    : primaryConfig.metrics.find(
+                        (m) => m.key === selectedMetric
+                      )?.label || selectedMetric
+                }
+              />
+            );
+          } else if (chartType === "line") {
+            return (
+              <Line
+                key={key}
+                yAxisId="left"
+                type="monotone"
+                dataKey={dataKey}
+                stroke={color}
+                strokeWidth={3}
+                dot={{ fill: color, r: 4 }}
+                name={
+                  isMultiSeries
+                    ? key
+                    : primaryConfig.metrics.find(
+                        (m) => m.key === selectedMetric
+                      )?.label || selectedMetric
+                }
+              />
+            );
+          } else {
+            return (
+              <Area
+                key={key}
+                yAxisId="left"
+                type="monotone"
+                dataKey={dataKey}
+                fill={color}
+                stroke={color}
+                name={
+                  isMultiSeries
+                    ? key
+                    : primaryConfig.metrics.find(
+                        (m) => m.key === selectedMetric
+                      )?.label || selectedMetric
+                }
+              />
+            );
+          }
+        })}
 
         {/* Overlay dataset */}
         {overlayChartType === "vertical-bar" ||
@@ -945,6 +986,7 @@ export function ChartRenderer({
         overlayChartType={overlayChartType}
         selectedTable={selectedTable}
         overlayTable={overlayTable}
+        groupBy={groupBy}
       />
     );
   }
