@@ -535,6 +535,11 @@ export default function HomePage() {
               selectedTable={selectedTable}
               granularity={granularity}
               groupBy={groupBy}
+              overlayActive={overlayActive}
+              overlayData={overlayData}
+              overlayMetric={overlayActiveMetric}
+              overlayTable={overlayActiveTable}
+              overlayGroupBy={overlayActiveGroupBy}
             />
           </Card>
         </div>
