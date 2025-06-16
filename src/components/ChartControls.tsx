@@ -172,6 +172,20 @@ export function ChartTypeSelector({
   );
 }
 
+export function ViewSelector({ view, onViewChange }) {
+  return (
+    <Select value={view} onValueChange={onViewChange}>
+      <SelectTrigger className="cursor-pointer">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="day">Day View</SelectItem>
+        <SelectItem value="record">Record View</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+}
+
 export function DatePickerSelector({ onDateChange }) {
   const startDate = new Date(POC_START_DATE).toLocaleDateString("en-US", {
     month: "short",

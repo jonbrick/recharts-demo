@@ -8,6 +8,7 @@ import {
   OperatorSelector,
   GranularitySelector,
   GroupBySelector,
+  ViewSelector,
 } from "../components/ChartControls";
 import { MetricsSummary } from "../components/MetricsSummary";
 import { ChartRenderer } from "../components/ChartRenderer";
@@ -38,6 +39,7 @@ export default function HomePage() {
   const [selectedMetric, setSelectedMetric] = useState("pullRequests");
   const [operator, setOperator] = useState("sum");
   const [groupBy, setGroupBy] = useState("org");
+  const [tableView, setTableView] = useState("record"); // Default to "record" for development
   const [selectedDateRange, setSelectedDateRange] = useState<DateRange>({
     from: new Date(DEFAULT_PICKER_DATES.defaultStart + "T00:00:00"),
     to: new Date(DEFAULT_PICKER_DATES.defaultEnd + "T00:00:00"),
@@ -528,6 +530,9 @@ export default function HomePage() {
                     : selectedMetric)}{" "}
                 over time
               </h3>
+              <div className="flex items-center gap-3">
+                <ViewSelector view={tableView} onViewChange={setTableView} />
+              </div>
             </div>
             <DataTable
               currentData={chartData}
@@ -535,6 +540,8 @@ export default function HomePage() {
               selectedTable={selectedTable}
               granularity={granularity}
               groupBy={groupBy}
+              viewMode={tableView}
+              rawData={dataTables[selectedTable]}
               overlayActive={overlayActive}
               overlayData={overlayData}
               overlayMetric={overlayActiveMetric}

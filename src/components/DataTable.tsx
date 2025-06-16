@@ -62,6 +62,8 @@ interface DataTableProps {
   selectedTable: string;
   granularity: string;
   groupBy: string;
+  viewMode?: string;
+  rawData?: any[];
   overlayActive?: boolean;
   overlayData?: any[] | null;
   overlayMetric?: string;
@@ -75,12 +77,21 @@ export function DataTable({
   selectedTable,
   granularity,
   groupBy,
+  viewMode = "day",
+  rawData,
   overlayActive,
   overlayData,
   overlayMetric,
   overlayTable,
   overlayGroupBy,
 }: DataTableProps) {
+  // Check if we're in record view
+  if (viewMode === "record" && rawData) {
+    return (
+      <div>Record view coming soon! We have {rawData.length} records.</div>
+    );
+  }
+
   // Merge overlay data if active
   const mergedData = React.useMemo(() => {
     if (!overlayActive || !overlayData || !currentData) {
