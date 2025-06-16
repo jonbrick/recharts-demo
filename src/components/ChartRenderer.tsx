@@ -127,7 +127,6 @@ export function AreaChartComponent({
                 key={key}
                 type="monotone"
                 dataKey={key}
-                stackId="1"
                 stroke={CHART_COLORS[index % CHART_COLORS.length]}
                 fill={CHART_COLORS[index % CHART_COLORS.length]}
               />
