@@ -199,6 +199,66 @@ export default function HomePage() {
     }
   };
 
+  const handleAddOverlay = () => {
+    // Check if overlay is supported for current chart type
+    const unsupportedTypes = [
+      "horizontal-bar",
+      "stacked-horizontal-bar",
+      "table",
+    ];
+    if (unsupportedTypes.includes(chartType)) {
+      alert(
+        `Overlay not supported for ${chartType}. Please select a different chart type.`
+      );
+      return;
+    }
+
+    setOverlayConfiguring(true);
+    // Initialize config with defaults
+    setOverlayConfigTable("pagerDuty"); // Default to different data source
+    setOverlayConfigMetric("incidents"); // Default first metric
+    setOverlayConfigGroupBy("org");
+
+    // Set compatible default chart type based on primary
+    if (["vertical-bar", "stacked-vertical-bar"].includes(chartType)) {
+      setOverlayConfigChartType("line");
+    } else if (["line", "area", "stacked-area"].includes(chartType)) {
+      setOverlayConfigChartType("vertical-bar");
+    }
+  };
+
+  const handleSaveOverlay = () => {
+    // Copy config to active
+    setOverlayActive(true);
+    setOverlayActiveTable(overlayConfigTable);
+    setOverlayActiveMetric(overlayConfigMetric);
+    setOverlayActiveGroupBy(overlayConfigGroupBy);
+    setOverlayActiveChartType(overlayConfigChartType);
+    // Exit config mode
+    setOverlayConfiguring(false);
+  };
+
+  const handleCancelOverlay = () => {
+    // Clear config and exit
+    setOverlayConfiguring(false);
+    setOverlayConfigTable("");
+    setOverlayConfigMetric("");
+  };
+
+  const handleRemoveOverlay = () => {
+    // Clear all overlay states
+    setOverlayActive(false);
+    setOverlayActiveTable("");
+    setOverlayActiveMetric("");
+    setOverlayActiveGroupBy("org");
+    setOverlayActiveChartType("line");
+    // Also clear config states
+    setOverlayConfigTable("");
+    setOverlayConfigMetric("");
+    setOverlayConfigGroupBy("org");
+    setOverlayConfigChartType("line");
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col gap-6">
@@ -244,207 +304,97 @@ export default function HomePage() {
         <div className="border-b border-gray-200" />
 
         {/* Controls row */}
-        <div className="flex flex-wrap gap-4 items-center">
-          {/* Primary Controls */}
-          <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4">
+          <DataSourceSelector
+            selectedTable={selectedTable}
+            onTableChange={handleTableChange}
+          />
+          <MetricSelector
+            selectedTable={selectedTable}
+            selectedMetric={selectedMetric}
+            onMetricChange={setSelectedMetric}
+          />
+          <GroupBySelector
+            groupBy={groupBy}
+            onGroupByChange={handleGroupByChange}
+            selectedTable={selectedTable}
+          />
+          <ChartTypeSelector
+            chartType={chartType}
+            onChartTypeChange={setChartType}
+          />
+
+          <div className="flex items-center gap-2 ml-auto">
+            <Button variant="secondary" onClick={handleAddOverlay}>
+              Add Overlay
+            </Button>
+          </div>
+        </div>
+
+        {/* Overlay Configuration Controls */}
+        {overlayConfiguring && (
+          <div className="flex items-center gap-4 bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+            <span className="text-sm font-medium text-gray-600">Overlay:</span>
             <DataSourceSelector
-              selectedTable={selectedTable}
-              onTableChange={handleTableChange}
+              selectedTable={overlayConfigTable}
+              onTableChange={setOverlayConfigTable}
             />
             <MetricSelector
-              selectedTable={selectedTable}
-              selectedMetric={selectedMetric}
-              onMetricChange={setSelectedMetric}
+              selectedTable={overlayConfigTable}
+              selectedMetric={overlayConfigMetric}
+              onMetricChange={setOverlayConfigMetric}
             />
-            {!overlayActive && !overlayConfiguring && (
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  // Check if overlay is supported for current chart type
-                  const unsupportedTypes = [
-                    "horizontal-bar",
-                    "stacked-horizontal-bar",
-                    "table",
-                  ];
-                  if (unsupportedTypes.includes(chartType)) {
-                    alert(
-                      `Overlay not supported for ${chartType}. Please select a different chart type.`
-                    );
-                    return;
-                  }
-
-                  setOverlayConfiguring(true);
-                  // Initialize config with defaults
-                  setOverlayConfigTable("pagerDuty"); // Default to different data source
-                  setOverlayConfigMetric("incidents"); // Default first metric
-                  setOverlayConfigGroupBy("org");
-
-                  // Set compatible default chart type based on primary
-                  if (
-                    ["vertical-bar", "stacked-vertical-bar"].includes(chartType)
-                  ) {
-                    setOverlayConfigChartType("line");
-                  } else if (
-                    ["line", "area", "stacked-area"].includes(chartType)
-                  ) {
-                    setOverlayConfigChartType("vertical-bar");
-                  }
-                }}
-                className="whitespace-nowrap"
-              >
+            <GroupBySelector
+              groupBy={overlayConfigGroupBy}
+              onGroupByChange={setOverlayConfigGroupBy}
+              selectedTable={overlayConfigTable}
+            />
+            <ChartTypeSelector
+              chartType={overlayConfigChartType}
+              onChartTypeChange={setOverlayConfigChartType}
+            />
+            <div className="flex items-center gap-2 ml-auto">
+              <Button variant="primary" onClick={handleSaveOverlay}>
                 Add Overlay
               </Button>
-            )}
-          </div>
-
-          {/* Overlay Configuration Controls */}
-          {overlayConfiguring && (
-            <div className="flex items-center gap-4">
-              <div className="h-6 w-px bg-gray-200" /> {/* Divider */}
-              <DataSourceSelector
-                selectedTable={overlayConfigTable}
-                onTableChange={(value) => {
-                  setOverlayConfigTable(value);
-                  // Reset metric to first available for new data source
-                  const firstMetric =
-                    dataSourceConfig[value]?.metrics[0]?.key || "";
-                  setOverlayConfigMetric(firstMetric);
-                }}
-              />
-              <MetricSelector
-                selectedTable={overlayConfigTable}
-                selectedMetric={overlayConfigMetric}
-                onMetricChange={(value) => {
-                  setOverlayConfigMetric(value);
-                }}
-              />
-              {/* Config phase chart controls */}
-              <GroupBySelector
-                groupBy={overlayConfigGroupBy}
-                onGroupByChange={(value) => {
-                  setOverlayConfigGroupBy(value);
-                }}
-                selectedTable={overlayConfigTable}
-              />
-              <ChartTypeSelector
-                chartType={overlayConfigChartType}
-                onChartTypeChange={(value) => {
-                  // Validate during config too
-                  const validTypes = [
-                    "vertical-bar",
-                    "stacked-vertical-bar",
-                  ].includes(chartType)
-                    ? ["line", "area", "stacked-area"]
-                    : ["line", "area", "stacked-area"].includes(chartType)
-                    ? ["vertical-bar", "stacked-vertical-bar"]
-                    : [];
-
-                  if (!validTypes.includes(value)) {
-                    alert(`Cannot use ${value} as overlay with ${chartType}`);
-                    return;
-                  }
-
-                  setOverlayConfigChartType(value);
-                }}
-              />
-              <div className="flex gap-2">
-                <Button
-                  variant="primary"
-                  onClick={() => {
-                    // Copy config to active
-                    setOverlayActive(true);
-                    setOverlayActiveTable(overlayConfigTable);
-                    setOverlayActiveMetric(overlayConfigMetric);
-                    setOverlayActiveGroupBy(overlayConfigGroupBy);
-                    setOverlayActiveChartType(overlayConfigChartType);
-                    // Exit config mode
-                    setOverlayConfiguring(false);
-                  }}
-                  className="px-4"
-                >
-                  Save
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => {
-                    // Clear config and exit
-                    setOverlayConfiguring(false);
-                    setOverlayConfigTable("");
-                    setOverlayConfigMetric("");
-                  }}
-                  className="px-4"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Active Overlay Controls */}
-          {overlayActive && !overlayConfiguring && (
-            <div className="flex items-center gap-4">
-              <div className="h-6 w-px bg-gray-200" /> {/* Divider */}
-              <DataSourceSelector
-                selectedTable={overlayActiveTable}
-                onTableChange={() => {}} // Disabled when active
-                disabled={true}
-              />
-              <MetricSelector
-                selectedTable={overlayActiveTable}
-                selectedMetric={overlayActiveMetric}
-                onMetricChange={() => {}} // Disabled when active
-                disabled={true}
-              />
-              <GroupBySelector
-                groupBy={overlayActiveGroupBy}
-                onGroupByChange={(value) => {
-                  setOverlayActiveGroupBy(value);
-                }}
-                selectedTable={overlayActiveTable}
-              />
-              <ChartTypeSelector
-                chartType={overlayActiveChartType}
-                onChartTypeChange={(value) => {
-                  // Validate the selection against primary chart type
-                  const validTypes = [
-                    "vertical-bar",
-                    "stacked-vertical-bar",
-                  ].includes(chartType)
-                    ? ["line", "area", "stacked-area"]
-                    : ["line", "area", "stacked-area"].includes(chartType)
-                    ? ["vertical-bar", "stacked-vertical-bar"]
-                    : [];
-
-                  if (!validTypes.includes(value)) {
-                    alert(`Cannot use ${value} as overlay with ${chartType}`);
-                    return;
-                  }
-
-                  setOverlayActiveChartType(value);
-                }}
-              />
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  // Clear all overlay states
-                  setOverlayActive(false);
-                  setOverlayActiveTable("");
-                  setOverlayActiveMetric("");
-                  setOverlayActiveGroupBy("org");
-                  setOverlayActiveChartType("line");
-                  // Also clear config states
-                  setOverlayConfigTable("");
-                  setOverlayConfigMetric("");
-                  setOverlayConfigGroupBy("org");
-                  setOverlayConfigChartType("line");
-                }}
-                className="whitespace-nowrap"
-              >
-                <span className="mr-1">×</span> Clear Overlay
+              <Button variant="secondary" onClick={handleCancelOverlay}>
+                Cancel
               </Button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {/* Active Overlay Controls */}
+        {overlayActive && !overlayConfiguring && (
+          <div className="flex items-center gap-4 bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+            <span className="text-sm font-medium text-gray-600">Overlay:</span>
+            <DataSourceSelector
+              selectedTable={overlayActiveTable}
+              onTableChange={setOverlayActiveTable}
+              disabled={true}
+            />
+            <MetricSelector
+              selectedTable={overlayActiveTable}
+              selectedMetric={overlayActiveMetric}
+              onMetricChange={setOverlayActiveMetric}
+              disabled={true}
+            />
+            <GroupBySelector
+              groupBy={overlayActiveGroupBy}
+              onGroupByChange={setOverlayActiveGroupBy}
+              selectedTable={overlayActiveTable}
+            />
+            <ChartTypeSelector
+              chartType={overlayActiveChartType}
+              onChartTypeChange={setOverlayActiveChartType}
+            />
+            <div className="flex items-center gap-2 ml-auto">
+              <Button variant="ghost" onClick={handleRemoveOverlay}>
+                Remove Overlay
+              </Button>
+            </div>
+          </div>
+        )}
 
         <div className="flex flex-col gap-6">
           <h2 className="text-2xl font-semibold text-gray-700">
@@ -490,15 +440,6 @@ export default function HomePage() {
                 <GranularitySelector
                   granularity={granularity}
                   onGranularityChange={setGranularity}
-                />
-                <GroupBySelector
-                  groupBy={groupBy}
-                  onGroupByChange={handleGroupByChange}
-                  selectedTable={selectedTable}
-                />
-                <ChartTypeSelector
-                  chartType={chartType}
-                  onChartTypeChange={setChartType}
                 />
               </div>
             </div>

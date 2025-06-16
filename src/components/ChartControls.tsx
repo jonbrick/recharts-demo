@@ -109,12 +109,24 @@ export function GranularitySelector({ granularity, onGranularityChange }) {
   );
 }
 
-export function GroupBySelector({ groupBy, onGroupByChange, selectedTable }) {
+interface GroupBySelectorProps {
+  groupBy: string;
+  onGroupByChange: (value: string) => void;
+  selectedTable: string;
+  disabled?: boolean;
+}
+
+export function GroupBySelector({
+  groupBy,
+  onGroupByChange,
+  selectedTable,
+  disabled = false,
+}: GroupBySelectorProps) {
   const config = dataSourceConfig[selectedTable];
   const groupByOptions = config.groupByOptions || [];
 
   return (
-    <Select value={groupBy} onValueChange={onGroupByChange}>
+    <Select value={groupBy} onValueChange={onGroupByChange} disabled={disabled}>
       <SelectTrigger className="cursor-pointer">
         <SelectValue />
       </SelectTrigger>
@@ -129,9 +141,23 @@ export function GroupBySelector({ groupBy, onGroupByChange, selectedTable }) {
   );
 }
 
-export function ChartTypeSelector({ chartType, onChartTypeChange }) {
+interface ChartTypeSelectorProps {
+  chartType: string;
+  onChartTypeChange: (value: string) => void;
+  disabled?: boolean;
+}
+
+export function ChartTypeSelector({
+  chartType,
+  onChartTypeChange,
+  disabled = false,
+}: ChartTypeSelectorProps) {
   return (
-    <Select value={chartType} onValueChange={onChartTypeChange}>
+    <Select
+      value={chartType}
+      onValueChange={onChartTypeChange}
+      disabled={disabled}
+    >
       <SelectTrigger className="cursor-pointer">
         <SelectValue />
       </SelectTrigger>

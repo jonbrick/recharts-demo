@@ -706,10 +706,6 @@ export function TableChartComponent({
           ))}
         </tbody>
       </table>
-
-      <div className="mt-4 text-sm text-gray-600 text-center">
-        💡 Pattern 1: Single metric ({metric.label}) over time
-      </div>
     </div>
   );
 }
