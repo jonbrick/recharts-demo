@@ -283,6 +283,54 @@ interface RecordTableProps {
 }
 
 function RecordTable({ data, selectedTable, groupBy }: RecordTableProps) {
+  // Define columns based on data source (memoized to ensure consistent hook order)
+  const columns = React.useMemo(() => {
+    switch (selectedTable) {
+      case "githubPR":
+        return [
+          { key: "id", label: "PR ID", format: "string" },
+          { key: "created_at", label: "Created", format: "date" },
+          { key: "author", label: "Author", format: "string" },
+          { key: "team", label: "Team", format: "string" },
+          { key: "lines_added", label: "Lines +", format: "number" },
+          { key: "lines_removed", label: "Lines -", format: "number" },
+          { key: "merged_at", label: "Merged", format: "date" },
+          {
+            key: "review_time_hours",
+            label: "Review Time (hrs)",
+            format: "decimal",
+          },
+        ];
+      case "pagerDuty":
+        return [
+          { key: "id", label: "Incident ID", format: "string" },
+          { key: "created_at", label: "Created", format: "date" },
+          { key: "resolved_at", label: "Resolved", format: "date" },
+          { key: "severity", label: "Severity", format: "string" },
+          { key: "assigned_team", label: "Team", format: "string" },
+          { key: "service", label: "Service", format: "string" },
+          { key: "users_affected", label: "Users Affected", format: "number" },
+        ];
+      case "githubActions":
+        return [
+          { key: "id", label: "Deploy ID", format: "string" },
+          { key: "deployed_at", label: "Deployed", format: "date" },
+          { key: "status", label: "Status", format: "string" },
+          { key: "author", label: "Author", format: "string" },
+          { key: "team", label: "Team", format: "string" },
+          { key: "repo", label: "Repository", format: "string" },
+          {
+            key: "duration_minutes",
+            label: "Duration (min)",
+            format: "decimal",
+          },
+          { key: "tests_run", label: "Tests Run", format: "number" },
+        ];
+      default:
+        return [];
+    }
+  }, [selectedTable]);
+
   // Group records by the groupBy field
   const groupedData = React.useMemo(() => {
     const groups: Record<string, any[]> = {};
@@ -293,7 +341,7 @@ function RecordTable({ data, selectedTable, groupBy }: RecordTableProps) {
       if (groupBy === "org") {
         groupKey = "Organization";
       } else if (groupBy === "team") {
-        groupKey = record.team || "Unknown";
+        groupKey = record.team || record.assigned_team || "Unknown";
       } else if (groupBy === "person") {
         groupKey = record.author || record.assigned_to || "Unknown";
       }
@@ -329,40 +377,34 @@ function RecordTable({ data, selectedTable, groupBy }: RecordTableProps) {
           <table className="w-full border-collapse bg-white">
             <thead>
               <tr className="bg-gray-50">
-                <th className="border border-gray-200 px-4 py-2 text-left text-sm font-semibold text-gray-700">
-                  ID
-                </th>
-                <th className="border border-gray-200 px-4 py-2 text-left text-sm font-semibold text-gray-700">
-                  Date
-                </th>
-                <th className="border border-gray-200 px-4 py-2 text-left text-sm font-semibold text-gray-700">
-                  Author
-                </th>
-                <th className="border border-gray-200 px-4 py-2 text-left text-sm font-semibold text-gray-700">
-                  Team
-                </th>
+                {columns.map((col) => (
+                  <th
+                    key={col.key}
+                    className="border border-gray-200 px-4 py-2 text-left text-sm font-semibold text-gray-700"
+                  >
+                    {col.label}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {groupedData[groupName].map((record, index) => (
                 <tr
-                  key={record.id}
+                  key={`${groupName}-${record.id}-${index}`}
                   className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
                 >
-                  <td className="border border-gray-200 px-4 py-2 text-sm">
-                    {record.id}
-                  </td>
-                  <td className="border border-gray-200 px-4 py-2 text-sm">
-                    {new Date(
-                      record.created_at || record.deployed_at
-                    ).toLocaleDateString()}
-                  </td>
-                  <td className="border border-gray-200 px-4 py-2 text-sm">
-                    {record.author || record.assigned_to || "N/A"}
-                  </td>
-                  <td className="border border-gray-200 px-4 py-2 text-sm">
-                    {record.team || "N/A"}
-                  </td>
+                  {columns.map((col) => (
+                    <td
+                      key={col.key}
+                      className="border border-gray-200 px-4 py-2 text-sm"
+                    >
+                      {col.format === "date" && record[col.key]
+                        ? new Date(record[col.key]).toLocaleDateString()
+                        : col.format === "number" || col.format === "decimal"
+                        ? formatValue(record[col.key], col.format)
+                        : record[col.key] || "N/A"}
+                    </td>
+                  ))}
                 </tr>
               ))}
             </tbody>
