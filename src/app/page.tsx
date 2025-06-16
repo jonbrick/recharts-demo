@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
+import { useUrlState } from "../hooks/useUrlState";
+import { Suspense } from "react";
 import {
   DataSourceSelector,
   MetricSelector,
@@ -32,7 +34,7 @@ import { Card } from "../components/Card";
 import { Button } from "../components/Button";
 import { DataTable } from "../components/DataTable";
 
-export default function HomePage() {
+function DashboardContent() {
   const [chartType, setChartType] = useState("line");
   const [granularity, setGranularity] = useState("monthly");
   const [selectedTable, setSelectedTable] = useState("githubPR");
@@ -58,6 +60,71 @@ export default function HomePage() {
   const [overlayActiveMetric, setOverlayActiveMetric] = useState("");
   const [overlayActiveGroupBy, setOverlayActiveGroupBy] = useState("org");
   const [overlayActiveChartType, setOverlayActiveChartType] = useState("line");
+
+  // Initialize URL state management
+  const { getStateFromUrl, updateUrl, getShareableUrl } = useUrlState();
+
+  // Load initial state from URL on mount
+  useEffect(() => {
+    const urlState = getStateFromUrl();
+    console.log("[DashboardContent] Loading state from URL:", urlState);
+
+    // Check if URL has no parameters
+    if (Object.keys(urlState).length === 0) {
+      console.log("[DashboardContent] No URL params found, setting defaults");
+
+      // Define your default view
+      const defaultState = {
+        selectedTable: "githubPR",
+        selectedMetric: "pullRequests",
+        selectedDateRange: {
+          from: new Date(DEFAULT_PICKER_DATES.defaultStart + "T00:00:00"),
+          to: new Date(DEFAULT_PICKER_DATES.defaultEnd + "T00:00:00"),
+        },
+        groupBy: "org",
+        chartType: "line",
+        granularity: "monthly",
+        operator: "sum",
+        tableView: "record",
+        overlayActive: false,
+      };
+
+      // Update URL with defaults (this will trigger a navigation)
+      updateUrl(defaultState);
+
+      // Also set the state (so it updates immediately)
+      setSelectedTable(defaultState.selectedTable);
+      setSelectedMetric(defaultState.selectedMetric);
+      setSelectedDateRange(defaultState.selectedDateRange);
+      setGroupBy(defaultState.groupBy);
+      setChartType(defaultState.chartType);
+      setGranularity(defaultState.granularity);
+      setOperator(defaultState.operator);
+      setTableView(defaultState.tableView);
+      return; // Exit early since we're setting defaults
+    }
+
+    // Apply URL state to component state
+    if (urlState.chartType) setChartType(urlState.chartType);
+    if (urlState.granularity) setGranularity(urlState.granularity);
+    if (urlState.selectedTable) setSelectedTable(urlState.selectedTable);
+    if (urlState.selectedMetric) setSelectedMetric(urlState.selectedMetric);
+    if (urlState.operator) setOperator(urlState.operator);
+    if (urlState.groupBy) setGroupBy(urlState.groupBy);
+    if (urlState.tableView) setTableView(urlState.tableView);
+    if (urlState.selectedDateRange)
+      setSelectedDateRange(urlState.selectedDateRange);
+    if (urlState.overlayActive) setOverlayActive(urlState.overlayActive);
+    if (urlState.overlayActiveTable)
+      setOverlayActiveTable(urlState.overlayActiveTable);
+    if (urlState.overlayActiveMetric)
+      setOverlayActiveMetric(urlState.overlayActiveMetric);
+    if (urlState.overlayActiveGroupBy)
+      setOverlayActiveGroupBy(urlState.overlayActiveGroupBy);
+    if (urlState.overlayActiveChartType)
+      setOverlayActiveChartType(urlState.overlayActiveChartType);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount
 
   // Available data tables - filtered by selected date range
   const dataTables = useMemo(() => {
@@ -217,17 +284,51 @@ export default function HomePage() {
     setSelectedTable(newTable);
     // Reset to first metric of new data source
     const newConfig = dataSourceConfig[newTable];
-    setSelectedMetric(newConfig.metrics[0].key);
+    const newMetric = newConfig.metrics[0].key;
+    setSelectedMetric(newMetric);
+
+    // Update URL
+    updateUrl({
+      selectedTable: newTable,
+      selectedMetric: newMetric,
+    });
   };
 
   const handleGroupByChange = (newGroupBy: string) => {
     setGroupBy(newGroupBy);
+    updateUrl({ groupBy: newGroupBy });
   };
 
   const handleDateRangeChange = (dateRange: DateRange | undefined) => {
     if (dateRange) {
       setSelectedDateRange(dateRange);
+      updateUrl({ selectedDateRange: dateRange });
     }
+  };
+
+  const handleChartTypeChange = (newType: string) => {
+    setChartType(newType);
+    updateUrl({ chartType: newType });
+  };
+
+  const handleMetricChange = (newMetric: string) => {
+    setSelectedMetric(newMetric);
+    updateUrl({ selectedMetric: newMetric });
+  };
+
+  const handleGranularityChange = (newGranularity: string) => {
+    setGranularity(newGranularity);
+    updateUrl({ granularity: newGranularity });
+  };
+
+  const handleOperatorChange = (newOperator: string) => {
+    setOperator(newOperator);
+    updateUrl({ operator: newOperator });
+  };
+
+  const handleTableViewChange = (newView: string) => {
+    setTableView(newView);
+    updateUrl({ tableView: newView });
   };
 
   const handleAddOverlay = () => {
@@ -267,6 +368,15 @@ export default function HomePage() {
     setOverlayActiveChartType(overlayConfigChartType);
     // Exit config mode
     setOverlayConfiguring(false);
+
+    // Update URL with overlay state
+    updateUrl({
+      overlayActive: true,
+      overlayActiveTable: overlayConfigTable,
+      overlayActiveMetric: overlayConfigMetric,
+      overlayActiveGroupBy: overlayConfigGroupBy,
+      overlayActiveChartType: overlayConfigChartType,
+    });
   };
 
   const handleCancelOverlay = () => {
@@ -288,6 +398,40 @@ export default function HomePage() {
     setOverlayConfigMetric("");
     setOverlayConfigGroupBy("org");
     setOverlayConfigChartType("line");
+
+    // Update URL to remove overlay
+    updateUrl({ overlayActive: false });
+  };
+
+  const handleShare = () => {
+    const currentState = {
+      chartType,
+      granularity,
+      selectedTable,
+      selectedMetric,
+      operator,
+      groupBy,
+      tableView,
+      selectedDateRange,
+      overlayActive,
+      overlayActiveTable,
+      overlayActiveMetric,
+      overlayActiveGroupBy,
+      overlayActiveChartType,
+    };
+
+    const shareUrl = getShareableUrl(currentState);
+
+    // Copy to clipboard
+    navigator.clipboard
+      .writeText(shareUrl)
+      .then(() => {
+        alert("Dashboard URL copied to clipboard!");
+      })
+      .catch((err) => {
+        console.error("Failed to copy URL:", err);
+        alert("Failed to copy URL. Check console for details.");
+      });
   };
 
   return (
@@ -299,6 +443,9 @@ export default function HomePage() {
             Metrics Building UX POC
           </h1>
           <div className="flex gap-2">
+            <Button variant="secondary" onClick={handleShare}>
+              Share View
+            </Button>
             <DateRangePicker
               value={selectedDateRange}
               onChange={handleDateRangeChange}
@@ -343,7 +490,7 @@ export default function HomePage() {
           <MetricSelector
             selectedTable={selectedTable}
             selectedMetric={selectedMetric}
-            onMetricChange={setSelectedMetric}
+            onMetricChange={handleMetricChange}
           />
           <GroupBySelector
             groupBy={groupBy}
@@ -352,7 +499,7 @@ export default function HomePage() {
           />
           <ChartTypeSelector
             chartType={chartType}
-            onChartTypeChange={setChartType}
+            onChartTypeChange={handleChartTypeChange}
           />
 
           <div className="flex items-center gap-2 ml-auto">
@@ -475,7 +622,7 @@ export default function HomePage() {
             <div className="flex flex-col gap-4">
               <OperatorSelector
                 operator={operator}
-                onOperatorChange={setOperator}
+                onOperatorChange={handleOperatorChange}
               />
             </div>
           </Card>
@@ -507,7 +654,7 @@ export default function HomePage() {
               <div className="flex items-center gap-3">
                 <GranularitySelector
                   granularity={granularity}
-                  onGranularityChange={setGranularity}
+                  onGranularityChange={handleGranularityChange}
                 />
               </div>
             </div>
@@ -540,7 +687,10 @@ export default function HomePage() {
                 over time
               </h3>
               <div className="flex items-center gap-3">
-                <ViewSelector view={tableView} onViewChange={setTableView} />
+                <ViewSelector
+                  view={tableView}
+                  onViewChange={handleTableViewChange}
+                />
               </div>
             </div>
             <DataTable
@@ -561,5 +711,17 @@ export default function HomePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="container mx-auto px-4 py-8">Loading dashboard...</div>
+      }
+    >
+      <DashboardContent />
+    </Suspense>
   );
 }
