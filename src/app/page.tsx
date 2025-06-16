@@ -56,20 +56,6 @@ export default function HomePage() {
   const [overlayActiveGroupBy, setOverlayActiveGroupBy] = useState("org");
   const [overlayActiveChartType, setOverlayActiveChartType] = useState("line");
 
-  // Console log to verify states
-  useEffect(() => {}, [
-    overlayConfiguring,
-    overlayConfigTable,
-    overlayConfigMetric,
-    overlayConfigGroupBy,
-    overlayConfigChartType,
-    overlayActive,
-    overlayActiveTable,
-    overlayActiveMetric,
-    overlayActiveGroupBy,
-    overlayActiveChartType,
-  ]);
-
   // Available data tables - filtered by selected date range
   const dataTables = useMemo(() => {
     const startDate =
@@ -195,13 +181,6 @@ export default function HomePage() {
     granularity,
     operator,
   ]);
-
-  // Log the processed data
-  useEffect(() => {
-    if (overlayData) {
-      console.log("📊 Overlay data processed:", overlayData);
-    }
-  }, [overlayData]);
 
   const handleTableChange = (newTable: string) => {
     setSelectedTable(newTable);
@@ -470,6 +449,12 @@ export default function HomePage() {
         <div className="flex flex-col gap-6">
           <h2 className="text-2xl font-semibold text-gray-700">
             {config.title}
+            {overlayActive && overlayActiveTable && (
+              <>
+                {" × "}
+                {dataSourceConfig[overlayActiveTable].title}
+              </>
+            )}
           </h2>
 
           {/* Operator and Metrics Card */}

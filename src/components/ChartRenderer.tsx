@@ -1,6 +1,6 @@
 // ChartRenderer.tsx - Unified chart rendering component
 
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import {
   AreaChart,
   Area,
@@ -925,19 +925,6 @@ export function ChartRenderer({
   overlayChartType = "",
   overlayGroupBy,
 }: ChartRendererProps) {
-  // Log overlay props
-  useEffect(() => {
-    if (overlayActive) {
-      console.log("📈 ChartRenderer received overlay:", {
-        active: overlayActive,
-        hasData: !!overlayData,
-        dataLength: overlayData?.length,
-        metric: overlayMetric,
-        chartType: overlayChartType,
-      });
-    }
-  }, [overlayActive, overlayData, overlayMetric, overlayChartType]);
-
   // Merge primary and overlay data for ComposedChart
   const mergedData = useMemo(() => {
     if (!overlayActive || !overlayData || !currentData) {
