@@ -294,7 +294,7 @@ export default function HomePage() {
         {/* Header row with title and date picker */}
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-900">
-            Interactive Chart Demo
+            Metrics Building UX POC
           </h1>
           <div className="flex gap-2">
             <DateRangePicker
