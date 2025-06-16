@@ -38,11 +38,6 @@ const CHART_COLORS = [
 // Global animation settings
 const DISABLE_ANIMATIONS = true;
 
-const commonChartProps = {
-  margin: { top: 20, right: 30, left: 20, bottom: 5 },
-  isAnimationActive: false,
-};
-
 // Add type definitions
 interface ChartRendererProps {
   chartType: string;
@@ -183,7 +178,10 @@ export function StackedAreaChartComponent({
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <AreaChart data={filteredData} {...commonChartProps}>
+      <AreaChart
+        data={filteredData}
+        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+      >
         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
         <XAxis
           dataKey="name"
@@ -217,7 +215,6 @@ export function StackedAreaChartComponent({
             strokeWidth={2}
             name={isMultiSeries ? key : "Organization"}
             connectNulls={false}
-            isAnimationActive={false}
             dot={{
               fill: CHART_COLORS[index % CHART_COLORS.length],
               strokeWidth: 2,
@@ -282,7 +279,10 @@ export function PercentAreaChartComponent({
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <AreaChart data={percentData} {...commonChartProps}>
+      <AreaChart
+        data={percentData}
+        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+      >
         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
         <XAxis
           dataKey="name"
@@ -317,7 +317,6 @@ export function PercentAreaChartComponent({
             strokeWidth={2}
             name={isMultiSeries ? key : "Organization"}
             connectNulls={false}
-            isAnimationActive={false}
             dot={{
               fill: CHART_COLORS[index % CHART_COLORS.length],
               strokeWidth: 2,
@@ -363,7 +362,10 @@ export function LineChartComponent({
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <LineChart data={filteredData} {...commonChartProps}>
+      <LineChart
+        data={filteredData}
+        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+      >
         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
         <XAxis
           dataKey="name"
@@ -394,7 +396,6 @@ export function LineChartComponent({
               dataKey={isMultiSeries ? key : selectedMetric}
               stroke={CHART_COLORS[index % CHART_COLORS.length]}
               strokeWidth={3}
-              isAnimationActive={false}
               dot={{
                 fill: CHART_COLORS[index % CHART_COLORS.length],
                 strokeWidth: 2,
@@ -434,7 +435,10 @@ export function VerticalBarChartComponent({
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <BarChart data={currentData} {...commonChartProps}>
+      <BarChart
+        data={currentData}
+        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+      >
         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
         <XAxis
           dataKey="name"
@@ -465,7 +469,6 @@ export function VerticalBarChartComponent({
                 key={key}
                 dataKey={dataKey}
                 fill={CHART_COLORS[index % CHART_COLORS.length]}
-                isAnimationActive={false}
               />
             );
           })}
@@ -499,7 +502,10 @@ export function StackedVerticalBarChartComponent({
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <BarChart data={currentData} {...commonChartProps}>
+      <BarChart
+        data={currentData}
+        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+      >
         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
         <XAxis
           dataKey="name"
@@ -529,7 +535,6 @@ export function StackedVerticalBarChartComponent({
               dataKey={dataKey}
               stackId="team"
               fill={CHART_COLORS[index % CHART_COLORS.length]}
-              isAnimationActive={false}
             />
           );
         })}
@@ -557,7 +562,6 @@ export function HorizontalBarChartComponent({
         layout="vertical"
         data={currentData}
         margin={{ top: 20, right: 30, left: 80, bottom: 5 }}
-        isAnimationActive={false}
       >
         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
         <XAxis
@@ -591,7 +595,6 @@ export function HorizontalBarChartComponent({
                 key={key}
                 dataKey={dataKey}
                 fill={CHART_COLORS[index % CHART_COLORS.length]}
-                isAnimationActive={false}
               />
             );
           })}
@@ -619,7 +622,6 @@ export function StackedHorizontalBarChartComponent({
         layout="vertical"
         data={currentData}
         margin={{ top: 20, right: 30, left: 80, bottom: 5 }}
-        isAnimationActive={false}
       >
         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
         <XAxis
@@ -652,7 +654,6 @@ export function StackedHorizontalBarChartComponent({
               dataKey={dataKey}
               stackId="team"
               fill={CHART_COLORS[index % CHART_COLORS.length]}
-              isAnimationActive={false}
             />
           );
         })}
@@ -789,8 +790,7 @@ function ComposedChartComponent({
     color,
     name,
     yAxisId,
-    stackId,
-    index
+    stackId
   ) => {
     const baseProps = {
       key: dataKey,
@@ -839,7 +839,10 @@ function ComposedChartComponent({
 
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <ComposedChart data={mergedData} {...commonChartProps}>
+      <ComposedChart
+        data={mergedData}
+        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+      >
         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
         <XAxis
           dataKey="name"
@@ -875,8 +878,7 @@ function ComposedChartComponent({
             color,
             name,
             "left",
-            "primary",
-            index
+            "primary"
           );
         })}
 
@@ -899,8 +901,7 @@ function ComposedChartComponent({
             getOverlayColor(index),
             overlayName,
             "right",
-            "overlay",
-            index
+            "overlay"
           );
         })}
       </ComposedChart>
