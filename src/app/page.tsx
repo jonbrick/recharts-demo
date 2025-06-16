@@ -534,6 +534,7 @@ export default function HomePage() {
               selectedMetric={selectedMetric}
               selectedTable={selectedTable}
               granularity={granularity}
+              groupBy={groupBy}
             />
           </Card>
         </div>
