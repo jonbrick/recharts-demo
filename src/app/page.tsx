@@ -266,58 +266,62 @@ export default function HomePage() {
 
         {/* Controls row */}
         <div className="flex flex-wrap gap-4 items-center">
-          <DataSourceSelector
-            selectedTable={selectedTable}
-            onTableChange={handleTableChange}
-          />
-          <MetricSelector
-            selectedTable={selectedTable}
-            selectedMetric={selectedMetric}
-            onMetricChange={setSelectedMetric}
-          />
-          {!overlayActive && !overlayConfiguring && (
-            <Button
-              variant="secondary"
-              onClick={() => {
-                // Check if overlay is supported for current chart type
-                const unsupportedTypes = [
-                  "horizontal-bar",
-                  "stacked-horizontal-bar",
-                  "table",
-                ];
-                if (unsupportedTypes.includes(chartType)) {
-                  alert(
-                    `Overlay not supported for ${chartType}. Please select a different chart type.`
-                  );
-                  return;
-                }
+          {/* Primary Controls */}
+          <div className="flex items-center gap-4">
+            <DataSourceSelector
+              selectedTable={selectedTable}
+              onTableChange={handleTableChange}
+            />
+            <MetricSelector
+              selectedTable={selectedTable}
+              selectedMetric={selectedMetric}
+              onMetricChange={setSelectedMetric}
+            />
+            {!overlayActive && !overlayConfiguring && (
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  // Check if overlay is supported for current chart type
+                  const unsupportedTypes = [
+                    "horizontal-bar",
+                    "stacked-horizontal-bar",
+                    "table",
+                  ];
+                  if (unsupportedTypes.includes(chartType)) {
+                    alert(
+                      `Overlay not supported for ${chartType}. Please select a different chart type.`
+                    );
+                    return;
+                  }
 
-                setOverlayConfiguring(true);
-                // Initialize config with defaults
-                setOverlayConfigTable("pagerDuty"); // Default to different data source
-                setOverlayConfigMetric("incidents"); // Default first metric
-                setOverlayConfigGroupBy("org");
+                  setOverlayConfiguring(true);
+                  // Initialize config with defaults
+                  setOverlayConfigTable("pagerDuty"); // Default to different data source
+                  setOverlayConfigMetric("incidents"); // Default first metric
+                  setOverlayConfigGroupBy("org");
 
-                // Set compatible default chart type based on primary
-                if (
-                  ["vertical-bar", "stacked-vertical-bar"].includes(chartType)
-                ) {
-                  setOverlayConfigChartType("line");
-                } else if (
-                  ["line", "area", "stacked-area"].includes(chartType)
-                ) {
-                  setOverlayConfigChartType("vertical-bar");
-                }
-              }}
-              className="whitespace-nowrap"
-            >
-              Add Overlay
-            </Button>
-          )}
+                  // Set compatible default chart type based on primary
+                  if (
+                    ["vertical-bar", "stacked-vertical-bar"].includes(chartType)
+                  ) {
+                    setOverlayConfigChartType("line");
+                  } else if (
+                    ["line", "area", "stacked-area"].includes(chartType)
+                  ) {
+                    setOverlayConfigChartType("vertical-bar");
+                  }
+                }}
+                className="whitespace-nowrap"
+              >
+                Add Overlay
+              </Button>
+            )}
+          </div>
 
           {/* Overlay Configuration Controls */}
           {overlayConfiguring && (
-            <>
+            <div className="flex items-center gap-4">
+              <div className="h-6 w-px bg-gray-200" /> {/* Divider */}
               <DataSourceSelector
                 selectedTable={overlayConfigTable}
                 onTableChange={(value) => {
@@ -394,30 +398,72 @@ export default function HomePage() {
                   Cancel
                 </Button>
               </div>
-            </>
+            </div>
           )}
 
-          {/* Clear Overlay Button */}
+          {/* Active Overlay Controls */}
           {overlayActive && !overlayConfiguring && (
-            <Button
-              variant="ghost"
-              onClick={() => {
-                // Clear all overlay states
-                setOverlayActive(false);
-                setOverlayActiveTable("");
-                setOverlayActiveMetric("");
-                setOverlayActiveGroupBy("org");
-                setOverlayActiveChartType("line");
-                // Also clear config states
-                setOverlayConfigTable("");
-                setOverlayConfigMetric("");
-                setOverlayConfigGroupBy("org");
-                setOverlayConfigChartType("line");
-              }}
-              className="whitespace-nowrap"
-            >
-              <span className="mr-1">×</span> Clear Overlay
-            </Button>
+            <div className="flex items-center gap-4">
+              <div className="h-6 w-px bg-gray-200" /> {/* Divider */}
+              <DataSourceSelector
+                selectedTable={overlayActiveTable}
+                onTableChange={() => {}} // Disabled when active
+                disabled={true}
+              />
+              <MetricSelector
+                selectedTable={overlayActiveTable}
+                selectedMetric={overlayActiveMetric}
+                onMetricChange={() => {}} // Disabled when active
+                disabled={true}
+              />
+              <GroupBySelector
+                groupBy={overlayActiveGroupBy}
+                onGroupByChange={(value) => {
+                  setOverlayActiveGroupBy(value);
+                }}
+                selectedTable={overlayActiveTable}
+              />
+              <ChartTypeSelector
+                chartType={overlayActiveChartType}
+                onChartTypeChange={(value) => {
+                  // Validate the selection against primary chart type
+                  const validTypes = [
+                    "vertical-bar",
+                    "stacked-vertical-bar",
+                  ].includes(chartType)
+                    ? ["line", "area", "stacked-area"]
+                    : ["line", "area", "stacked-area"].includes(chartType)
+                    ? ["vertical-bar", "stacked-vertical-bar"]
+                    : [];
+
+                  if (!validTypes.includes(value)) {
+                    alert(`Cannot use ${value} as overlay with ${chartType}`);
+                    return;
+                  }
+
+                  setOverlayActiveChartType(value);
+                }}
+              />
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  // Clear all overlay states
+                  setOverlayActive(false);
+                  setOverlayActiveTable("");
+                  setOverlayActiveMetric("");
+                  setOverlayActiveGroupBy("org");
+                  setOverlayActiveChartType("line");
+                  // Also clear config states
+                  setOverlayConfigTable("");
+                  setOverlayConfigMetric("");
+                  setOverlayConfigGroupBy("org");
+                  setOverlayConfigChartType("line");
+                }}
+                className="whitespace-nowrap"
+              >
+                <span className="mr-1">×</span> Clear Overlay
+              </Button>
+            </div>
           )}
         </div>
 
@@ -471,42 +517,6 @@ export default function HomePage() {
                 />
               </div>
             </div>
-            {/* Overlay Chart Controls */}
-            {overlayActive && (
-              <div className="flex items-center gap-3 mt-3">
-                <span className="text-sm text-gray-600 font-medium">
-                  Overlay Dataset:
-                </span>
-                <GroupBySelector
-                  groupBy={overlayActiveGroupBy}
-                  onGroupByChange={(value) => {
-                    setOverlayActiveGroupBy(value);
-                  }}
-                  selectedTable={overlayActiveTable}
-                />
-                <ChartTypeSelector
-                  chartType={overlayActiveChartType}
-                  onChartTypeChange={(value) => {
-                    // Validate the selection against primary chart type
-                    const validTypes = [
-                      "vertical-bar",
-                      "stacked-vertical-bar",
-                    ].includes(chartType)
-                      ? ["line", "area", "stacked-area"]
-                      : ["line", "area", "stacked-area"].includes(chartType)
-                      ? ["vertical-bar", "stacked-vertical-bar"]
-                      : [];
-
-                    if (!validTypes.includes(value)) {
-                      alert(`Cannot use ${value} as overlay with ${chartType}`);
-                      return;
-                    }
-
-                    setOverlayActiveChartType(value);
-                  }}
-                />
-              </div>
-            )}
             <ChartRenderer
               chartType={chartType}
               currentData={chartData}

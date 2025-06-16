@@ -11,9 +11,23 @@ import {
   SelectValue,
 } from "./Select";
 
-export function DataSourceSelector({ selectedTable, onTableChange }) {
+interface DataSourceSelectorProps {
+  selectedTable: string;
+  onTableChange: (value: string) => void;
+  disabled?: boolean;
+}
+
+export function DataSourceSelector({
+  selectedTable,
+  onTableChange,
+  disabled = false,
+}: DataSourceSelectorProps) {
   return (
-    <Select value={selectedTable} onValueChange={onTableChange}>
+    <Select
+      value={selectedTable}
+      onValueChange={onTableChange}
+      disabled={disabled}
+    >
       <SelectTrigger className="cursor-pointer">
         <SelectValue />
       </SelectTrigger>
@@ -42,11 +56,19 @@ export function OperatorSelector({ operator, onOperatorChange }) {
   );
 }
 
+interface MetricSelectorProps {
+  selectedTable: string;
+  selectedMetric: string;
+  onMetricChange: (value: string) => void;
+  disabled?: boolean;
+}
+
 export function MetricSelector({
   selectedTable,
   selectedMetric,
   onMetricChange,
-}) {
+  disabled = false,
+}: MetricSelectorProps) {
   const config = dataSourceConfig[selectedTable];
   const allMetrics = [...config.metrics];
   if (config.overlayMetric) {
@@ -54,7 +76,11 @@ export function MetricSelector({
   }
 
   return (
-    <Select value={selectedMetric} onValueChange={onMetricChange}>
+    <Select
+      value={selectedMetric}
+      onValueChange={onMetricChange}
+      disabled={disabled}
+    >
       <SelectTrigger className="cursor-pointer">
         <SelectValue />
       </SelectTrigger>
