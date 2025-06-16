@@ -221,210 +221,204 @@ export default function HomePage() {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-4 sm:p-12">
-      <div className="flex flex-col gap-8">
-        <div className="flex flex-col gap-6">
-          <h1 className="text-3xl font-bold text-gray-800">
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex flex-col gap-6">
+        {/* Header row with title and date picker */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-gray-900">
             Interactive Chart Demo
           </h1>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <DataSourceSelector
-              selectedTable={selectedTable}
-              onTableChange={handleTableChange}
+          <div className="flex gap-2">
+            <DateRangePicker
+              value={selectedDateRange}
+              onChange={handleDateRangeChange}
+              placeholder="Select date range"
+              className="w-64 cursor-pointer"
             />
-            <MetricSelector
-              selectedTable={selectedTable}
-              selectedMetric={selectedMetric}
-              onMetricChange={setSelectedMetric}
-            />
-            {/* Add Overlay Button */}
-            {!overlayConfiguring && !overlayActive && (
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  // Check if overlay is supported for current chart type
-                  const unsupportedTypes = [
-                    "horizontal-bar",
-                    "stacked-horizontal-bar",
-                    "table",
-                  ];
-                  if (unsupportedTypes.includes(chartType)) {
-                    alert(
-                      `Overlay not supported for ${chartType}. Please select a different chart type.`
-                    );
-                    return;
-                  }
-
-                  setOverlayConfiguring(true);
-                  // Initialize config with defaults
-                  setOverlayConfigTable("pagerDuty"); // Default to different data source
-                  setOverlayConfigMetric("incidents"); // Default first metric
-                  setOverlayConfigGroupBy("org");
-
-                  // Set compatible default chart type based on primary
-                  if (
-                    ["vertical-bar", "stacked-vertical-bar"].includes(chartType)
-                  ) {
-                    setOverlayConfigChartType("line");
-                  } else if (
-                    ["line", "area", "stacked-area"].includes(chartType)
-                  ) {
-                    setOverlayConfigChartType("vertical-bar");
-                  }
-                }}
-                className="whitespace-nowrap"
-              >
-                <span className="mr-1">+</span> Add Overlay
-              </Button>
-            )}
-
-            {/* Overlay Configuration Controls */}
-            {overlayConfiguring && (
-              <>
-                <DataSourceSelector
-                  selectedTable={overlayConfigTable}
-                  onTableChange={(value) => {
-                    setOverlayConfigTable(value);
-                    // Reset metric to first available for new data source
-                    const firstMetric =
-                      dataSourceConfig[value]?.metrics[0]?.key || "";
-                    setOverlayConfigMetric(firstMetric);
-                  }}
-                />
-                <MetricSelector
-                  selectedTable={overlayConfigTable}
-                  selectedMetric={overlayConfigMetric}
-                  onMetricChange={(value) => {
-                    setOverlayConfigMetric(value);
-                  }}
-                />
-                {/* Config phase chart controls */}
-                <GroupBySelector
-                  groupBy={overlayConfigGroupBy}
-                  onGroupByChange={(value) => {
-                    console.log(
-                      "🔄 Config: Overlay groupBy changed to:",
-                      value
-                    );
-                    setOverlayConfigGroupBy(value);
-                  }}
-                  selectedTable={overlayConfigTable}
-                />
-                <ChartTypeSelector
-                  chartType={overlayConfigChartType}
-                  onChartTypeChange={(value) => {
-                    console.log(
-                      "📊 Config: Overlay chart type changed to:",
-                      value
-                    );
-
-                    // Validate during config too
-                    const validTypes = [
-                      "vertical-bar",
-                      "stacked-vertical-bar",
-                    ].includes(chartType)
-                      ? ["line", "area", "stacked-area"]
-                      : ["line", "area", "stacked-area"].includes(chartType)
-                      ? ["vertical-bar", "stacked-vertical-bar"]
-                      : [];
-
-                    if (!validTypes.includes(value)) {
-                      alert(`Cannot use ${value} as overlay with ${chartType}`);
-                      return;
-                    }
-
-                    setOverlayConfigChartType(value);
-                  }}
-                />
-                <div className="flex gap-2">
-                  <Button
-                    variant="primary"
-                    onClick={() => {
-                      // Copy config to active
-                      setOverlayActive(true);
-                      setOverlayActiveTable(overlayConfigTable);
-                      setOverlayActiveMetric(overlayConfigMetric);
-                      setOverlayActiveGroupBy(overlayConfigGroupBy);
-                      setOverlayActiveChartType(overlayConfigChartType);
-                      // Exit config mode
-                      setOverlayConfiguring(false);
-                    }}
-                    className="px-4"
-                  >
-                    Save
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={() => {
-                      // Clear config and exit
-                      setOverlayConfiguring(false);
-                      setOverlayConfigTable("");
-                      setOverlayConfigMetric("");
-                    }}
-                    className="px-4"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </>
-            )}
-
-            {/* Clear Overlay Button */}
-            {overlayActive && !overlayConfiguring && (
+            {selectedDateRange.from?.toISOString() !==
+              new Date(
+                DEFAULT_PICKER_DATES.defaultStart + "T00:00:00"
+              ).toISOString() ||
+            selectedDateRange.to?.toISOString() !==
+              new Date(
+                DEFAULT_PICKER_DATES.defaultEnd + "T00:00:00"
+              ).toISOString() ? (
               <Button
                 variant="ghost"
                 onClick={() => {
-                  // Clear all overlay states
-                  setOverlayActive(false);
-                  setOverlayActiveTable("");
-                  setOverlayActiveMetric("");
-                  setOverlayActiveGroupBy("org");
-                  setOverlayActiveChartType("line");
-                  // Also clear config states
-                  setOverlayConfigTable("");
-                  setOverlayConfigMetric("");
-                  setOverlayConfigGroupBy("org");
-                  setOverlayConfigChartType("line");
+                  setSelectedDateRange({
+                    from: new Date(
+                      DEFAULT_PICKER_DATES.defaultStart + "T00:00:00"
+                    ),
+                    to: new Date(DEFAULT_PICKER_DATES.defaultEnd + "T00:00:00"),
+                  });
                 }}
-                className="whitespace-nowrap"
+                className="cursor-pointer"
               >
-                <span className="mr-1">×</span> Clear Overlay
+                Reset range
               </Button>
-            )}
-            <div className="flex gap-2">
-              <DateRangePicker
-                value={selectedDateRange}
-                onChange={handleDateRangeChange}
-                placeholder="Select date range"
-                className="w-64 cursor-pointer"
-              />
-              {selectedDateRange.from?.toISOString() !==
-                new Date(
-                  DEFAULT_PICKER_DATES.defaultStart + "T00:00:00"
-                ).toISOString() ||
-              selectedDateRange.to?.toISOString() !==
-                new Date(
-                  DEFAULT_PICKER_DATES.defaultEnd + "T00:00:00"
-                ).toISOString() ? (
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    setSelectedDateRange({
-                      from: new Date(
-                        DEFAULT_PICKER_DATES.defaultStart + "T00:00:00"
-                      ),
-                      to: new Date(
-                        DEFAULT_PICKER_DATES.defaultEnd + "T00:00:00"
-                      ),
-                    });
-                  }}
-                  className="cursor-pointer"
-                >
-                  Reset range
-                </Button>
-              ) : null}
-            </div>
+            ) : null}
           </div>
+        </div>
+
+        {/* Divider */}
+        <div className="border-b border-gray-200" />
+
+        {/* Controls row */}
+        <div className="flex flex-wrap gap-4 items-center">
+          <DataSourceSelector
+            selectedTable={selectedTable}
+            onTableChange={handleTableChange}
+          />
+          <MetricSelector
+            selectedTable={selectedTable}
+            selectedMetric={selectedMetric}
+            onMetricChange={setSelectedMetric}
+          />
+          {!overlayActive && !overlayConfiguring && (
+            <Button
+              variant="secondary"
+              onClick={() => {
+                // Check if overlay is supported for current chart type
+                const unsupportedTypes = [
+                  "horizontal-bar",
+                  "stacked-horizontal-bar",
+                  "table",
+                ];
+                if (unsupportedTypes.includes(chartType)) {
+                  alert(
+                    `Overlay not supported for ${chartType}. Please select a different chart type.`
+                  );
+                  return;
+                }
+
+                setOverlayConfiguring(true);
+                // Initialize config with defaults
+                setOverlayConfigTable("pagerDuty"); // Default to different data source
+                setOverlayConfigMetric("incidents"); // Default first metric
+                setOverlayConfigGroupBy("org");
+
+                // Set compatible default chart type based on primary
+                if (
+                  ["vertical-bar", "stacked-vertical-bar"].includes(chartType)
+                ) {
+                  setOverlayConfigChartType("line");
+                } else if (
+                  ["line", "area", "stacked-area"].includes(chartType)
+                ) {
+                  setOverlayConfigChartType("vertical-bar");
+                }
+              }}
+              className="whitespace-nowrap"
+            >
+              Add Overlay
+            </Button>
+          )}
+
+          {/* Overlay Configuration Controls */}
+          {overlayConfiguring && (
+            <>
+              <DataSourceSelector
+                selectedTable={overlayConfigTable}
+                onTableChange={(value) => {
+                  setOverlayConfigTable(value);
+                  // Reset metric to first available for new data source
+                  const firstMetric =
+                    dataSourceConfig[value]?.metrics[0]?.key || "";
+                  setOverlayConfigMetric(firstMetric);
+                }}
+              />
+              <MetricSelector
+                selectedTable={overlayConfigTable}
+                selectedMetric={overlayConfigMetric}
+                onMetricChange={(value) => {
+                  setOverlayConfigMetric(value);
+                }}
+              />
+              {/* Config phase chart controls */}
+              <GroupBySelector
+                groupBy={overlayConfigGroupBy}
+                onGroupByChange={(value) => {
+                  setOverlayConfigGroupBy(value);
+                }}
+                selectedTable={overlayConfigTable}
+              />
+              <ChartTypeSelector
+                chartType={overlayConfigChartType}
+                onChartTypeChange={(value) => {
+                  // Validate during config too
+                  const validTypes = [
+                    "vertical-bar",
+                    "stacked-vertical-bar",
+                  ].includes(chartType)
+                    ? ["line", "area", "stacked-area"]
+                    : ["line", "area", "stacked-area"].includes(chartType)
+                    ? ["vertical-bar", "stacked-vertical-bar"]
+                    : [];
+
+                  if (!validTypes.includes(value)) {
+                    alert(`Cannot use ${value} as overlay with ${chartType}`);
+                    return;
+                  }
+
+                  setOverlayConfigChartType(value);
+                }}
+              />
+              <div className="flex gap-2">
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    // Copy config to active
+                    setOverlayActive(true);
+                    setOverlayActiveTable(overlayConfigTable);
+                    setOverlayActiveMetric(overlayConfigMetric);
+                    setOverlayActiveGroupBy(overlayConfigGroupBy);
+                    setOverlayActiveChartType(overlayConfigChartType);
+                    // Exit config mode
+                    setOverlayConfiguring(false);
+                  }}
+                  className="px-4"
+                >
+                  Save
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    // Clear config and exit
+                    setOverlayConfiguring(false);
+                    setOverlayConfigTable("");
+                    setOverlayConfigMetric("");
+                  }}
+                  className="px-4"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </>
+          )}
+
+          {/* Clear Overlay Button */}
+          {overlayActive && !overlayConfiguring && (
+            <Button
+              variant="ghost"
+              onClick={() => {
+                // Clear all overlay states
+                setOverlayActive(false);
+                setOverlayActiveTable("");
+                setOverlayActiveMetric("");
+                setOverlayActiveGroupBy("org");
+                setOverlayActiveChartType("line");
+                // Also clear config states
+                setOverlayConfigTable("");
+                setOverlayConfigMetric("");
+                setOverlayConfigGroupBy("org");
+                setOverlayConfigChartType("line");
+              }}
+              className="whitespace-nowrap"
+            >
+              <span className="mr-1">×</span> Clear Overlay
+            </Button>
+          )}
         </div>
 
         <div className="flex flex-col gap-6">

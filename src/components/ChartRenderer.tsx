@@ -793,7 +793,6 @@ function ComposedChartComponent({
     stackId
   ) => {
     const baseProps = {
-      key: dataKey,
       yAxisId,
       dataKey,
       name,
@@ -804,6 +803,7 @@ function ComposedChartComponent({
       case "stacked-vertical-bar":
         return (
           <Bar
+            key={dataKey}
             {...baseProps}
             fill={color}
             opacity={yAxisId === "right" ? 0.7 : 1}
@@ -813,6 +813,7 @@ function ComposedChartComponent({
       case "line":
         return (
           <Line
+            key={dataKey}
             {...baseProps}
             type="monotone"
             stroke={color}
@@ -824,6 +825,7 @@ function ComposedChartComponent({
       case "stacked-area":
         return (
           <Area
+            key={dataKey}
             {...baseProps}
             type="monotone"
             fill={color}
