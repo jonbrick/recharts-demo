@@ -429,11 +429,20 @@ export default function HomePage() {
 
         <div className="flex flex-col gap-6">
           <h2 className="text-2xl font-semibold text-gray-700">
-            {config.title}
+            {config.metrics.find((m) => m.key === selectedMetric)?.label ||
+              (config.overlayMetric?.key === selectedMetric
+                ? config.overlayMetric.label
+                : selectedMetric)}
             {overlayActive && overlayActiveTable && (
               <>
                 {" × "}
-                {dataSourceConfig[overlayActiveTable].title}
+                {dataSourceConfig[overlayActiveTable].metrics.find(
+                  (m) => m.key === overlayActiveMetric
+                )?.label ||
+                  (dataSourceConfig[overlayActiveTable].overlayMetric?.key ===
+                  overlayActiveMetric
+                    ? dataSourceConfig[overlayActiveTable].overlayMetric.label
+                    : overlayActiveMetric)}
               </>
             )}
           </h2>
