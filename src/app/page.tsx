@@ -29,6 +29,7 @@ import {
 } from "../lib/dashboardUtils";
 import { Card } from "../components/Card";
 import { Button } from "../components/Button";
+import { DataTable } from "../components/DataTable";
 
 export default function HomePage() {
   const [chartType, setChartType] = useState("line");
@@ -513,6 +514,26 @@ export default function HomePage() {
               overlayMetric={overlayActiveMetric}
               overlayChartType={overlayActiveChartType}
               overlayGroupBy={overlayActiveGroupBy}
+            />
+          </Card>
+
+          {/* Table Card */}
+          <Card className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <h3 className="text-sm text-gray-600 font-medium">
+                Table card:{" "}
+                {config.metrics.find((m) => m.key === selectedMetric)?.label ||
+                  (config.overlayMetric?.key === selectedMetric
+                    ? config.overlayMetric.label
+                    : selectedMetric)}{" "}
+                over time
+              </h3>
+            </div>
+            <DataTable
+              currentData={chartData}
+              selectedMetric={selectedMetric}
+              selectedTable={selectedTable}
+              granularity={granularity}
             />
           </Card>
         </div>
