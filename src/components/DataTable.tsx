@@ -81,20 +81,11 @@ export function DataTable({
   overlayTable,
   overlayGroupBy,
 }: DataTableProps) {
-  console.log("DataTable received data:", currentData);
-  console.log(
-    "First row keys:",
-    currentData.length > 0 ? Object.keys(currentData[0]) : []
-  );
-
   // Merge overlay data if active
   const mergedData = React.useMemo(() => {
     if (!overlayActive || !overlayData || !currentData) {
       return currentData;
     }
-
-    console.log("Merging data - primary:", currentData);
-    console.log("Merging data - overlay:", overlayData);
 
     // Merge the data arrays
     return currentData.map((row, index) => {
@@ -116,7 +107,6 @@ export function DataTable({
         });
       }
 
-      console.log("Merged row:", merged);
       return merged;
     });
   }, [currentData, overlayData, overlayActive, overlayGroupBy, overlayMetric]);
@@ -152,9 +142,6 @@ export function DataTable({
 
   // Combine all columns
   const columnKeys = [...primaryColumnKeys, ...overlayColumnKeys];
-
-  console.log("GroupBy:", groupBy);
-  console.log("Column keys for table:", columnKeys);
 
   const config = dataSourceConfig[selectedTable];
   const column = config.tableColumns.find((c) => c.key === selectedMetric);
