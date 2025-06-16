@@ -1,133 +1,155 @@
-# Dashboard Visualization Patterns
+# Dashboard Builder Demo
 
-Interactive dashboard demonstrating different chart visualization patterns for DevOps metrics.
+An interactive dashboard system that visualizes DevOps metrics with dynamic charts and tables. This demo explores different visualization patterns using real-world data sources like GitHub PRs, GitHub Actions, and PagerDuty incidents.
 
-## Data Sources
+## Features
 
-### GitHub Actions 📊
+### Dynamic Data Visualization
 
-CI/CD Pipeline metrics for deployment and build tracking.
+- **Multiple Chart Types**: Area, Line, Bar (vertical/horizontal), Stacked charts
+- **Table View**: Dynamic table that mirrors chart data structure
+- **Real-time Controls**: Instant updates when changing metrics, groupings, or date ranges
+- **Overlay Support**: Compare two different data sources on the same chart
 
-**Metrics:**
+### Smart Grouping System
 
-- **Deployments:** Daily deployment count
-- **Success Rate:** Percentage of successful deployments
-- **Build Time:** Average build duration in minutes
-- **Tests Run:** Total number of tests executed
+- **Organization View**: See aggregated totals for your entire organization
+- **Team Breakdown**: Compare Platform Team vs Product Team performance
+- **Individual Metrics**: Track contributions by specific team members
 
-### PagerDuty 🚨
+### Data Sources
 
-Incident Management metrics for reliability and response tracking.
+#### GitHub Pull Requests 🔀
 
-**Metrics:**
+Track code review and collaboration metrics:
 
-- **Incidents:** Daily incident count
-- **MTTR:** Mean Time to Recovery in minutes
-- **Critical Incidents:** High-severity incidents
-- **Users Affected:** Total users impacted
+- **Pull Requests**: Daily PR count
+- **Merge Rate**: Percentage of PRs successfully merged
+- **Review Time**: Average hours from PR creation to merge
+- **Lines Changed**: Total code modifications
 
-### GitHub PRs 🔀
+#### GitHub Actions 📊
 
-Pull Request Activity metrics for code review and collaboration tracking.
+Monitor CI/CD pipeline performance:
 
-**Metrics:**
+- **Deployments**: Daily deployment frequency
+- **Success Rate**: Percentage of successful builds
+- **Build Time**: Average build duration in minutes
+- **Tests Run**: Total test executions
 
-- **Pull Requests:** Daily PR count
-- **Merge Rate:** Percentage of PRs merged
-- **Review Time:** Average review time in hours
-- **Lines Changed:** Total lines of code changed
+#### PagerDuty 🚨
+
+Analyze incident management and reliability:
+
+- **Incidents**: Daily incident count
+- **MTTR**: Mean Time to Recovery in minutes
+- **Critical Incidents**: High-severity event tracking
+- **Users Affected**: Impact radius of incidents
+
+## How It Works
+
+### Architecture Overview
+
+The dashboard follows a unidirectional data flow pattern:
+
+```
+User Interaction → State Update → Data Transformation → Component Re-render
+```
+
+### Data Processing Pipeline
+
+1. **Raw Events**: Individual records (PRs, deployments, incidents) with timestamps and metadata
+2. **Transformation Layer**: Groups and aggregates data based on selected view (org/team/person)
+3. **Formatted Output**: Time-series data ready for visualization
+
+Example data transformation:
+
+```javascript
+// Raw PR data
+{
+  id: "pr-001",
+  created_at: "2025-05-15T08:30:00Z",
+  author: "sarah_chen",
+  team: "platform",
+  lines_added: 234
+}
+
+// Transformed for Team View
+{
+  name: "May 15",
+  "Platform Team": 5,    // Total PRs from platform team
+  "Product Team": 2      // Total PRs from product team
+}
+```
+
+### Control System
+
+All controls are configuration-driven, pulling options from a central config:
+
+- **Data Source Selector**: Switch between GitHub PRs, Actions, or PagerDuty
+- **Metric Selector**: Choose which metric to visualize
+- **Group By Selector**: Change data aggregation (Org/Team/Person)
+- **Chart Type Selector**: Pick visualization style
+- **Date Range Picker**: Filter data to specific time periods
+
+### Table Implementation
+
+The table dynamically adjusts its structure based on the selected grouping:
+
+- **Org View**: Single column showing organization totals
+- **Team View**: Multiple columns, one per team
+- **Person View**: Multiple columns, one per individual
+
+The same transformed data that feeds the charts also feeds the table, ensuring consistency across all visualizations.
 
 ## Visualization Patterns
 
-### Pattern 1: Single Source Time Series
+### Pattern 1: Single Source Time Series (Implemented)
 
-Current implementation demonstrating single metric visualization over time.
+View one data source with various grouping and aggregation options. Switch between different chart types to find the best representation for your data.
 
-**Features:**
+### Pattern 2: Overlay Comparisons (Implemented)
 
-- Switch between data sources using the dropdown
-- Toggle between stacked and overlapping views
-- Try different chart types for the same data
-- Observe correlations in the data patterns
+Combine two data sources on a single chart using dual Y-axes. For example:
 
-**Available Chart Types:**
+- GitHub PRs (bars) with PagerDuty Incidents (line)
+- Deployments (area) with Build Success Rate (line)
 
-- Area Chart
-- Line Chart
-- Vertical Bar Chart
-- Horizontal Bar Chart
-- Table View
-- Tremor Area Chart
-- Tremor Line Chart
+### Pattern 3: Correlation Analysis (Planned)
 
-### Pattern 2: Frontend ComposedChart Combinations (Planned)
+Future implementation for scatter plots showing relationships between metrics without time dimension.
 
-Two data sources displayed together using ComposedChart - without backend math calculations.
+## Technical Stack
 
-**Examples:**
+- **React** with TypeScript for type safety
+- **Recharts** for primary chart rendering
+- **Tailwind CSS** for styling
+- **Radix UI** for accessible dropdown components
+- **Next.js** as the framework
 
-- Deployments vs Incidents: GitHub Actions count + PagerDuty incident count over time
-- Code Changes vs Bug Reports: GitHub PR count + Jira bug count over time
-- Deployments vs Error Rate: GitHub Actions count + Error percentage over time
-
-### Pattern 3: ScatterChart Correlations (Planned)
-
-Two metrics plotted against each other (no time axis).
-
-**Examples:**
-
-- PR Size vs Review Time: Lines of code (X) vs review hours (Y)
-- Code Quality vs Velocity: Coverage % (X) vs deployment frequency (Y)
-- Incident Impact vs Recovery: Users affected (X) vs recovery time (Y)
-
-## Out of Scope
-
-### Backend Calculated Metrics
-
-This exploration does not include combining multiple data sources with mathematical operations in the backend. Examples of what we're **not** building:
-
-- Change Failure Rate: (PagerDuty incidents ÷ GitHub Actions deployments) × 100
-- Lead Time for Changes: GitHub PR merge → GitHub Actions deployment completion
-- Code Review Efficiency: GitHub PR size ÷ GitHub review time
-
-These composite metrics would require complex data correlation logic and are beyond the scope of this visualization pattern exploration.
-
-## Technical Implementation
-
-### Chart Configuration
-
-Data source configurations are defined in `lib/chartConfig.js` with:
-
-- Metric definitions and colors
-- Table column formatting
-- Data source metadata
-
-### Data Processing
-
-- Daily time series data in `lib/data.js`
-- Aggregation utilities in `lib/utils.js`
-- Support for both average and sum operators
-
-### UI Components
-
-- Chart controls using Radix UI Select components
-- Recharts for primary visualizations
-- Tremor components for enhanced chart types
-- Responsive design with Tailwind CSS
-
-## Development
+## Running the Demo
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the dashboard.
+Open [http://localhost:3000](http://localhost:3000) to explore the dashboard.
 
-## Next Steps
+## Key Design Principles
 
-1. **Pattern 2 Implementation**: Build dual-axis composed charts showing multiple data sources
-2. **Pattern 3 Implementation**: Create scatter plot correlations
-3. **Real Data Integration**: Connect to actual DevOps tool APIs
-4. **Advanced Filtering**: Add date range and team filtering
-5. **Export Capabilities**: Add chart export and sharing features
+1. **Single Source of Truth**: All state management happens in the main page component
+2. **Configuration-Driven**: Data sources, metrics, and options defined in central config
+3. **Pure Components**: UI components receive data via props and emit events upward
+4. **Consistent Formatting**: Centralized formatting functions for numbers, percentages, and dates
+5. **Responsive Design**: Works seamlessly across desktop and tablet viewports
+
+## Data Model
+
+The system uses a flexible event-based data model where each data source has:
+
+- Common fields: `id`, `created_at`, timestamps
+- Source-specific fields: `author`, `team`, `severity`, etc.
+- Calculated metrics: Derived from raw event data
+
+This design allows for easy addition of new data sources while maintaining consistent visualization patterns.
