@@ -85,17 +85,6 @@ export function DataTable({
   overlayTable,
   overlayGroupBy,
 }: DataTableProps) {
-  // Check if we're in record view
-  if (viewMode === "record" && rawData) {
-    return (
-      <RecordTable
-        data={rawData}
-        selectedTable={selectedTable}
-        groupBy={groupBy}
-      />
-    );
-  }
-
   // Merge overlay data if active
   const mergedData = React.useMemo(() => {
     if (!overlayActive || !overlayData || !currentData) {
@@ -161,6 +150,18 @@ export function DataTable({
   const config = dataSourceConfig[selectedTable];
   const column = config.tableColumns.find((c) => c.key === selectedMetric);
 
+  // Check if we're in record view (moved to after all hooks)
+  if (viewMode === "record" && rawData) {
+    return (
+      <RecordTable
+        data={rawData}
+        selectedTable={selectedTable}
+        groupBy={groupBy}
+      />
+    );
+  }
+
+  // Default: return the day view table
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm">
