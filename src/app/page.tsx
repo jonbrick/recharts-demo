@@ -437,14 +437,29 @@ export default function HomePage() {
 
           {/* Operator and Metrics Card */}
           <Card className="flex gap-4 justify-between">
-            <MetricsSummary
-              key={`${operator}-${selectedMetric}-${groupBy}-${granularity}`}
-              selectedTable={selectedTable}
-              selectedMetric={selectedMetric}
-              operator={operator}
-              granularity={granularity}
-              data={allTimeData}
-            />
+            <div className="flex items-center gap-8">
+              <MetricsSummary
+                key={`${operator}-${selectedMetric}-${groupBy}-${granularity}`}
+                selectedTable={selectedTable}
+                selectedMetric={selectedMetric}
+                operator={operator}
+                granularity={granularity}
+                data={allTimeData}
+              />
+              {overlayActive && overlayData && (
+                <>
+                  <div className="h-12 w-px bg-gray-200 dark:bg-gray-700" />
+                  <MetricsSummary
+                    key={`overlay-${operator}-${overlayActiveMetric}-${overlayActiveGroupBy}-${granularity}`}
+                    selectedTable={overlayActiveTable}
+                    selectedMetric={overlayActiveMetric}
+                    operator={operator}
+                    granularity={granularity}
+                    data={overlayData}
+                  />
+                </>
+              )}
+            </div>
             <div className="flex flex-col gap-4">
               <OperatorSelector
                 operator={operator}
@@ -463,6 +478,19 @@ export default function HomePage() {
                     ? config.overlayMetric.label
                     : selectedMetric)}{" "}
                 over time
+                {overlayActive && overlayActiveTable && (
+                  <>
+                    {" × "}
+                    {dataSourceConfig[overlayActiveTable].metrics.find(
+                      (m) => m.key === overlayActiveMetric
+                    )?.label ||
+                      (dataSourceConfig[overlayActiveTable].overlayMetric
+                        ?.key === overlayActiveMetric
+                        ? dataSourceConfig[overlayActiveTable].overlayMetric
+                            .label
+                        : overlayActiveMetric)}
+                  </>
+                )}
               </h3>
               <div className="flex items-center gap-3">
                 <GranularitySelector
