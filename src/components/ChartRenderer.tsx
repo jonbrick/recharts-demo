@@ -56,6 +56,7 @@ interface ChartRendererProps {
   overlayTable?: string;
   overlayMetric?: string;
   overlayChartType?: string;
+  overlayGroupBy?: string;
 }
 
 interface CustomTooltipProps extends TooltipProps<any, any> {
@@ -722,6 +723,7 @@ function ComposedChartComponent({
   selectedTable,
   overlayTable,
   groupBy,
+  overlayGroupBy,
 }: {
   mergedData: any[];
   selectedMetric: string;
@@ -731,7 +733,9 @@ function ComposedChartComponent({
   selectedTable: string;
   overlayTable: string;
   groupBy: string;
+  overlayGroupBy?: string;
 }) {
+  console.log("🎯 ComposedChart received overlayGroupBy:", overlayGroupBy);
   // Get colors from config
   const primaryConfig = dataSourceConfig[selectedTable];
   const overlayConfig = dataSourceConfig[overlayTable];
@@ -762,6 +766,27 @@ function ComposedChartComponent({
     isMultiSeries,
     seriesKeys,
     groupBy,
+  });
+
+  // Detect overlay series
+  const isOverlayMultiSeries =
+    overlayGroupBy !== "org" && mergedData.length > 0;
+  let overlaySeriesKeys = [];
+
+  if (isOverlayMultiSeries) {
+    // Find all keys that start with "overlay_" and don't end with "_hasData"
+    overlaySeriesKeys = Object.keys(mergedData[0])
+      .filter((key) => key.startsWith("overlay_") && !key.endsWith("_hasData"))
+      .map((key) => key.replace("overlay_", ""));
+  } else {
+    overlaySeriesKeys = [overlayMetric];
+  }
+
+  console.log("🔍 Overlay series detection:", {
+    isOverlayMultiSeries,
+    overlaySeriesKeys,
+    overlayGroupBy,
+    sampleData: mergedData[0],
   });
 
   return (
@@ -851,44 +876,64 @@ function ComposedChartComponent({
           }
         })}
 
-        {/* Overlay dataset */}
-        {overlayChartType === "vertical-bar" ||
-        overlayChartType === "stacked-vertical-bar" ? (
-          <Bar
-            yAxisId="right"
-            dataKey={`overlay_${overlayMetric}`}
-            fill={overlayColor}
-            name={
-              overlayConfig.metrics.find((m) => m.key === overlayMetric)
-                ?.label || overlayMetric
-            }
-          />
-        ) : overlayChartType === "line" ? (
-          <Line
-            yAxisId="right"
-            type="monotone"
-            dataKey={`overlay_${overlayMetric}`}
-            stroke={overlayColor}
-            strokeWidth={3}
-            dot={{ fill: overlayColor, r: 4 }}
-            name={
-              overlayConfig.metrics.find((m) => m.key === overlayMetric)
-                ?.label || overlayMetric
-            }
-          />
-        ) : (
-          <Area
-            yAxisId="right"
-            type="monotone"
-            dataKey={`overlay_${overlayMetric}`}
-            fill={overlayColor}
-            stroke={overlayColor}
-            name={
-              overlayConfig.metrics.find((m) => m.key === overlayMetric)
-                ?.label || overlayMetric
-            }
-          />
-        )}
+        {/* Overlay dataset - render multiple series if needed */}
+        {overlaySeriesKeys.map((key, index) => {
+          const overlayDataKey = isOverlayMultiSeries
+            ? `overlay_${key}`
+            : `overlay_${overlayMetric}`;
+          const overlayName = isOverlayMultiSeries
+            ? `${key} (${
+                overlayConfig.metrics.find((m) => m.key === overlayMetric)
+                  ?.label || overlayMetric
+              })`
+            : overlayConfig.metrics.find((m) => m.key === overlayMetric)
+                ?.label || overlayMetric;
+
+          console.log(`🎯 Rendering overlay series ${index}:`, {
+            key,
+            overlayDataKey,
+            overlayName,
+          });
+
+          if (overlayChartType === "vertical-bar") {
+            return (
+              <Bar
+                key={overlayDataKey}
+                yAxisId="right"
+                dataKey={overlayDataKey}
+                fill={overlayColor}
+                opacity={0.7}
+                name={overlayName}
+              />
+            );
+          } else if (overlayChartType === "line") {
+            return (
+              <Line
+                key={overlayDataKey}
+                yAxisId="right"
+                type="monotone"
+                dataKey={overlayDataKey}
+                stroke={overlayColor}
+                strokeWidth={3}
+                dot={{ fill: overlayColor, r: 4 }}
+                name={overlayName}
+              />
+            );
+          } else {
+            return (
+              <Area
+                key={overlayDataKey}
+                yAxisId="right"
+                type="monotone"
+                dataKey={overlayDataKey}
+                fill={overlayColor}
+                stroke={overlayColor}
+                opacity={0.5}
+                name={overlayName}
+              />
+            );
+          }
+        })}
       </ComposedChart>
     </ResponsiveContainer>
   );
@@ -906,6 +951,7 @@ export function ChartRenderer({
   overlayTable = "",
   overlayMetric = "",
   overlayChartType = "",
+  overlayGroupBy,
 }: ChartRendererProps) {
   // Log overlay props
   useEffect(() => {
@@ -985,6 +1031,7 @@ export function ChartRenderer({
         selectedTable={selectedTable}
         overlayTable={overlayTable}
         groupBy={groupBy}
+        overlayGroupBy={overlayGroupBy}
       />
     );
   }
