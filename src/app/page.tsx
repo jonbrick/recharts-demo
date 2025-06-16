@@ -100,6 +100,34 @@ export default function HomePage() {
     }
   }, [selectedTable, groupBy]);
 
+  // Ensure overlay groupBy is valid for the overlayActiveTable
+  useEffect(() => {
+    if (overlayActiveTable) {
+      const validGroupBys = (
+        dataSourceConfig[overlayActiveTable]?.groupByOptions || []
+      ).map((opt) => opt.value);
+      if (!validGroupBys.includes(overlayActiveGroupBy)) {
+        setOverlayActiveGroupBy("org");
+      }
+    }
+  }, [overlayActiveTable, overlayActiveGroupBy]);
+
+  // Ensure overlay metric is valid for the overlayActiveTable
+  useEffect(() => {
+    if (overlayActiveTable) {
+      const config = dataSourceConfig[overlayActiveTable];
+      const allMetrics = [...config.metrics];
+      if (config.overlayMetric) {
+        allMetrics.push(config.overlayMetric);
+      }
+      const validMetrics = allMetrics.map((m) => m.key);
+
+      if (!validMetrics.includes(overlayActiveMetric)) {
+        setOverlayActiveMetric(config.metrics[0].key);
+      }
+    }
+  }, [overlayActiveTable, overlayActiveMetric]);
+
   // Replace your existing allTimeData calculation with this:
   const allTimeData = useMemo(() => {
     return operator === "average"
@@ -325,9 +353,11 @@ export default function HomePage() {
           />
 
           <div className="flex items-center gap-2 ml-auto">
-            <Button variant="secondary" onClick={handleAddOverlay}>
-              Add Overlay
-            </Button>
+            {!overlayActive && (
+              <Button variant="secondary" onClick={handleAddOverlay}>
+                Add Overlay
+              </Button>
+            )}
           </div>
         </div>
 
@@ -371,13 +401,11 @@ export default function HomePage() {
             <DataSourceSelector
               selectedTable={overlayActiveTable}
               onTableChange={setOverlayActiveTable}
-              disabled={true}
             />
             <MetricSelector
               selectedTable={overlayActiveTable}
               selectedMetric={overlayActiveMetric}
               onMetricChange={setOverlayActiveMetric}
-              disabled={true}
             />
             <GroupBySelector
               groupBy={overlayActiveGroupBy}
