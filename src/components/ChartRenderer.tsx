@@ -17,11 +17,7 @@ import {
   TooltipProps,
   ComposedChart,
 } from "recharts";
-import {
-  dataSourceConfig,
-  formatValue,
-  isMathMetric,
-} from "../lib/chartConfig.js";
+import { dataSourceConfig, isMathMetric } from "../lib/chartConfig.js";
 
 // Common chart colors
 const CHART_COLORS = [
@@ -61,15 +57,10 @@ interface CustomTooltipProps extends TooltipProps<any, any> {
 
 interface ChartComponentProps {
   currentData: any[];
-  selectedMetric: string;
-  groupBy: string;
-}
-
-interface TableChartComponentProps {
-  currentData: any[];
-  selectedMetric: string;
   selectedTable: string;
+  selectedMetric: string;
   granularity: string;
+  groupBy: string;
 }
 
 // Custom tooltip component with proper types
@@ -661,54 +652,6 @@ export function StackedHorizontalBarChartComponent({
   );
 }
 
-export function TableChartComponent({
-  currentData,
-  selectedMetric,
-  selectedTable,
-  granularity,
-}: TableChartComponentProps) {
-  const config = dataSourceConfig[selectedTable];
-  const metric = [...config.metrics, config.overlayMetric].find(
-    (m) => m.key === selectedMetric
-  );
-  const column = config.tableColumns.find((c) => c.key === selectedMetric);
-
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm">
-        <thead>
-          <tr className="bg-gray-50">
-            <th className="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">
-              {granularity === "monthly" ? "Date" : "Period"}
-            </th>
-            <th className="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">
-              {column ? column.label : metric.label}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {currentData.map((row, index) => (
-            <tr
-              key={row.name}
-              className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
-            >
-              <td className="border border-gray-200 px-4 py-3 font-medium text-gray-900">
-                {row.name}
-              </td>
-              <td className="border border-gray-200 px-4 py-3 text-gray-700">
-                {formatValue(
-                  row[selectedMetric],
-                  column ? column.format : "number"
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
 // ComposedChart component for overlay mode
 function ComposedChartComponent({
   mergedData,
@@ -997,7 +940,6 @@ export function ChartRenderer({
     "percent-area": PercentAreaChartComponent,
     "stacked-vertical-bar": StackedVerticalBarChartComponent,
     "stacked-horizontal-bar": StackedHorizontalBarChartComponent,
-    table: TableChartComponent,
   };
   const Component = chartComponents[chartType];
 

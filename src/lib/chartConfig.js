@@ -150,7 +150,6 @@ export const chartTypeConfig = {
     label: "📊 Stacked Horizontal Bar Chart",
     icon: "📊",
   },
-  table: { label: "📋 Data Table", icon: "📋" },
 };
 
 // Helper functions
