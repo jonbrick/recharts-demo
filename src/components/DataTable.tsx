@@ -3,6 +3,59 @@
 import React from "react";
 import { dataSourceConfig, formatValue } from "../lib/chartConfig.js";
 
+// Helper function to get column label
+function getColumnLabel(
+  key: string,
+  groupBy: string,
+  selectedTable: string,
+  selectedMetric: string,
+  overlayTable?: string,
+  overlayMetric?: string,
+  overlayGroupBy?: string
+): string {
+  // Check if it's an overlay column
+  if (key.endsWith("_overlay")) {
+    const baseKey = key.replace("_overlay", "");
+
+    // Get overlay metric label
+    if (overlayTable && overlayMetric) {
+      const overlayConfig = dataSourceConfig[overlayTable];
+      const metricConfig = [
+        ...overlayConfig.metrics,
+        overlayConfig.overlayMetric,
+      ].find((m) => m?.key === overlayMetric);
+      const metricLabel = metricConfig?.label || overlayMetric;
+
+      // For org overlay
+      if (overlayGroupBy === "org") {
+        return `${metricLabel} - Organization`;
+      }
+
+      // For team/person overlay
+      if (baseKey === overlayMetric) {
+        return `${metricLabel} - Organization`;
+      }
+
+      return `${metricLabel} - ${baseKey}`;
+    }
+  }
+
+  // For primary columns
+  const config = dataSourceConfig[selectedTable];
+  const metricLabel =
+    config.metrics.find((m) => m.key === selectedMetric)?.label ||
+    config.overlayMetric?.label ||
+    selectedMetric;
+
+  // For org view
+  if (groupBy === "org") {
+    return `${metricLabel} - Organization`;
+  }
+
+  // For team/person view
+  return `${metricLabel} - ${key}`;
+}
+
 interface DataTableProps {
   currentData: any[];
   selectedMetric: string;
@@ -12,6 +65,7 @@ interface DataTableProps {
   overlayActive?: boolean;
   overlayData?: any[] | null;
   overlayMetric?: string;
+  overlayTable?: string;
   overlayGroupBy?: string;
 }
 
@@ -24,6 +78,7 @@ export function DataTable({
   overlayActive,
   overlayData,
   overlayMetric,
+  overlayTable,
   overlayGroupBy,
 }: DataTableProps) {
   console.log("DataTable received data:", currentData);
@@ -119,14 +174,30 @@ export function DataTable({
             ) : groupBy === "org" && overlayActive ? (
               <>
                 <th className="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">
-                  Organization
+                  {(() => {
+                    const config = dataSourceConfig[selectedTable];
+                    const metricLabel =
+                      config.metrics.find((m) => m.key === selectedMetric)
+                        ?.label ||
+                      config.overlayMetric?.label ||
+                      selectedMetric;
+                    return `${metricLabel} - Organization`;
+                  })()}
                 </th>
                 {overlayColumnKeys.map((key) => (
                   <th
                     key={key}
                     className="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700"
                   >
-                    {key}
+                    {getColumnLabel(
+                      key,
+                      groupBy,
+                      selectedTable,
+                      selectedMetric,
+                      overlayTable,
+                      overlayMetric,
+                      overlayGroupBy
+                    )}
                   </th>
                 ))}
               </>
@@ -136,7 +207,15 @@ export function DataTable({
                   key={key}
                   className="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700"
                 >
-                  {key}
+                  {getColumnLabel(
+                    key,
+                    groupBy,
+                    selectedTable,
+                    selectedMetric,
+                    overlayTable,
+                    overlayMetric,
+                    overlayGroupBy
+                  )}
                 </th>
               ))
             )}
