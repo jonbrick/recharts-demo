@@ -41,9 +41,6 @@ export function DataTable({
   console.log("Column keys for table:", columnKeys);
 
   const config = dataSourceConfig[selectedTable];
-  const metric = [...config.metrics, config.overlayMetric].find(
-    (m) => m.key === selectedMetric
-  );
   const column = config.tableColumns.find((c) => c.key === selectedMetric);
 
   return (
