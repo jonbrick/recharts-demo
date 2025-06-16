@@ -88,7 +88,11 @@ export function DataTable({
   // Check if we're in record view
   if (viewMode === "record" && rawData) {
     return (
-      <div>Record view coming soon! We have {rawData.length} records.</div>
+      <RecordTable
+        data={rawData}
+        selectedTable={selectedTable}
+        groupBy={groupBy}
+      />
     );
   }
 
@@ -266,6 +270,104 @@ export function DataTable({
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+// RecordTable component for showing raw records
+interface RecordTableProps {
+  data: any[];
+  selectedTable: string;
+  groupBy: string;
+}
+
+function RecordTable({ data, selectedTable, groupBy }: RecordTableProps) {
+  // Group records by the groupBy field
+  const groupedData = React.useMemo(() => {
+    const groups: Record<string, any[]> = {};
+
+    data.forEach((record) => {
+      let groupKey = "Unknown";
+
+      if (groupBy === "org") {
+        groupKey = "Organization";
+      } else if (groupBy === "team") {
+        groupKey = record.team || "Unknown";
+      } else if (groupBy === "person") {
+        groupKey = record.author || record.assigned_to || "Unknown";
+      }
+
+      if (!groups[groupKey]) {
+        groups[groupKey] = [];
+      }
+      groups[groupKey].push(record);
+    });
+
+    // Sort records within each group by date
+    Object.keys(groups).forEach((key) => {
+      groups[key].sort(
+        (a, b) =>
+          new Date(a.created_at || a.deployed_at || 0).getTime() -
+          new Date(b.created_at || b.deployed_at || 0).getTime()
+      );
+    });
+
+    return groups;
+  }, [data, groupBy]);
+
+  // Sort group names alphabetically
+  const sortedGroupNames = Object.keys(groupedData).sort();
+
+  return (
+    <div className="space-y-6">
+      {sortedGroupNames.map((groupName) => (
+        <div key={groupName}>
+          <div className="bg-gray-100 px-4 py-2 font-semibold text-gray-700">
+            {groupName} ({groupedData[groupName].length} records)
+          </div>
+          <table className="w-full border-collapse bg-white">
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="border border-gray-200 px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                  ID
+                </th>
+                <th className="border border-gray-200 px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                  Date
+                </th>
+                <th className="border border-gray-200 px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                  Author
+                </th>
+                <th className="border border-gray-200 px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                  Team
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {groupedData[groupName].map((record, index) => (
+                <tr
+                  key={record.id}
+                  className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                >
+                  <td className="border border-gray-200 px-4 py-2 text-sm">
+                    {record.id}
+                  </td>
+                  <td className="border border-gray-200 px-4 py-2 text-sm">
+                    {new Date(
+                      record.created_at || record.deployed_at
+                    ).toLocaleDateString()}
+                  </td>
+                  <td className="border border-gray-200 px-4 py-2 text-sm">
+                    {record.author || record.assigned_to || "N/A"}
+                  </td>
+                  <td className="border border-gray-200 px-4 py-2 text-sm">
+                    {record.team || "N/A"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
     </div>
   );
 }
