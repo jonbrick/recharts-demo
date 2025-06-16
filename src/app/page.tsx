@@ -57,22 +57,7 @@ export default function HomePage() {
   const [overlayActiveChartType, setOverlayActiveChartType] = useState("line");
 
   // Console log to verify states
-  useEffect(() => {
-    console.log("🔧 Overlay Config States:", {
-      configuring: overlayConfiguring,
-      table: overlayConfigTable,
-      metric: overlayConfigMetric,
-      groupBy: overlayConfigGroupBy,
-      chartType: overlayConfigChartType,
-    });
-    console.log("✅ Overlay Active States:", {
-      active: overlayActive,
-      table: overlayActiveTable,
-      metric: overlayActiveMetric,
-      groupBy: overlayActiveGroupBy,
-      chartType: overlayActiveChartType,
-    });
-  }, [
+  useEffect(() => {}, [
     overlayConfiguring,
     overlayConfigTable,
     overlayConfigMetric,
@@ -138,7 +123,6 @@ export default function HomePage() {
 
   // Get the current dataset based on granularity
   const chartData = useMemo(() => {
-    console.log("📊 PRIMARY chartData recalculating with groupBy:", groupBy);
     const startDate = selectedDateRange.from?.toISOString().split("T")[0];
     const endDate = selectedDateRange.to?.toISOString().split("T")[0];
 
@@ -173,12 +157,6 @@ export default function HomePage() {
     if (!overlayActive || !overlayActiveTable) {
       return null;
     }
-
-    console.log("🔄 Processing overlay data:", {
-      table: overlayActiveTable,
-      metric: overlayActiveMetric,
-      groupBy: overlayActiveGroupBy,
-    });
 
     const overlayDataSource = dataTables[overlayActiveTable];
     const startDate = selectedDateRange.from?.toISOString().split("T")[0];
@@ -233,7 +211,6 @@ export default function HomePage() {
   };
 
   const handleGroupByChange = (newGroupBy: string) => {
-    console.log("🎯 PRIMARY groupBy changed from:", groupBy, "to:", newGroupBy);
     setGroupBy(newGroupBy);
   };
 
@@ -265,9 +242,6 @@ export default function HomePage() {
               <Button
                 variant="secondary"
                 onClick={() => {
-                  console.log("🎯 Add Overlay clicked!");
-                  console.log("📊 Primary chart type:", chartType);
-
                   // Check if overlay is supported for current chart type
                   const unsupportedTypes = [
                     "horizontal-bar",
@@ -275,10 +249,6 @@ export default function HomePage() {
                     "table",
                   ];
                   if (unsupportedTypes.includes(chartType)) {
-                    console.log(
-                      "❌ Overlay not supported for chart type:",
-                      chartType
-                    );
                     alert(
                       `Overlay not supported for ${chartType}. Please select a different chart type.`
                     );
@@ -314,7 +284,6 @@ export default function HomePage() {
                 <DataSourceSelector
                   selectedTable={overlayConfigTable}
                   onTableChange={(value) => {
-                    console.log("📊 Overlay data source changed to:", value);
                     setOverlayConfigTable(value);
                     // Reset metric to first available for new data source
                     const firstMetric =
@@ -326,7 +295,6 @@ export default function HomePage() {
                   selectedTable={overlayConfigTable}
                   selectedMetric={overlayConfigMetric}
                   onMetricChange={(value) => {
-                    console.log("📈 Overlay metric changed to:", value);
                     setOverlayConfigMetric(value);
                   }}
                 />
@@ -361,10 +329,6 @@ export default function HomePage() {
                       : [];
 
                     if (!validTypes.includes(value)) {
-                      console.log(
-                        "❌ Config: Invalid overlay chart type:",
-                        value
-                      );
                       alert(`Cannot use ${value} as overlay with ${chartType}`);
                       return;
                     }
@@ -376,7 +340,6 @@ export default function HomePage() {
                   <Button
                     variant="primary"
                     onClick={() => {
-                      console.log("💾 Save overlay clicked!");
                       // Copy config to active
                       setOverlayActive(true);
                       setOverlayActiveTable(overlayConfigTable);
@@ -393,7 +356,6 @@ export default function HomePage() {
                   <Button
                     variant="secondary"
                     onClick={() => {
-                      console.log("❌ Cancel overlay clicked!");
                       // Clear config and exit
                       setOverlayConfiguring(false);
                       setOverlayConfigTable("");
@@ -412,7 +374,6 @@ export default function HomePage() {
               <Button
                 variant="ghost"
                 onClick={() => {
-                  console.log("🧹 Clear overlay clicked!");
                   // Clear all overlay states
                   setOverlayActive(false);
                   setOverlayActiveTable("");
@@ -525,7 +486,6 @@ export default function HomePage() {
                 <GroupBySelector
                   groupBy={overlayActiveGroupBy}
                   onGroupByChange={(value) => {
-                    console.log("🔄 Overlay groupBy changed to:", value);
                     setOverlayActiveGroupBy(value);
                   }}
                   selectedTable={overlayActiveTable}
@@ -533,8 +493,6 @@ export default function HomePage() {
                 <ChartTypeSelector
                   chartType={overlayActiveChartType}
                   onChartTypeChange={(value) => {
-                    console.log("📊 Overlay chart type changed to:", value);
-
                     // Validate the selection against primary chart type
                     const validTypes = [
                       "vertical-bar",
@@ -546,7 +504,6 @@ export default function HomePage() {
                       : [];
 
                     if (!validTypes.includes(value)) {
-                      console.log("❌ Invalid overlay chart type:", value);
                       alert(`Cannot use ${value} as overlay with ${chartType}`);
                       return;
                     }

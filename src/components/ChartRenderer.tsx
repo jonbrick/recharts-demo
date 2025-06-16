@@ -735,7 +735,6 @@ function ComposedChartComponent({
   groupBy: string;
   overlayGroupBy?: string;
 }) {
-  console.log("🎯 ComposedChart received overlayGroupBy:", overlayGroupBy);
   // Get colors from config
   const primaryConfig = dataSourceConfig[selectedTable];
   const overlayConfig = dataSourceConfig[overlayTable];
@@ -758,13 +757,6 @@ function ComposedChartComponent({
     return OVERLAY_COLORS[index % OVERLAY_COLORS.length];
   };
 
-  console.log("🎨 ComposedChart rendering:", {
-    primaryMetric: selectedMetric,
-    overlayMetric: overlayMetric,
-    primaryType: chartType,
-    overlayType: overlayChartType,
-  });
-
   // Check if primary chart is multi-series
   const isMultiSeries = groupBy !== "org" && mergedData.length > 0;
   const seriesKeys = isMultiSeries
@@ -775,12 +767,6 @@ function ComposedChartComponent({
           !key.endsWith("_hasData")
       )
     : [selectedMetric];
-
-  console.log("📊 ComposedChart series detection:", {
-    isMultiSeries,
-    seriesKeys,
-    groupBy,
-  });
 
   // Detect overlay series
   const isOverlayMultiSeries =
@@ -795,13 +781,6 @@ function ComposedChartComponent({
   } else {
     overlaySeriesKeys = [overlayMetric];
   }
-
-  console.log("🔍 Overlay series detection:", {
-    isOverlayMultiSeries,
-    overlaySeriesKeys,
-    overlayGroupBy,
-    sampleData: mergedData[0],
-  });
 
   // Helper function to render chart components
   const renderChartComponent = (
@@ -962,8 +941,6 @@ export function ChartRenderer({
       return currentData;
     }
 
-    console.log("🔀 Merging data for ComposedChart");
-
     // Create a map of dates to merged data points
     const dataMap = new Map();
 
@@ -1000,7 +977,6 @@ export function ChartRenderer({
       (a, b) => new Date(a.name).getTime() - new Date(b.name).getTime()
     );
 
-    console.log("📊 Merged data sample:", merged[0]);
     return merged;
   }, [currentData, overlayData, overlayActive]);
 
