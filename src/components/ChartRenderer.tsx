@@ -744,6 +744,20 @@ function ComposedChartComponent({
     overlayConfig.metrics.find((m) => m.key === overlayMetric)?.color ||
     "#82ca9d";
 
+  // Create a color palette for multi-series overlays
+  const OVERLAY_COLORS = [
+    "#82ca9d",
+    "#8dd1e1",
+    "#d084d0",
+    "#ffb347",
+    "#87ceeb",
+  ];
+
+  const getOverlayColor = (index) => {
+    if (!isOverlayMultiSeries) return overlayColor;
+    return OVERLAY_COLORS[index % OVERLAY_COLORS.length];
+  };
+
   console.log("🎨 ComposedChart rendering:", {
     primaryMetric: selectedMetric,
     overlayMetric: overlayMetric,
@@ -789,6 +803,61 @@ function ComposedChartComponent({
     sampleData: mergedData[0],
   });
 
+  // Helper function to render chart components
+  const renderChartComponent = (
+    type,
+    dataKey,
+    color,
+    name,
+    yAxisId,
+    stackId,
+    index
+  ) => {
+    const baseProps = {
+      key: dataKey,
+      yAxisId,
+      dataKey,
+      name,
+    };
+
+    switch (type) {
+      case "vertical-bar":
+      case "stacked-vertical-bar":
+        return (
+          <Bar
+            {...baseProps}
+            fill={color}
+            opacity={yAxisId === "right" ? 0.7 : 1}
+            stackId={type === "stacked-vertical-bar" ? stackId : undefined}
+          />
+        );
+      case "line":
+        return (
+          <Line
+            {...baseProps}
+            type="monotone"
+            stroke={color}
+            strokeWidth={3}
+            dot={{ fill: color, r: 4 }}
+          />
+        );
+      case "area":
+      case "stacked-area":
+        return (
+          <Area
+            {...baseProps}
+            type="monotone"
+            fill={color}
+            stroke={color}
+            opacity={yAxisId === "right" ? 0.5 : 0.8}
+            stackId={type === "stacked-area" ? stackId : undefined}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <ResponsiveContainer width="100%" height={400}>
       <ComposedChart data={mergedData} {...commonChartProps}>
@@ -816,67 +885,23 @@ function ComposedChartComponent({
         {seriesKeys.map((key, index) => {
           const dataKey = isMultiSeries ? key : selectedMetric;
           const color = CHART_COLORS[index % CHART_COLORS.length];
+          const name = isMultiSeries
+            ? key
+            : primaryConfig.metrics.find((m) => m.key === selectedMetric)
+                ?.label || selectedMetric;
 
-          if (
-            chartType === "vertical-bar" ||
-            chartType === "stacked-vertical-bar"
-          ) {
-            return (
-              <Bar
-                key={key}
-                yAxisId="left"
-                dataKey={dataKey}
-                fill={color}
-                name={
-                  isMultiSeries
-                    ? key
-                    : primaryConfig.metrics.find(
-                        (m) => m.key === selectedMetric
-                      )?.label || selectedMetric
-                }
-              />
-            );
-          } else if (chartType === "line") {
-            return (
-              <Line
-                key={key}
-                yAxisId="left"
-                type="monotone"
-                dataKey={dataKey}
-                stroke={color}
-                strokeWidth={3}
-                dot={{ fill: color, r: 4 }}
-                name={
-                  isMultiSeries
-                    ? key
-                    : primaryConfig.metrics.find(
-                        (m) => m.key === selectedMetric
-                      )?.label || selectedMetric
-                }
-              />
-            );
-          } else {
-            return (
-              <Area
-                key={key}
-                yAxisId="left"
-                type="monotone"
-                dataKey={dataKey}
-                fill={color}
-                stroke={color}
-                name={
-                  isMultiSeries
-                    ? key
-                    : primaryConfig.metrics.find(
-                        (m) => m.key === selectedMetric
-                      )?.label || selectedMetric
-                }
-              />
-            );
-          }
+          return renderChartComponent(
+            chartType,
+            dataKey,
+            color,
+            name,
+            "left",
+            "primary",
+            index
+          );
         })}
 
-        {/* Overlay dataset - render multiple series if needed */}
+        {/* Overlay dataset */}
         {overlaySeriesKeys.map((key, index) => {
           const overlayDataKey = isOverlayMultiSeries
             ? `overlay_${key}`
@@ -889,50 +914,15 @@ function ComposedChartComponent({
             : overlayConfig.metrics.find((m) => m.key === overlayMetric)
                 ?.label || overlayMetric;
 
-          console.log(`🎯 Rendering overlay series ${index}:`, {
-            key,
+          return renderChartComponent(
+            overlayChartType,
             overlayDataKey,
+            getOverlayColor(index),
             overlayName,
-          });
-
-          if (overlayChartType === "vertical-bar") {
-            return (
-              <Bar
-                key={overlayDataKey}
-                yAxisId="right"
-                dataKey={overlayDataKey}
-                fill={overlayColor}
-                opacity={0.7}
-                name={overlayName}
-              />
-            );
-          } else if (overlayChartType === "line") {
-            return (
-              <Line
-                key={overlayDataKey}
-                yAxisId="right"
-                type="monotone"
-                dataKey={overlayDataKey}
-                stroke={overlayColor}
-                strokeWidth={3}
-                dot={{ fill: overlayColor, r: 4 }}
-                name={overlayName}
-              />
-            );
-          } else {
-            return (
-              <Area
-                key={overlayDataKey}
-                yAxisId="right"
-                type="monotone"
-                dataKey={overlayDataKey}
-                fill={overlayColor}
-                stroke={overlayColor}
-                opacity={0.5}
-                name={overlayName}
-              />
-            );
-          }
+            "right",
+            "overlay",
+            index
+          );
         })}
       </ComposedChart>
     </ResponsiveContainer>
