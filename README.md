@@ -215,11 +215,6 @@ Headers use a clean "Metric - Group" format:
 
 This format clearly shows what metric is being displayed for which group.
 
-### Remaining Polish Items
-
-1. **Null/undefined handling**: Show "N/A" for missing values
-2. **Correct formatting**: Use metric-specific formats from config for overlay columns
-
 ## Phase 3: Record View
 
 ### Design Goals
@@ -339,30 +334,4 @@ tableColumns: [
 - Format values consistently using config
 - Show "N/A" for null/undefined values
 
-## Next Implementation Steps
-
-### Immediate (Phase 2 Polish):
-
-1. Add null/undefined handling to show "N/A"
-2. Fix overlay column formatting to use correct format from config
-3. Add TypeScript types for better type safety
-4. Test edge cases (empty data, mismatched array lengths)
-
-### Following (Phase 3 - Record View):
-
-1. Add view toggle control
-2. Create RecordTable component
-3. Implement grouping logic for records
-4. Add proper column selection from config
-5. Handle overlay as separate table
-6. Test with all data sources
-
-### Future Enhancements:
-
-1. Column sorting
-2. Column filtering
-3. Export functionality
-4. Column resizing
-5. Sticky headers for long tables
-
-This guide should serve as your technical reference for the current state and future development of the dashboard table implementation.
+This guide serves as a technical reference for the dashboard table implementation, documenting the architecture, patterns, and current functionality.
