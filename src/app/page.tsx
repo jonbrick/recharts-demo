@@ -579,7 +579,6 @@ function DashboardContent() {
                   (config.overlayMetric?.key === selectedMetric
                     ? config.overlayMetric.label
                     : selectedMetric)}{" "}
-                over time
                 {overlayActive && overlayActiveTable && (
                   <>
                     {" × "}
@@ -635,7 +634,6 @@ function DashboardContent() {
                   (config.overlayMetric?.key === selectedMetric
                     ? config.overlayMetric.label
                     : selectedMetric)}{" "}
-                over time
                 {overlayActive && overlayActiveTable && (
                   <>
                     {" × "}
@@ -649,6 +647,7 @@ function DashboardContent() {
                         : overlayActiveMetric)}
                   </>
                 )}
+                {" over time"}
               </h3>
               <div className="flex items-center gap-3">
                 {overlayActive && !overlayConfiguring && (
@@ -693,7 +692,6 @@ function DashboardContent() {
                   (config.overlayMetric?.key === selectedMetric
                     ? config.overlayMetric.label
                     : selectedMetric)}{" "}
-                over time
                 {overlayActive && overlayActiveTable && (
                   <>
                     {" × "}
