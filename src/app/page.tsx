@@ -83,7 +83,7 @@ function DashboardContent() {
         chartType: "line",
         granularity: "monthly",
         operator: "sum",
-        tableView: "day",
+        tableView: "record",
         overlayActive: false,
       });
       return;
@@ -96,7 +96,7 @@ function DashboardContent() {
     setSelectedMetric(urlState.selectedMetric || "pullRequests");
     setOperator(urlState.operator || "sum");
     setGroupBy(urlState.groupBy || "org");
-    setTableView(urlState.tableView || "day");
+    setTableView(urlState.tableView || "record");
     setSelectedDateRange(
       urlState.selectedDateRange || {
         from: new Date(DEFAULT_PICKER_DATES.defaultStart + "T00:00:00"),

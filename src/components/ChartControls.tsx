@@ -48,9 +48,9 @@ export function OperatorSelector({ operator, onOperatorChange }) {
       <SelectTrigger className="cursor-pointer">
         <SelectValue />
       </SelectTrigger>
-      <SelectContent position="popper" align="end">
-        <SelectItem value="sum">Sum</SelectItem>
+      <SelectContent>
         <SelectItem value="average">Average</SelectItem>
+        <SelectItem value="sum">Sum</SelectItem>
       </SelectContent>
     </Select>
   );
@@ -161,7 +161,7 @@ export function ChartTypeSelector({
       <SelectTrigger className="cursor-pointer">
         <SelectValue />
       </SelectTrigger>
-      <SelectContent position="popper" align="end">
+      <SelectContent>
         {Object.entries(chartTypeConfig).map(([key, config]) => (
           <SelectItem key={key} value={key}>
             {config.label}
@@ -178,7 +178,7 @@ export function ViewSelector({ view, onViewChange }) {
       <SelectTrigger className="cursor-pointer">
         <SelectValue />
       </SelectTrigger>
-      <SelectContent position="popper" align="end">
+      <SelectContent>
         <SelectItem value="day">X-axis View: Day</SelectItem>
         <SelectItem value="record">Y-axis View: Records</SelectItem>
       </SelectContent>
@@ -207,7 +207,7 @@ export function DatePickerSelector({ onDateChange }) {
       <SelectTrigger>
         <SelectValue />
       </SelectTrigger>
-      <SelectContent position="popper" align="end">
+      <SelectContent>
         <SelectItem value={`${POC_START_DATE} to ${POC_END_DATE}`}>
           {startDate} - {endDate}
         </SelectItem>
