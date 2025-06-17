@@ -64,15 +64,31 @@ Measures deployment activity:
 
 ## How It Works
 
-1. **Select your data source** - Choose between GitHub PRs, PagerDuty, or GitHub Actions
-2. **Pick a metric** - Each data source offers different metrics to analyze
-3. **Choose your view** - Group by Organization, Team, or Individual
-4. **Customize visualization** - Select chart type and date range
-5. **Share your view** - Click "Share View" to copy the URL
+1. **Apply filters** - Set your date range to bound the data
+2. **Select your data source** - Choose between GitHub PRs, PagerDuty, or GitHub Actions
+3. **Pick a metric** - Each data source offers different metrics to analyze
+4. **Choose your view** - Group by Organization, Team, or Individual
+5. **Set granularity** - Toggle between Daily and All-time views
+6. **Customize each card** - Adjust operator, chart type, or table view
+7. **Add overlays** - Compare two datasets across all cards
+8. **Share your view** - Click "Share View" to copy the URL
 
 Every selection instantly updates the URL, creating a unique link to your exact configuration.
 
 ## Controls
+
+| Control       | Level | Purpose                           | Affects       | Notes                              | Status |
+| ------------- | ----- | --------------------------------- | ------------- | ---------------------------------- | ------ |
+| `Date Range`  | Page  | Time boundaries                   | All cards     | Universal constraint               | ✅     |
+| `Filters`     | Page  | Team, Individual, Repo boundaries | All cards     | Universal constraint               | ❌     |
+| `Data Source` | View  | Choose dataset                    | All cards     | Updates available metrics          | ✅     |
+| `Metric`      | View  | What to measure                   | All cards     | Auto-resets when source changes    | ✅     |
+| `Group By`    | View  | Aggregation level                 | All cards     | Changes chart series               | ✅     |
+| `Granularity` | View  | Time detail                       | Chart & Table | Daily vs All-time                  | ✅     |
+| `Overlay`     | View  | Secondary dataset                 | All cards     | Compare two data sources           | ✅     |
+| `Operator`    | Card  | Calculation method                | Metrics only  | Sum vs Average                     | ✅     |
+| `Chart Type`  | Card  | Visualization style               | Chart only    | In card header; 8 types available  | ✅     |
+| `Table View`  | Card  | Display mode                      | Table only    | In card header; Day vs Record view | ✅     |
 
 ## Chart Types
 
@@ -114,10 +130,13 @@ Overlays are a **View Control** that affects all three cards simultaneously, ena
 
 1. Click "Add Overlay" to configure a secondary dataset
 2. Select overlay source, metric, and group by
-3. All cards update to show both datasets:
+3. Click "Add Overlay" to save configuration
+4. The system auto-selects a complementary chart type
+5. All cards update to show both datasets:
    - **Metrics**: Shows both values side by side
-   - **Chart**: Visualizes both on same axes
+   - **Chart**: Visualizes both on same axes with overlay chart type selector in header
    - **Table**: Adds overlay columns
+6. Adjust overlay visualization using the chart type selector in the Chart card header
 
 ### Why Overlays are View Controls
 
@@ -212,11 +231,16 @@ page.tsx (Main Container)
 │   ├── GroupBySelector
 │   ├── GranularitySelector
 │   └── Overlay Configuration (when active)
+│       ├── DataSourceSelector
+│       ├── MetricSelector
+│       └── GroupBySelector
 ├── Display Cards
 │   ├── MetricsSummary
 │   │   └── OperatorSelector (Card Control)
 │   ├── ChartRenderer
-│   │   └── ChartTypeSelector (Card Control)
+│   │   └── Chart Header
+│   │       ├── ChartTypeSelector (Primary)
+│   │       └── ChartTypeSelector (Overlay - when active)
 │   └── DataTable
 │       └── ViewSelector (Card Control)
 └── URL State Management
