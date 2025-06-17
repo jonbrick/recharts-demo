@@ -497,9 +497,9 @@ function DashboardContent() {
             onGroupByChange={handleGroupByChange}
             selectedTable={selectedTable}
           />
-          <ChartTypeSelector
-            chartType={chartType}
-            onChartTypeChange={handleChartTypeChange}
+          <GranularitySelector
+            granularity={granularity}
+            onGranularityChange={handleGranularityChange}
           />
 
           <div className="flex items-center gap-2 ml-auto">
@@ -529,10 +529,6 @@ function DashboardContent() {
               onGroupByChange={setOverlayConfigGroupBy}
               selectedTable={overlayConfigTable}
             />
-            <ChartTypeSelector
-              chartType={overlayConfigChartType}
-              onChartTypeChange={setOverlayConfigChartType}
-            />
             <div className="flex items-center gap-2 ml-auto">
               <Button variant="primary" onClick={handleSaveOverlay}>
                 Add Overlay
@@ -561,10 +557,6 @@ function DashboardContent() {
               groupBy={overlayActiveGroupBy}
               onGroupByChange={setOverlayActiveGroupBy}
               selectedTable={overlayActiveTable}
-            />
-            <ChartTypeSelector
-              chartType={overlayActiveChartType}
-              onChartTypeChange={setOverlayActiveChartType}
             />
             <div className="flex items-center gap-2 ml-auto">
               <Button variant="ghost" onClick={handleRemoveOverlay}>
@@ -652,9 +644,19 @@ function DashboardContent() {
                 )}
               </h3>
               <div className="flex items-center gap-3">
-                <GranularitySelector
-                  granularity={granularity}
-                  onGranularityChange={handleGranularityChange}
+                {overlayActive && !overlayConfiguring && (
+                  <>
+                    <span className="text-sm text-gray-600">Overlay:</span>
+                    <ChartTypeSelector
+                      chartType={overlayActiveChartType}
+                      onChartTypeChange={setOverlayActiveChartType}
+                    />
+                    <span className="text-sm text-gray-500">|</span>
+                  </>
+                )}
+                <ChartTypeSelector
+                  chartType={chartType}
+                  onChartTypeChange={handleChartTypeChange}
                 />
               </div>
             </div>
