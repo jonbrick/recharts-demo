@@ -10,6 +10,7 @@ export function MetricsSummary({
   operator,
   granularity,
   data,
+  overlayActive = false,
 }) {
   // Extract group keys (exclude 'name' and '_hasData' fields)
   const groupKeys = data?.[0]
@@ -42,7 +43,7 @@ export function MetricsSummary({
     return (
       <div>
         <div className="text-sm text-gray-600">
-          {metricLabel} - Organization
+          {overlayActive ? `${metricLabel} - Organization` : "Organization"}
         </div>
         <div className="text-3xl font-bold text-gray-800">
           {value.toFixed(1)}
@@ -68,7 +69,7 @@ export function MetricsSummary({
         return (
           <div key={groupName}>
             <div className="text-sm text-gray-600">
-              {metricLabel} - {groupName}
+              {overlayActive ? `${metricLabel} - ${groupName}` : groupName}
             </div>
             <div className="text-3xl font-bold text-gray-800">
               {finalValue.toFixed(1)}

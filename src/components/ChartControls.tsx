@@ -49,8 +49,8 @@ export function OperatorSelector({ operator, onOperatorChange }) {
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="average">Average</SelectItem>
         <SelectItem value="sum">Sum</SelectItem>
+        <SelectItem value="average">Average</SelectItem>
       </SelectContent>
     </Select>
   );
@@ -179,8 +179,8 @@ export function ViewSelector({ view, onViewChange }) {
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="day">Day View</SelectItem>
-        <SelectItem value="record">Record View</SelectItem>
+        <SelectItem value="day">X-axis View: Day</SelectItem>
+        <SelectItem value="record">Y-axis View: Records</SelectItem>
       </SelectContent>
     </Select>
   );

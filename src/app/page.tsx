@@ -42,7 +42,7 @@ function DashboardContent() {
   const [selectedMetric, setSelectedMetric] = useState("pullRequests");
   const [operator, setOperator] = useState("sum");
   const [groupBy, setGroupBy] = useState("org");
-  const [tableView, setTableView] = useState("record"); // Default to "record" for development
+  const [tableView, setTableView] = useState("day"); // Default to "day" view
   const [selectedDateRange, setSelectedDateRange] = useState<DateRange>({
     from: new Date(DEFAULT_PICKER_DATES.defaultStart + "T00:00:00"),
     to: new Date(DEFAULT_PICKER_DATES.defaultEnd + "T00:00:00"),
@@ -83,7 +83,7 @@ function DashboardContent() {
         chartType: "line",
         granularity: "monthly",
         operator: "sum",
-        tableView: "record",
+        tableView: "day",
         overlayActive: false,
       });
       return;
@@ -96,7 +96,7 @@ function DashboardContent() {
     setSelectedMetric(urlState.selectedMetric || "pullRequests");
     setOperator(urlState.operator || "sum");
     setGroupBy(urlState.groupBy || "org");
-    setTableView(urlState.tableView || "record");
+    setTableView(urlState.tableView || "day");
     setSelectedDateRange(
       urlState.selectedDateRange || {
         from: new Date(DEFAULT_PICKER_DATES.defaultStart + "T00:00:00"),
@@ -616,6 +616,7 @@ function DashboardContent() {
                 operator={operator}
                 granularity={granularity}
                 data={chartData}
+                overlayActive={overlayActive}
               />
               {overlayActive && overlayData && (
                 <>
@@ -627,6 +628,7 @@ function DashboardContent() {
                     operator={operator}
                     granularity={granularity}
                     data={overlayData}
+                    overlayActive={overlayActive}
                   />
                 </>
               )}
