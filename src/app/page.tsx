@@ -429,15 +429,6 @@ function DashboardContent() {
             Metrics Building UX POC
           </h1>
           <div className="flex gap-2">
-            <Button variant="secondary" onClick={handleShare}>
-              Share View
-            </Button>
-            <DateRangePicker
-              value={selectedDateRange}
-              onChange={handleDateRangeChange}
-              placeholder="Select date range"
-              className="w-64 cursor-pointer"
-            />
             {selectedDateRange.from?.toISOString() !==
               new Date(
                 DEFAULT_PICKER_DATES.defaultStart + "T00:00:00"
@@ -461,6 +452,15 @@ function DashboardContent() {
                 Reset range
               </Button>
             ) : null}
+            <DateRangePicker
+              value={selectedDateRange}
+              onChange={handleDateRangeChange}
+              placeholder="Select date range"
+              className="w-64 cursor-pointer"
+            />
+            <Button variant="primary" onClick={handleShare}>
+              Share View
+            </Button>
           </div>
         </div>
 
