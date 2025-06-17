@@ -1,337 +1,253 @@
-# Dashboard Table Implementation Guide
+# Dashboard Builder Demo
 
-## Table of Contents
+## Overview
 
-1. [System Architecture Overview](#system-architecture-overview)
-2. [Current Implementation](#current-implementation)
-3. [Data Flow Patterns](#data-flow-patterns)
-4. [Patterns to Preserve](#patterns-to-preserve)
-5. [Phase 2: Overlay Support](#phase-2-overlay-support)
-6. [Phase 3: Record View](#phase-3-record-view)
-7. [Technical Notes](#technical-notes)
+This dashboard visualizes engineering metrics from multiple data sources with real-time URL synchronization. Every interaction updates the URL, making any view instantly shareable with your team.
 
-## System Architecture Overview
+## Mental Model & Control Hierarchy
 
-### Core Components
+Understanding the control hierarchy is crucial for using the dashboard effectively:
+
+### Filters (Page-Level Controls)
+
+Universal constraints that bound all data regardless of view:
+
+- **Date Range** - Time boundaries for all data
+- **Future filters** - Team filter, Status filter, etc.
+
+### View Controls
+
+Define WHAT data you're analyzing (applies to all cards):
+
+- **Data Source** - Which dataset (GitHub PRs, PagerDuty, etc.)
+- **Metric** - What to measure (PR count, merge rate, etc.)
+- **Group By** - How to slice data (Organization, Team, Individual)
+- **Granularity** - Time aggregation (Daily vs All-time)
+- **Overlay** - Secondary dataset for comparison (when active)
+
+### Card-Specific Controls
+
+Each card controls its own presentation:
+
+- **Metrics Summary**: Operator (Sum/Average)
+- **Chart**: Chart Type, Overlay Chart Type (visualization style)
+- **Table**: View Mode (Day/Record)
+
+## Data Sources
+
+### GitHub Pull Requests
+
+Tracks development velocity and code review metrics:
+
+- **Pull Requests**: Count of PRs created
+- **Merge Rate**: Percentage of PRs merged
+- **Avg Review Time**: Hours from creation to merge
+- **Lines Changed**: Total lines added + removed
+
+### PagerDuty Incidents
+
+Monitors operational health:
+
+- **Incidents**: Count of incidents created
+- **Acknowledgments**: Incidents acknowledged
+- **Avg Ack Time**: Minutes to acknowledgment
+- **MTTR**: Mean time to resolution in minutes
+
+### GitHub Actions
+
+Measures deployment activity:
+
+- **Deployments**: Count of deployment runs
+- **Success Rate**: Percentage of successful deployments
+- **Rollbacks**: Failed deployment count
+- **Avg Duration**: Runtime in minutes
+
+## How It Works
+
+1. **Select your data source** - Choose between GitHub PRs, PagerDuty, or GitHub Actions
+2. **Pick a metric** - Each data source offers different metrics to analyze
+3. **Choose your view** - Group by Organization, Team, or Individual
+4. **Customize visualization** - Select chart type and date range
+5. **Share your view** - Click "Share View" to copy the URL
+
+Every selection instantly updates the URL, creating a unique link to your exact configuration.
+
+## Controls
+
+## Chart Types
+
+| Chart            | Icon | Best For                    | Stackable | Overlay Support |
+| ---------------- | ---- | --------------------------- | --------- | --------------- |
+| `Line`           | 📈   | Trends over time            | ❌        | ✅              |
+| `Area`           | 🌊   | Volume/magnitude            | ✅        | ✅              |
+| `Percent Area`   | 🌊   | Relative proportions (100%) | ✅        | ❌              |
+| `Vertical Bar`   | 📊   | Daily comparisons           | ✅        | ✅              |
+| `Horizontal Bar` | 📊   | Many categories             | ✅        | ❌              |
+
+## Display Cards
+
+Each card responds to View Controls but has its own presentation options:
+
+| Card                | Responds To                  | Card-Specific Controls         | Key Features                              |
+| ------------------- | ---------------------------- | ------------------------------ | ----------------------------------------- |
+| **Metrics Summary** | All View Controls + Overlays | Operator (Sum/Average)         | Large numbers, auto-calculated totals     |
+| **Chart**           | All View Controls + Overlays | Chart Type, Overlay Chart Type | Interactive tooltips, dual Y-axis support |
+| **Table**           | All View Controls + Overlays | View Mode (Day/Record)         | Sortable, precise values                  |
+
+### Card Details
+
+**Metrics Summary**: Shows aggregated numbers for the selected metric and date range. Switch between Sum and Average to change the calculation. When overlays are active, displays both metrics side by side.
+
+**Chart**: Visualizes data using your selected chart type. Supports overlays to compare two datasets. Hover for detailed tooltips. Granularity control switches between daily and all-time views.
+
+**Table**:
+
+- _Day View_: Shows aggregated metrics by date
+- _Record View_: Shows individual events grouped by your selection (org/team/person)
+- _With Overlays_: Adds columns for overlay data
+
+## Advanced Feature: Overlays
+
+Overlays are a **View Control** that affects all three cards simultaneously, enabling powerful comparisons across your entire dashboard.
+
+### How Overlays Work
+
+1. Click "Add Overlay" to configure a secondary dataset
+2. Select overlay source, metric, and group by
+3. All cards update to show both datasets:
+   - **Metrics**: Shows both values side by side
+   - **Chart**: Visualizes both on same axes
+   - **Table**: Adds overlay columns
+
+### Why Overlays are View Controls
+
+Unlike card-specific controls, overlays fundamentally change what data is being analyzed across the entire dashboard. When you add an overlay:
+
+- The Metrics card shows comparative KPIs
+- The Chart displays both datasets with dual Y-axes
+- The Table includes columns for both primary and overlay data
+
+### Example Use Cases
+
+- **PRs vs Incidents**: Do more code changes lead to more incidents?
+- **Deployments vs MTTR**: Does deployment frequency affect recovery time?
+- **Team comparisons**: Platform team PRs vs Product team incidents
+
+### Technical Implementation
+
+Overlays use Recharts' `ComposedChart` component:
+
+- Primary data uses left Y-axis
+- Overlay data uses right Y-axis
+- Data series prefixed with `overlay_` to prevent conflicts
+- Automatic scale adjustment for different value ranges
+
+### Supported Overlays
+
+✅ **Any combination of**: Line, Area, Vertical Bar (including stacked variants)
+❌ **Not supported**: Horizontal Bar charts, Table views
+
+**Popular combinations**:
+
+- Line + Vertical Bar: Great for trends vs discrete events
+- Area + Line: Layer continuous metrics
+- Vertical Bar + Vertical Bar: Compare two bar datasets
+- Stacked Area + Line: See composition with trend overlay
+
+## URL Sharing & Persistence
+
+Every dashboard state is captured in the URL, enabling powerful sharing workflows.
+
+### URL Parameters
+
+| Parameter    | Description        | Example                                 |
+| ------------ | ------------------ | --------------------------------------- |
+| `source`     | Data source        | `source=githubPR`                       |
+| `metric`     | Selected metric    | `metric=pullRequests`                   |
+| `from`, `to` | Date range         | `from=2025-05-15&to=2025-05-30`         |
+| `group`      | Grouping level     | `group=team`                            |
+| `chart`      | Chart type         | `chart=line`                            |
+| `gran`       | Granularity        | `gran=monthly`                          |
+| `op`         | Operator           | `op=sum`                                |
+| `table`      | Table view mode    | `table=record`                          |
+| `o_*`        | Overlay parameters | `o_source=pagerDuty&o_metric=incidents` |
+
+### Sharing Workflows
+
+- **Daily Standup**: Bookmark "Yesterday's deployment success rate"
+- **Weekly Review**: Share "Team PR velocity over past week"
+- **Incident Analysis**: Link "Deployments vs incidents correlation"
+- **Performance Reviews**: Save "Individual contributions by quarter"
+
+### Default Behavior
+
+- Loading the bare URL redirects to a sensible default view
+- Invalid parameters fall back to defaults
+- Bookmarks always load the exact saved state
+
+## Coming Soon: Single Card Mode
+
+A new display mode is being added where you can focus on one card at a time:
+
+- **Dashboard Mode** (current) - All 3 cards visible
+- **Single Card Mode** (upcoming) - Tab through individual cards
+
+This reinforces the control hierarchy:
+
+- Filters and View Controls remain constant
+- Only the card display changes
+- Each card maintains its specific controls
+
+## Architecture Notes
+
+### Component Structure
 
 ```
 page.tsx (Main Container)
-  ├── Controls (Dropdowns)
-  │   ├── DataSourceSelector
-  │   ├── MetricSelector
-  │   ├── GroupBySelector
-  │   ├── ChartTypeSelector
-  │   └── DateRangePicker
-  ├── Cards
-  │   ├── MetricsSummary Card
-  │   ├── Chart Card (via ChartRenderer)
-  │   └── Table Card (via DataTable)
-  └── Data Processing
-      ├── Raw Data (githubPRData, pagerDutyData, etc.)
-      ├── Transformation Functions (groupEventsByType, etc.)
-      └── Formatted Output (chartData)
+├── Filters (Page Controls)
+│   └── DateRangePicker
+├── View Controls
+│   ├── DataSourceSelector
+│   ├── MetricSelector
+│   ├── GroupBySelector
+│   ├── GranularitySelector
+│   └── Overlay Configuration (when active)
+├── Display Cards
+│   ├── MetricsSummary
+│   │   └── OperatorSelector (Card Control)
+│   ├── ChartRenderer
+│   │   └── ChartTypeSelector (Card Control)
+│   └── DataTable
+│       └── ViewSelector (Card Control)
+└── URL State Management
+    └── useUrlState hook
 ```
 
-### State Management
+### Data Flow
 
-All state lives in `page.tsx` and flows down to components:
+1. **Raw data** → Filtered by date range
+2. **Transform functions** → Group by date/type
+3. **State updates** → Trigger re-renders
+4. **URL sync** → Update browser location
+5. **Components** → Display formatted data
 
-- `selectedTable` - Current data source
-- `selectedMetric` - Which metric to display
-- `groupBy` - How to group data (org/team/person)
-- `chartType` - Visual representation type
-- `granularity` - Time aggregation level
-- `selectedDateRange` - Time filter
-- `overlayActive` - Whether overlay is shown
-- `overlayActiveTable`, `overlayActiveMetric`, etc. - Overlay configuration
+### Key Design Patterns
 
-## Current Implementation
+- **Single source of truth**: All state in page.tsx
+- **Derived state**: Use useMemo for calculations
+- **Pure components**: Display only, no business logic
+- **URL as state**: Shareable, bookmarkable views
+- **Config-driven**: Data sources define available options
+- **Control hierarchy**: Clear separation between filter/view/card controls
 
-### How Controls Work
+### Recharts Implementation
 
-Each control is a stateless component that:
+This dashboard uses Recharts for all visualizations:
 
-1. Receives current value via props
-2. Displays available options from config
-3. Calls parent's onChange handler
-4. Parent updates state → triggers re-render
+- **Single charts**: LineChart, AreaChart, BarChart components
+- **Overlays**: ComposedChart allows mixing chart types
+- **Responsive**: Charts resize automatically
+- **Interactive**: Built-in tooltips and hover states
+- **Customizable**: Colors, axes, and formatting options
 
-Example flow:
-
-```typescript
-// User selects "By Team" in GroupBySelector
-onGroupByChange("team")
-  → setGroupBy("team") in page.tsx
-  → groupEventsByType() recalculates with new grouping
-  → chartData updates
-  → All components re-render with new data
-```
-
-### Data Transformation Pipeline
-
-#### Raw Data Structure
-
-```javascript
-// githubPRData example
-{
-  id: "pr-001",
-  created_at: "2025-05-15T08:30:00Z",
-  author: "sarah_chen",
-  team: "platform",
-  lines_added: 234,
-  lines_removed: 45,
-  // ... more fields
-}
-```
-
-#### Transformed for Charts/Tables
-
-**Org View (single series):**
-
-```javascript
-[
-  { name: "May 15", pullRequests: 5, mergeRate: 100, ... },
-  { name: "May 16", pullRequests: 7, mergeRate: 71.4, ... }
-]
-```
-
-**Team View (multi-series):**
-
-```javascript
-[
-  {
-    name: "May 15",
-    "Platform Team": 3, // PR count for Platform
-    "Product Team": 2, // PR count for Product
-    "Platform Team_hasData": true,
-    "Product Team_hasData": true,
-  },
-];
-```
-
-## Data Flow Patterns
-
-### Primary Data Flow
-
-1. Raw events filtered by date range in `dataTables`
-2. Transformed by `groupEventsByDate()` or `groupEventsByType()`
-3. Stored in `chartData` state
-4. Passed to both ChartRenderer and DataTable
-
-### Overlay Data Flow
-
-1. Overlay configuration stored in separate state variables
-2. Overlay data calculated in `overlayData` using same transformation functions
-3. ChartRenderer merges data with `overlay_` prefix
-4. DataTable merges data following the same pattern
-
-## Patterns to Preserve
-
-### 1. Single Source of Truth
-
-- All data transformation happens in `page.tsx`
-- Components are pure renderers
-- No duplicate state or logic
-
-### 2. Configuration-Driven
-
-```javascript
-// dataSourceConfig drives available options
-githubPR: {
-  metrics: [...],
-  groupByOptions: [
-    { value: "org", label: "🏢 Org View" },
-    { value: "team", label: "👥 By Team" },
-    { value: "person", label: "👤 By Individual" }
-  ]
-}
-```
-
-### 3. Reusable Data Functions
-
-- `groupEventsByType()` - Handles all grouping logic
-- `formatValue()` - Consistent formatting across components
-- `calculateMetricsFromEvents()` - Centralized metric calculation
-
-### 4. Props Flow Pattern
-
-```
-page.tsx (state)
-  → component (props)
-  → user interaction
-  → callback to page.tsx
-  → state update
-  → re-render
-```
-
-## Phase 2: Overlay Support
-
-### Implementation Status: ✅ COMPLETE
-
-The table now supports overlays with the same flexibility as charts:
-
-- Overlay data merged into display data
-- Column headers show "Metric - Group" format
-- Supports all groupBy combinations
-- Handles org/team/person views correctly
-
-### Key Implementation Details
-
-#### Data Merging Strategy
-
-```javascript
-// In DataTable.tsx
-const mergedData = React.useMemo(() => {
-  if (!overlayActive || !overlayData) return currentData;
-
-  return currentData.map((row, index) => {
-    const overlayRow = overlayData[index];
-    const merged = { ...row };
-
-    if (overlayGroupBy === "org") {
-      // For org view, only add selected metric
-      merged[`${overlayMetric}_overlay`] = overlayRow[overlayMetric];
-    } else {
-      // For team/person, add all columns
-      Object.keys(overlayRow).forEach((key) => {
-        if (key !== "name" && !key.endsWith("_hasData")) {
-          merged[`${key}_overlay`] = overlayRow[key];
-        }
-      });
-    }
-
-    return merged;
-  });
-}, [currentData, overlayData, overlayActive, overlayGroupBy, overlayMetric]);
-```
-
-#### Column Header Format
-
-Headers use a clean "Metric - Group" format:
-
-- "Pull Requests - Organization"
-- "Incidents - Platform Team"
-- "MTTR - Product Team"
-
-This format clearly shows what metric is being displayed for which group.
-
-## Phase 3: Record View
-
-### Design Goals
-
-- Show raw event records (not aggregated)
-- Group by selected `groupBy` option
-- Display all relevant columns from config
-- Handle overlays as separate tables
-
-### Implementation Strategy
-
-1. **Add View Toggle:**
-
-```typescript
-// In page.tsx
-const [tableView, setTableView] = useState<"day" | "record">("day");
-
-// Add to table card header
-<ViewSelector view={tableView} onViewChange={setTableView} />;
-```
-
-2. **Pass Raw Data to DataTable:**
-
-```typescript
-<DataTable
-  currentData={tableView === "day" ? chartData : rawData}
-  viewMode={tableView}
-  // ... other props
-/>
-```
-
-3. **Record View Rendering:**
-
-```typescript
-// In DataTable.tsx
-if (viewMode === "record") {
-  return <RecordTable data={currentData} groupBy={groupBy} />;
-}
-```
-
-4. **RecordTable Component Structure:**
-
-```typescript
-function RecordTable({ data, groupBy }) {
-  // Group records by groupBy field
-  const grouped = useMemo(() => {
-    return data.reduce((acc, record) => {
-      const key = getGroupingKey(record, selectedTable, groupBy);
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(record);
-      return acc;
-    }, {});
-  }, [data, groupBy]);
-
-  return (
-    <div>
-      {Object.entries(grouped).map(([group, records]) => (
-        <div key={group} className="mb-6">
-          <h3 className="font-semibold bg-gray-100 p-2">{group}</h3>
-          <table>{/* Render records */}</table>
-        </div>
-      ))}
-    </div>
-  );
-}
-```
-
-### Column Selection
-
-Use `dataSourceConfig[selectedTable].tableColumns` to determine which columns to show:
-
-```javascript
-// From chartConfig.js
-tableColumns: [
-  { key: "pullRequests", label: "Pull Requests", format: "number" },
-  { key: "mergeRate", label: "Merge Rate (%)", format: "percentage" },
-  { key: "avgReviewTime", label: "Review Time (hrs)", format: "decimal" },
-  { key: "linesChanged", label: "Lines Changed", format: "number" },
-];
-```
-
-### Overlay Handling in Record View
-
-- Render as completely separate table below primary table
-- Clear visual separation
-- Each table shows its own data source and metrics
-
-## Technical Notes
-
-### Key Functions to Reuse
-
-1. **`getGroupingKey()`** - Extracts grouping value from record
-2. **`formatValue()`** - Consistent formatting
-3. **`groupEventsByType()`** - Can adapt for record grouping
-4. **`calculateMetricsFromEvents()`** - For any aggregations needed
-5. **`getColumnLabel()`** - Generates "Metric - Group" format labels
-
-### State Management Best Practices
-
-- Keep all state in page.tsx
-- Components should be stateless when possible
-- Use `useMemo` for expensive calculations
-- Maintain single source of truth for data
-
-### Performance Considerations
-
-- DataTable re-renders on any prop change
-- Use React.memo if performance becomes issue
-- Consider virtualization for large record sets
-- Memoize column calculations
-
-### Error Prevention
-
-- Always filter out `_hasData` fields from display
-- Handle empty data arrays gracefully
-- Validate groupBy values against config
-- Format values consistently using config
-- Show "N/A" for null/undefined values
-
-This guide serves as a technical reference for the dashboard table implementation, documenting the architecture, patterns, and current functionality.
+This dashboard demonstrates modern React patterns with Next.js App Router, showcasing how URL state management enables powerful sharing and collaboration features while maintaining a clear control hierarchy for intuitive user interaction.
