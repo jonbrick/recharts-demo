@@ -3,6 +3,7 @@
 import React from "react";
 import { calculateMetricValue } from "../lib/dashboardUtils";
 import { dataSourceConfig } from "../lib/chartConfig.js";
+import clsx from "clsx";
 
 export function MetricsSummary({
   selectedTable,
@@ -11,6 +12,7 @@ export function MetricsSummary({
   granularity,
   data,
   overlayActive = false,
+  className = undefined,
 }) {
   // Extract group keys (exclude 'name' and '_hasData' fields)
   const groupKeys = data?.[0]
@@ -31,6 +33,18 @@ export function MetricsSummary({
   const metricConfig = allMetrics.find((m) => m.key === selectedMetric);
   const metricLabel = metricConfig?.label || selectedMetric;
 
+  // Render a single metric value
+  const renderMetricValue = (value) => (
+    <div className="text-3xl font-bold text-gray-800">{value.toFixed(1)}</div>
+  );
+
+  // Render a metric label
+  const renderMetricLabel = (label) => (
+    <div className="text-sm text-gray-600">
+      {overlayActive ? `${metricLabel} - ${label}` : label}
+    </div>
+  );
+
   if (!isGrouped) {
     // Original behavior for org view
     const value = calculateMetricValue(
@@ -41,20 +55,16 @@ export function MetricsSummary({
     );
 
     return (
-      <div>
-        <div className="text-sm text-gray-600">
-          {overlayActive ? `${metricLabel} - Organization` : "Organization"}
-        </div>
-        <div className="text-3xl font-bold text-gray-800">
-          {value.toFixed(1)}
-        </div>
+      <div className={clsx("metrics-summary", className)}>
+        {renderMetricLabel("Organization")}
+        {renderMetricValue(value)}
       </div>
     );
   }
 
   // New behavior for grouped data
   return (
-    <div className="flex flex-wrap gap-8">
+    <div className={clsx("metrics-summary flex flex-wrap gap-8", className)}>
       {groupKeys.map((groupName) => {
         // Calculate value for this specific group
         const groupValue = data.reduce((sum, row) => {
@@ -68,12 +78,8 @@ export function MetricsSummary({
 
         return (
           <div key={groupName}>
-            <div className="text-sm text-gray-600">
-              {overlayActive ? `${metricLabel} - ${groupName}` : groupName}
-            </div>
-            <div className="text-3xl font-bold text-gray-800">
-              {finalValue.toFixed(1)}
-            </div>
+            {renderMetricLabel(groupName)}
+            {renderMetricValue(finalValue)}
           </div>
         );
       })}

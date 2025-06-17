@@ -618,7 +618,7 @@ function DashboardContent() {
                 />
               </div>
             </div>
-            <div className="flex items-center gap-8">
+            <div className="flex items-start gap-4">
               <MetricsSummary
                 key={`${operator}-${selectedMetric}-${groupBy}-${granularity}`}
                 selectedTable={selectedTable}
@@ -630,15 +630,15 @@ function DashboardContent() {
               />
               {overlayActive && overlayData && (
                 <>
-                  <div className="h-12 w-px bg-gray-200 dark:bg-gray-700" />
                   <MetricsSummary
+                    className="border-l border-gray-200 dark:border-gray-700 pl-8"
                     key={`overlay-${operator}-${overlayActiveMetric}-${overlayActiveGroupBy}-${granularity}`}
                     selectedTable={overlayActiveTable}
                     selectedMetric={overlayActiveMetric}
                     operator={operator}
                     granularity={granularity}
                     data={overlayData}
-                    overlayActive={overlayActive}
+                    overlayActive={true}
                   />
                 </>
               )}
