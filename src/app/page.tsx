@@ -69,7 +69,7 @@ function DashboardContent() {
   // Load state from URL on mount
   useEffect(() => {
     const state = getStateFromUrl();
-    if (state) {
+    if (state && Object.keys(state).length > 0) {
       // Apply state from URL
       setSelectedTable(state.selectedTable || "githubPR");
       setSelectedMetric(state.selectedMetric || "pullRequests");
@@ -84,8 +84,20 @@ function DashboardContent() {
       setGranularity(state.granularity || "monthly");
       setOperator(state.operator || "sum");
       setTableView(state.tableView || "day");
+
+      // Apply overlay state from URL
+      if (state.overlayActive !== undefined)
+        setOverlayActive(state.overlayActive);
+      if (state.overlayActiveTable)
+        setOverlayActiveTable(state.overlayActiveTable);
+      if (state.overlayActiveMetric)
+        setOverlayActiveMetric(state.overlayActiveMetric);
+      if (state.overlayActiveGroupBy)
+        setOverlayActiveGroupBy(state.overlayActiveGroupBy);
+      if (state.overlayActiveChartType)
+        setOverlayActiveChartType(state.overlayActiveChartType);
     } else {
-      // Set default state and update URL
+      // Set default state and update URL with ALL parameters
       updateUrl({
         selectedTable: "githubPR",
         selectedMetric: "pullRequests",
@@ -97,10 +109,16 @@ function DashboardContent() {
         chartType: "line",
         granularity: "monthly",
         operator: "sum",
-        tableView: "day", // Changed from "record" to "day"
+        tableView: "day",
+        // Include all overlay parameters with defaults
+        overlayActive: false,
+        overlayActiveTable: "",
+        overlayActiveMetric: "",
+        overlayActiveGroupBy: "org",
+        overlayActiveChartType: "line",
       });
     }
-  }, [searchParams]);
+  }, [searchParams, getStateFromUrl, updateUrl]);
 
   // Available data tables - filtered by selected date range
   const dataTables = useMemo(() => {

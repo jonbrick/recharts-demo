@@ -31,6 +31,7 @@ const URL_PARAMS = {
   granularity: "gran",
   operator: "op",
   tableView: "table",
+  overlayActive: "overlay",
   overlayActiveTable: "o_source",
   overlayActiveMetric: "o_metric",
   overlayActiveGroupBy: "o_group",
@@ -107,22 +108,33 @@ export function useUrlState() {
       state.selectedDateRange = { from: dateFrom, to: dateTo };
     }
 
-    // Check if overlay is active by looking for overlay params
+    // Read overlay active state explicitly
+    const overlayActive = searchParams.get(URL_PARAMS.overlayActive);
+    if (overlayActive !== null) {
+      state.overlayActive = overlayActive === "true";
+    }
+
+    // Read other overlay params
     const overlayTable = searchParams.get(URL_PARAMS.overlayActiveTable);
-    const overlayMetric = searchParams.get(URL_PARAMS.overlayActiveMetric);
-
-    if (overlayTable && overlayMetric) {
-      state.overlayActive = true;
+    if (overlayTable) {
       state.overlayActiveTable = overlayTable;
+    }
+
+    const overlayMetric = searchParams.get(URL_PARAMS.overlayActiveMetric);
+    if (overlayMetric) {
       state.overlayActiveMetric = overlayMetric;
+    }
 
-      const overlayGroupBy = searchParams.get(URL_PARAMS.overlayActiveGroupBy);
-      if (overlayGroupBy) state.overlayActiveGroupBy = overlayGroupBy;
+    const overlayGroupBy = searchParams.get(URL_PARAMS.overlayActiveGroupBy);
+    if (overlayGroupBy) {
+      state.overlayActiveGroupBy = overlayGroupBy;
+    }
 
-      const overlayChartType = searchParams.get(
-        URL_PARAMS.overlayActiveChartType
-      );
-      if (overlayChartType) state.overlayActiveChartType = overlayChartType;
+    const overlayChartType = searchParams.get(
+      URL_PARAMS.overlayActiveChartType
+    );
+    if (overlayChartType) {
+      state.overlayActiveChartType = overlayChartType;
     }
 
     return state;
@@ -172,8 +184,10 @@ export function useUrlState() {
         }
       }
 
-      // Update overlay parameters
+      // Update overlay active parameter explicitly
       if (updates.overlayActive !== undefined) {
+        params.set(URL_PARAMS.overlayActive, updates.overlayActive.toString());
+
         if (!updates.overlayActive) {
           // Remove all overlay params if overlay is disabled
           params.delete(URL_PARAMS.overlayActiveTable);
