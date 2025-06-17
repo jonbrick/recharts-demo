@@ -307,7 +307,15 @@ function DashboardContent() {
 
   const handleOperatorChange = (newOperator: string) => {
     setOperator(newOperator);
-    updateUrl({ operator: newOperator });
+    updateUrl({
+      operator: newOperator,
+      // Preserve current overlay state
+      overlayActive,
+      overlayActiveTable,
+      overlayActiveMetric,
+      overlayActiveGroupBy,
+      overlayActiveChartType,
+    });
   };
 
   const handleTableViewChange = (newView: string) => {
