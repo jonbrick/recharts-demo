@@ -69,11 +69,9 @@ function DashboardContent() {
   // Sync state with URL
   useEffect(() => {
     const urlState = getStateFromUrl();
-    console.log("[DashboardContent] Loading state from URL:", urlState);
 
     // If no URL params, set defaults and exit
     if (Object.keys(urlState).length === 0) {
-      console.log("[DashboardContent] No URL params found, setting defaults");
       updateUrl({
         selectedTable: "githubPR",
         selectedMetric: "pullRequests",
@@ -610,7 +608,7 @@ function DashboardContent() {
                 selectedMetric={selectedMetric}
                 operator={operator}
                 granularity={granularity}
-                data={allTimeData}
+                data={chartData}
               />
               {overlayActive && overlayData && (
                 <>

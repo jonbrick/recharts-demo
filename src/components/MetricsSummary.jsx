@@ -11,17 +11,17 @@ export function MetricsSummary({
   granularity,
   data,
 }) {
-  // Calculate org-level data once
-  const orgData = data;
+  // Extract group keys (exclude 'name' and '_hasData' fields)
+  const groupKeys = data?.[0]
+    ? Object.keys(data[0]).filter(
+        (k) => k !== "name" && !k.endsWith("_hasData")
+      )
+    : [];
 
-  const value = calculateMetricValue(
-    orgData,
-    selectedMetric,
-    granularity,
-    operator
-  );
+  // Check if we have grouped data (multiple columns beyond just metrics)
+  const isGrouped = groupKeys.length > 1 && !groupKeys.includes(selectedMetric);
 
-  // Get the metric label from config
+  // Get metric label from config
   const config = dataSourceConfig[selectedTable];
   const allMetrics = [...config.metrics];
   if (config.overlayMetric) {
@@ -30,15 +30,52 @@ export function MetricsSummary({
   const metricConfig = allMetrics.find((m) => m.key === selectedMetric);
   const metricLabel = metricConfig?.label || selectedMetric;
 
-  // Format the operator text
-  const operatorText = operator === "average" ? "average per day" : "total";
+  if (!isGrouped) {
+    // Original behavior for org view
+    const value = calculateMetricValue(
+      data,
+      selectedMetric,
+      granularity,
+      operator
+    );
 
-  return (
-    <div className="flex flex-col gap-2">
-      <div className="text-sm text-gray-600 font-medium">
-        {`Summary card: ${metricLabel} ${operatorText}`}
+    return (
+      <div>
+        <div className="text-sm text-gray-600">
+          {metricLabel} - Organization
+        </div>
+        <div className="text-3xl font-bold text-gray-800">
+          {value.toFixed(1)}
+        </div>
       </div>
-      <div className="text-3xl font-bold text-gray-800">{value.toFixed(1)}</div>
+    );
+  }
+
+  // New behavior for grouped data
+  return (
+    <div className="flex flex-wrap gap-8">
+      {groupKeys.map((groupName) => {
+        // Calculate value for this specific group
+        const groupValue = data.reduce((sum, row) => {
+          return sum + (row[groupName] || 0);
+        }, 0);
+
+        const finalValue =
+          operator === "average" && data.length > 0
+            ? groupValue / data.length
+            : groupValue;
+
+        return (
+          <div key={groupName}>
+            <div className="text-sm text-gray-600">
+              {metricLabel} - {groupName}
+            </div>
+            <div className="text-3xl font-bold text-gray-800">
+              {finalValue.toFixed(1)}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

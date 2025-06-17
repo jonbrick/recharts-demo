@@ -62,50 +62,42 @@ export function useUrlState() {
 
   // Read current state from URL
   const getStateFromUrl = useCallback((): Partial<DashboardState> => {
-    console.log("[useUrlState] Reading from URL:", searchParams.toString());
     const state: Partial<DashboardState> = {};
 
     // Read simple string parameters
     const selectedTable = searchParams.get(URL_PARAMS.selectedTable);
     if (selectedTable) {
       state.selectedTable = selectedTable;
-      console.log("[useUrlState] Found selectedTable:", selectedTable);
     }
 
     const selectedMetric = searchParams.get(URL_PARAMS.selectedMetric);
     if (selectedMetric) {
       state.selectedMetric = selectedMetric;
-      console.log("[useUrlState] Found selectedMetric:", selectedMetric);
     }
 
     const groupBy = searchParams.get(URL_PARAMS.groupBy);
     if (groupBy) {
       state.groupBy = groupBy;
-      console.log("[useUrlState] Found groupBy:", groupBy);
     }
 
     const chartType = searchParams.get(URL_PARAMS.chartType);
     if (chartType) {
       state.chartType = chartType;
-      console.log("[useUrlState] Found chartType:", chartType);
     }
 
     const granularity = searchParams.get(URL_PARAMS.granularity);
     if (granularity) {
       state.granularity = granularity;
-      console.log("[useUrlState] Found granularity:", granularity);
     }
 
     const operator = searchParams.get(URL_PARAMS.operator);
     if (operator) {
       state.operator = operator;
-      console.log("[useUrlState] Found operator:", operator);
     }
 
     const tableView = searchParams.get(URL_PARAMS.tableView);
     if (tableView) {
       state.tableView = tableView;
-      console.log("[useUrlState] Found tableView:", tableView);
     }
 
     // Read date range
@@ -113,12 +105,6 @@ export function useUrlState() {
     const dateTo = parseDate(searchParams.get(URL_PARAMS.dateTo));
     if (dateFrom && dateTo) {
       state.selectedDateRange = { from: dateFrom, to: dateTo };
-      console.log(
-        "[useUrlState] Found date range:",
-        formatDate(dateFrom),
-        "to",
-        formatDate(dateTo)
-      );
     }
 
     // Check if overlay is active by looking for overlay params
@@ -137,23 +123,14 @@ export function useUrlState() {
         URL_PARAMS.overlayActiveChartType
       );
       if (overlayChartType) state.overlayActiveChartType = overlayChartType;
-
-      console.log("[useUrlState] Found overlay config:", {
-        table: overlayTable,
-        metric: overlayMetric,
-        groupBy: overlayGroupBy,
-        chartType: overlayChartType,
-      });
     }
 
-    console.log("[useUrlState] Final parsed state:", state);
     return state;
   }, [searchParams]);
 
   // Update URL with new state
   const updateUrl = useCallback(
     (updates: Partial<DashboardState>) => {
-      console.log("[useUrlState] Updating URL with:", updates);
       const params = new URLSearchParams(searchParams.toString());
 
       // Update simple parameters
@@ -203,7 +180,6 @@ export function useUrlState() {
           params.delete(URL_PARAMS.overlayActiveMetric);
           params.delete(URL_PARAMS.overlayActiveGroupBy);
           params.delete(URL_PARAMS.overlayActiveChartType);
-          console.log("[useUrlState] Removed overlay params");
         }
       }
 
@@ -229,7 +205,6 @@ export function useUrlState() {
 
       // Update the URL without navigation
       const newUrl = `${pathname}?${params.toString()}`;
-      console.log("[useUrlState] New URL:", newUrl);
       router.push(newUrl, { scroll: false });
     },
     [pathname, router, searchParams]
@@ -271,10 +246,7 @@ export function useUrlState() {
         typeof window !== "undefined"
           ? `${window.location.origin}${pathname}`
           : pathname;
-      const shareableUrl = `${baseUrl}?${params.toString()}`;
-
-      console.log("[useUrlState] Generated shareable URL:", shareableUrl);
-      return shareableUrl;
+      return `${baseUrl}?${params.toString()}`;
     },
     [pathname]
   );
