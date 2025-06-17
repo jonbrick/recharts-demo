@@ -4,34 +4,44 @@
 
 This dashboard visualizes engineering metrics from multiple data sources with real-time URL synchronization. Every interaction updates the URL, making any view instantly shareable with your team.
 
-## Mental Model & Control Hierarchy
+## Mental Model
+
+### A note on control dependencies
+
+All of these controls can happen independent of each other. There are a few key UX concerns, but from a technical standpoint, there's no reason why any control can be in any location on the page.
+
+### A note on control UX
+
+However, due to the size, scope and scale of the data sets were working with we are choosing to separate out some of these controls as a way to start the app with a more manageable data set. These separated controls I am calling "page controls". They are the filters of date picker, and the filters of things like team individual or repo.
+
+## Control Hierarchy
 
 Understanding the control hierarchy is crucial for using the dashboard effectively:
 
-### Filters (Page-Level Controls)
+### Page-Level Controls
 
-Universal constraints that bound all data regardless of view:
+Define the bounding box for looking (card agnostic). Data sets can be so huge we should start with these
 
 - **Date Range** - Time boundaries for all data
-- **Future filters** - Team filter, Status filter, etc.
+- **Future filters** - Team, individual, repo, status, etc. boundaries for all data
 
 ### View Controls
 
-Define WHAT data you're analyzing (applies to all cards):
+Define the data you're analyzing (card agnostic):
 
-- **Data Source** - Which dataset (GitHub PRs, PagerDuty, etc.)
-- **Metric** - What to measure (PR count, merge rate, etc.)
-- **Group By** - How to slice data (Organization, Team, Individual)
-- **Granularity** - Time aggregation (Daily vs All-time)
-- **Overlay** - Secondary dataset for comparison (when active)
+- **Data Source** - What dataset
+- **Metric** - What to measure
+- **Group By** - How to group data
+- **Granularity** - How to present data over time
+- **Overlay** - What data to overlay
 
-### Card-Specific Controls
+### Card Controls
 
-Each card controls its own presentation:
+Define the data you're analyzing (card specific):
 
-- **Metrics Summary**: Operator (Sum/Average)
-- **Chart**: Chart Type, Overlay Chart Type (visualization style)
-- **Table**: View Mode (Day/Record)
+- **Operator** - Sum/Average/etc of summaries (Metrics Summary only)
+- **Chart Type** - Visualization style of chart (Chart only)
+- **Table Type**: Visualization of table (Table only)
 
 ## Data Sources
 
