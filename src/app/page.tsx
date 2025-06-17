@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { useUrlState } from "../hooks/useUrlState";
+import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import {
   DataSourceSelector,
@@ -63,18 +64,17 @@ function DashboardContent() {
 
   // Initialize URL state management
   const { getStateFromUrl, updateUrl, getShareableUrl } = useUrlState();
+  const searchParams = useSearchParams();
 
-  // Load initial state from URL on mount
+  // Sync state with URL
   useEffect(() => {
     const urlState = getStateFromUrl();
     console.log("[DashboardContent] Loading state from URL:", urlState);
 
-    // Check if URL has no parameters
+    // If no URL params, set defaults and exit
     if (Object.keys(urlState).length === 0) {
       console.log("[DashboardContent] No URL params found, setting defaults");
-
-      // Define your default view
-      const defaultState = {
+      updateUrl({
         selectedTable: "githubPR",
         selectedMetric: "pullRequests",
         selectedDateRange: {
@@ -87,44 +87,30 @@ function DashboardContent() {
         operator: "sum",
         tableView: "record",
         overlayActive: false,
-      };
-
-      // Update URL with defaults (this will trigger a navigation)
-      updateUrl(defaultState);
-
-      // Also set the state (so it updates immediately)
-      setSelectedTable(defaultState.selectedTable);
-      setSelectedMetric(defaultState.selectedMetric);
-      setSelectedDateRange(defaultState.selectedDateRange);
-      setGroupBy(defaultState.groupBy);
-      setChartType(defaultState.chartType);
-      setGranularity(defaultState.granularity);
-      setOperator(defaultState.operator);
-      setTableView(defaultState.tableView);
-      return; // Exit early since we're setting defaults
+      });
+      return;
     }
 
-    // Apply URL state to component state
-    if (urlState.chartType) setChartType(urlState.chartType);
-    if (urlState.granularity) setGranularity(urlState.granularity);
-    if (urlState.selectedTable) setSelectedTable(urlState.selectedTable);
-    if (urlState.selectedMetric) setSelectedMetric(urlState.selectedMetric);
-    if (urlState.operator) setOperator(urlState.operator);
-    if (urlState.groupBy) setGroupBy(urlState.groupBy);
-    if (urlState.tableView) setTableView(urlState.tableView);
-    if (urlState.selectedDateRange)
-      setSelectedDateRange(urlState.selectedDateRange);
-    if (urlState.overlayActive) setOverlayActive(urlState.overlayActive);
-    if (urlState.overlayActiveTable)
-      setOverlayActiveTable(urlState.overlayActiveTable);
-    if (urlState.overlayActiveMetric)
-      setOverlayActiveMetric(urlState.overlayActiveMetric);
-    if (urlState.overlayActiveGroupBy)
-      setOverlayActiveGroupBy(urlState.overlayActiveGroupBy);
-    if (urlState.overlayActiveChartType)
-      setOverlayActiveChartType(urlState.overlayActiveChartType);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run on mount
+    // Set ALL state from URL (URL is the source of truth)
+    setChartType(urlState.chartType || "line");
+    setGranularity(urlState.granularity || "monthly");
+    setSelectedTable(urlState.selectedTable || "githubPR");
+    setSelectedMetric(urlState.selectedMetric || "pullRequests");
+    setOperator(urlState.operator || "sum");
+    setGroupBy(urlState.groupBy || "org");
+    setTableView(urlState.tableView || "record");
+    setSelectedDateRange(
+      urlState.selectedDateRange || {
+        from: new Date(DEFAULT_PICKER_DATES.defaultStart + "T00:00:00"),
+        to: new Date(DEFAULT_PICKER_DATES.defaultEnd + "T00:00:00"),
+      }
+    );
+    setOverlayActive(urlState.overlayActive || false);
+    setOverlayActiveTable(urlState.overlayActiveTable || "");
+    setOverlayActiveMetric(urlState.overlayActiveMetric || "");
+    setOverlayActiveGroupBy(urlState.overlayActiveGroupBy || "org");
+    setOverlayActiveChartType(urlState.overlayActiveChartType || "line");
+  }, [searchParams]); // Only depend on searchParams changes
 
   // Available data tables - filtered by selected date range
   const dataTables = useMemo(() => {
