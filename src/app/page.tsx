@@ -573,8 +573,8 @@ function DashboardContent() {
           {/* Metrics Summary Card */}
           <Card className="flex flex-col gap-4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <h3 className="text-sm text-gray-600 font-medium">
-                Summary card:{" "}
+              <h3 className="text-lg text-gray-600 font-medium">
+                Summary Card:{" "}
                 {config.metrics.find((m) => m.key === selectedMetric)?.label ||
                   (config.overlayMetric?.key === selectedMetric
                     ? config.overlayMetric.label
@@ -629,8 +629,8 @@ function DashboardContent() {
           {/* Chart Card */}
           <Card className="flex flex-col gap-4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <h3 className="text-sm text-gray-600 font-medium">
-                Trend card:{" "}
+              <h3 className="text-lg text-gray-600 font-medium">
+                Trend Card:{" "}
                 {config.metrics.find((m) => m.key === selectedMetric)?.label ||
                   (config.overlayMetric?.key === selectedMetric
                     ? config.overlayMetric.label
@@ -687,8 +687,8 @@ function DashboardContent() {
           {/* Table Card */}
           <Card className="flex flex-col gap-4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <h3 className="text-sm text-gray-600 font-medium">
-                Table card:{" "}
+              <h3 className="text-lg text-gray-600 font-medium">
+                Table Card:{" "}
                 {config.metrics.find((m) => m.key === selectedMetric)?.label ||
                   (config.overlayMetric?.key === selectedMetric
                     ? config.overlayMetric.label
