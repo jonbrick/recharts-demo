@@ -48,9 +48,9 @@ export function OperatorSelector({ operator, onOperatorChange }) {
       <SelectTrigger className="cursor-pointer">
         <SelectValue />
       </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="average">Average</SelectItem>
+      <SelectContent align="end">
         <SelectItem value="sum">Sum</SelectItem>
+        <SelectItem value="average">Average</SelectItem>
       </SelectContent>
     </Select>
   );
@@ -161,7 +161,7 @@ export function ChartTypeSelector({
       <SelectTrigger className="cursor-pointer">
         <SelectValue />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent align="end">
         {Object.entries(chartTypeConfig).map(([key, config]) => (
           <SelectItem key={key} value={key}>
             {config.label}
@@ -178,9 +178,9 @@ export function ViewSelector({ view, onViewChange }) {
       <SelectTrigger className="cursor-pointer">
         <SelectValue />
       </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="day">X-axis View: Day</SelectItem>
-        <SelectItem value="record">Y-axis View: Records</SelectItem>
+      <SelectContent align="end">
+        <SelectItem value="day">X-axis View (Day)</SelectItem>
+        <SelectItem value="record">Y-axis View (Records)</SelectItem>
       </SelectContent>
     </Select>
   );

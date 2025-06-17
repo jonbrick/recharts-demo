@@ -116,7 +116,9 @@ SelectScrollDownButton.displayName =
 
 const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitives.Content>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitives.Content>
+  React.ComponentPropsWithoutRef<typeof SelectPrimitives.Content> & {
+    align?: "start" | "center" | "end";
+  }
 >(
   (
     {
@@ -125,6 +127,7 @@ const SelectContent = React.forwardRef<
       children,
       sideOffset = 8,
       collisionPadding = 10,
+      align = "center",
       ...props
     },
     forwardedRef
@@ -155,6 +158,7 @@ const SelectContent = React.forwardRef<
         sideOffset={sideOffset}
         position={position}
         collisionPadding={collisionPadding}
+        align={align}
         {...props}
       >
         <SelectScrollUpButton />
