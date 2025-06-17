@@ -572,8 +572,37 @@ function DashboardContent() {
             )}
           </h2>
 
-          {/* Operator and Metrics Card */}
-          <Card className="flex gap-4 justify-between">
+          {/* Metrics Summary Card */}
+          <Card className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <h3 className="text-sm text-gray-600 font-medium">
+                Summary card:{" "}
+                {config.metrics.find((m) => m.key === selectedMetric)?.label ||
+                  (config.overlayMetric?.key === selectedMetric
+                    ? config.overlayMetric.label
+                    : selectedMetric)}{" "}
+                over time
+                {overlayActive && overlayActiveTable && (
+                  <>
+                    {" × "}
+                    {dataSourceConfig[overlayActiveTable].metrics.find(
+                      (m) => m.key === overlayActiveMetric
+                    )?.label ||
+                      (dataSourceConfig[overlayActiveTable].overlayMetric
+                        ?.key === overlayActiveMetric
+                        ? dataSourceConfig[overlayActiveTable].overlayMetric
+                            .label
+                        : overlayActiveMetric)}
+                  </>
+                )}
+              </h3>
+              <div className="flex items-center gap-3">
+                <OperatorSelector
+                  operator={operator}
+                  onOperatorChange={handleOperatorChange}
+                />
+              </div>
+            </div>
             <div className="flex items-center gap-8">
               <MetricsSummary
                 key={`${operator}-${selectedMetric}-${groupBy}-${granularity}`}
@@ -596,12 +625,6 @@ function DashboardContent() {
                   />
                 </>
               )}
-            </div>
-            <div className="flex flex-col gap-4">
-              <OperatorSelector
-                operator={operator}
-                onOperatorChange={handleOperatorChange}
-              />
             </div>
           </Card>
 
@@ -673,6 +696,19 @@ function DashboardContent() {
                     ? config.overlayMetric.label
                     : selectedMetric)}{" "}
                 over time
+                {overlayActive && overlayActiveTable && (
+                  <>
+                    {" × "}
+                    {dataSourceConfig[overlayActiveTable].metrics.find(
+                      (m) => m.key === overlayActiveMetric
+                    )?.label ||
+                      (dataSourceConfig[overlayActiveTable].overlayMetric
+                        ?.key === overlayActiveMetric
+                        ? dataSourceConfig[overlayActiveTable].overlayMetric
+                            .label
+                        : overlayActiveMetric)}
+                  </>
+                )}
               </h3>
               <div className="flex items-center gap-3">
                 <ViewSelector
