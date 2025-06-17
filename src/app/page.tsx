@@ -66,12 +66,26 @@ function DashboardContent() {
   const { getStateFromUrl, updateUrl, getShareableUrl } = useUrlState();
   const searchParams = useSearchParams();
 
-  // Sync state with URL
+  // Load state from URL on mount
   useEffect(() => {
-    const urlState = getStateFromUrl();
-
-    // If no URL params, set defaults and exit
-    if (Object.keys(urlState).length === 0) {
+    const state = getStateFromUrl();
+    if (state) {
+      // Apply state from URL
+      setSelectedTable(state.selectedTable || "githubPR");
+      setSelectedMetric(state.selectedMetric || "pullRequests");
+      setSelectedDateRange(
+        state.selectedDateRange || {
+          from: new Date(DEFAULT_PICKER_DATES.defaultStart + "T00:00:00"),
+          to: new Date(DEFAULT_PICKER_DATES.defaultEnd + "T00:00:00"),
+        }
+      );
+      setGroupBy(state.groupBy || "org");
+      setChartType(state.chartType || "line");
+      setGranularity(state.granularity || "monthly");
+      setOperator(state.operator || "sum");
+      setTableView(state.tableView || "day");
+    } else {
+      // Set default state and update URL
       updateUrl({
         selectedTable: "githubPR",
         selectedMetric: "pullRequests",
@@ -83,32 +97,10 @@ function DashboardContent() {
         chartType: "line",
         granularity: "monthly",
         operator: "sum",
-        tableView: "record",
-        overlayActive: false,
+        tableView: "day", // Changed from "record" to "day"
       });
-      return;
     }
-
-    // Set ALL state from URL (URL is the source of truth)
-    setChartType(urlState.chartType || "line");
-    setGranularity(urlState.granularity || "monthly");
-    setSelectedTable(urlState.selectedTable || "githubPR");
-    setSelectedMetric(urlState.selectedMetric || "pullRequests");
-    setOperator(urlState.operator || "sum");
-    setGroupBy(urlState.groupBy || "org");
-    setTableView(urlState.tableView || "record");
-    setSelectedDateRange(
-      urlState.selectedDateRange || {
-        from: new Date(DEFAULT_PICKER_DATES.defaultStart + "T00:00:00"),
-        to: new Date(DEFAULT_PICKER_DATES.defaultEnd + "T00:00:00"),
-      }
-    );
-    setOverlayActive(urlState.overlayActive || false);
-    setOverlayActiveTable(urlState.overlayActiveTable || "");
-    setOverlayActiveMetric(urlState.overlayActiveMetric || "");
-    setOverlayActiveGroupBy(urlState.overlayActiveGroupBy || "org");
-    setOverlayActiveChartType(urlState.overlayActiveChartType || "line");
-  }, [searchParams]); // Only depend on searchParams changes
+  }, [searchParams]);
 
   // Available data tables - filtered by selected date range
   const dataTables = useMemo(() => {
