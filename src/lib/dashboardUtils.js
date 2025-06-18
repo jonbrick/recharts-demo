@@ -5,6 +5,18 @@ import { dataSourceConfig, isMathMetric } from "./chartConfig.js";
 export const POC_START_DATE = "2025-05-15";
 export const POC_END_DATE = "2025-05-30";
 
+// Current date for relative calculations
+export const TODAY = new Date("2025-05-24T00:00:00");
+
+// Helper function to calculate relative date ranges
+export const getRelativeDateRange = (days) => {
+  const to = new Date(TODAY);
+  const from = new Date(TODAY);
+  from.setDate(from.getDate() - (days - 1)); // -6 for 7 days to include today
+
+  return { from, to };
+};
+
 // Default dates for the date picker
 export const DEFAULT_PICKER_DATES = {
   defaultStart: POC_START_DATE,

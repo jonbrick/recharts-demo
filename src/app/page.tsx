@@ -12,6 +12,8 @@ import {
   GranularitySelector,
   GroupBySelector,
   ViewSelector,
+  DateModeSelector,
+  RelativeDaysSelector,
 } from "../components/ChartControls";
 import { MetricsSummary } from "../components/MetricsSummary";
 import { ChartRenderer } from "../components/ChartRenderer";
@@ -30,6 +32,8 @@ import {
   POC_END_DATE,
   POC_START_DATE_UTC,
   POC_END_DATE_UTC,
+  TODAY,
+  getRelativeDateRange,
 } from "../lib/dashboardUtils";
 import { Card } from "../components/Card";
 import { Button } from "../components/Button";
@@ -43,10 +47,18 @@ function DashboardContent() {
   const [operator, setOperator] = useState("sum");
   const [groupBy, setGroupBy] = useState("org");
   const [tableView, setTableView] = useState("day"); // Default to "day" view
-  const [selectedDateRange, setSelectedDateRange] = useState<DateRange>({
+  const [dateMode, setDateMode] = useState("relative");
+  const [relativeDays, setRelativeDays] = useState(7);
+  const [customDateRange, setCustomDateRange] = useState<DateRange>({
     from: new Date(DEFAULT_PICKER_DATES.defaultStart + "T00:00:00"),
     to: new Date(DEFAULT_PICKER_DATES.defaultEnd + "T00:00:00"),
   });
+  const selectedDateRange = useMemo(() => {
+    if (dateMode === "relative") {
+      return getRelativeDateRange(relativeDays);
+    }
+    return customDateRange;
+  }, [dateMode, relativeDays, customDateRange]);
 
   // Overlay Configuration State (what user is building)
   const [overlayConfiguring, setOverlayConfiguring] = useState(false);
@@ -73,17 +85,13 @@ function DashboardContent() {
       // Apply state from URL
       setSelectedTable(state.selectedTable || "githubPR");
       setSelectedMetric(state.selectedMetric || "pullRequests");
-      setSelectedDateRange(
-        state.selectedDateRange || {
-          from: new Date(DEFAULT_PICKER_DATES.defaultStart + "T00:00:00"),
-          to: new Date(DEFAULT_PICKER_DATES.defaultEnd + "T00:00:00"),
-        }
-      );
       setGroupBy(state.groupBy || "org");
       setChartType(state.chartType || "line");
       setGranularity(state.granularity || "monthly");
       setOperator(state.operator || "sum");
       setTableView(state.tableView || "day");
+      setDateMode(state.dateMode || "relative");
+      setRelativeDays(state.relativeDays || 7);
 
       // Apply overlay state from URL
       if (state.overlayActive !== undefined)
@@ -110,6 +118,8 @@ function DashboardContent() {
         granularity: "monthly",
         operator: "sum",
         tableView: "day",
+        dateMode: "relative",
+        relativeDays: 7,
         // Include all overlay parameters with defaults
         overlayActive: false,
         overlayActiveTable: "",
@@ -295,8 +305,12 @@ function DashboardContent() {
 
   const handleDateRangeChange = (dateRange: DateRange | undefined) => {
     if (dateRange) {
-      setSelectedDateRange(dateRange);
-      updateUrl({ selectedDateRange: dateRange });
+      setCustomDateRange(dateRange);
+      setDateMode("custom");
+      updateUrl({
+        dateMode: "custom",
+        selectedDateRange: dateRange,
+      });
     }
   };
 
@@ -331,6 +345,16 @@ function DashboardContent() {
   const handleTableViewChange = (newView: string) => {
     setTableView(newView);
     updateUrl({ tableView: newView });
+  };
+
+  const handleDateModeChange = (newDateMode: string) => {
+    setDateMode(newDateMode);
+    updateUrl({ dateMode: newDateMode });
+  };
+
+  const handleRelativeDaysChange = (newRelativeDays: number) => {
+    setRelativeDays(newRelativeDays);
+    updateUrl({ relativeDays: newRelativeDays });
   };
 
   const handleAddOverlay = () => {
@@ -415,6 +439,8 @@ function DashboardContent() {
       groupBy,
       tableView,
       selectedDateRange,
+      dateMode,
+      relativeDays,
       overlayActive,
       overlayActiveTable,
       overlayActiveMetric,
@@ -445,35 +471,36 @@ function DashboardContent() {
             Metrics Building UX POC
           </h1>
           <div className="flex gap-2">
-            {selectedDateRange.from?.toISOString() !==
-              new Date(
-                DEFAULT_PICKER_DATES.defaultStart + "T00:00:00"
-              ).toISOString() ||
-            selectedDateRange.to?.toISOString() !==
-              new Date(
-                DEFAULT_PICKER_DATES.defaultEnd + "T00:00:00"
-              ).toISOString() ? (
+            <DateModeSelector
+              dateMode={dateMode}
+              onDateModeChange={handleDateModeChange}
+            />
+            {dateMode === "custom" ? (
+              <DateRangePicker
+                value={selectedDateRange}
+                onChange={handleDateRangeChange}
+                placeholder="Select date range"
+                className="w-64 cursor-pointer"
+              />
+            ) : (
+              <RelativeDaysSelector
+                relativeDays={relativeDays}
+                onRelativeDaysChange={handleRelativeDaysChange}
+              />
+            )}
+            {(dateMode !== "relative" || relativeDays !== 7) && (
               <Button
                 variant="ghost"
                 onClick={() => {
-                  setSelectedDateRange({
-                    from: new Date(
-                      DEFAULT_PICKER_DATES.defaultStart + "T00:00:00"
-                    ),
-                    to: new Date(DEFAULT_PICKER_DATES.defaultEnd + "T00:00:00"),
-                  });
+                  setDateMode("relative");
+                  setRelativeDays(7);
+                  updateUrl({ dateMode: "relative", relativeDays: 7 });
                 }}
                 className="cursor-pointer"
               >
                 Reset range
               </Button>
-            ) : null}
-            <DateRangePicker
-              value={selectedDateRange}
-              onChange={handleDateRangeChange}
-              placeholder="Select date range"
-              className="w-64 cursor-pointer"
-            />
+            )}
             <Button variant="primary" onClick={handleShare}>
               Share View
             </Button>

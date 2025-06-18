@@ -13,6 +13,8 @@ interface DashboardState {
   groupBy: string;
   tableView: string;
   selectedDateRange: DateRange;
+  dateMode: string;
+  relativeDays: number;
   overlayActive: boolean;
   overlayActiveTable: string;
   overlayActiveMetric: string;
@@ -26,6 +28,8 @@ const URL_PARAMS = {
   selectedMetric: "metric",
   dateFrom: "from",
   dateTo: "to",
+  dateMode: "dateMode",
+  relativeDays: "days",
   groupBy: "group",
   chartType: "chart",
   granularity: "gran",
@@ -108,6 +112,17 @@ export function useUrlState() {
       state.selectedDateRange = { from: dateFrom, to: dateTo };
     }
 
+    // Read date mode and relative days
+    const dateMode = searchParams.get(URL_PARAMS.dateMode);
+    if (dateMode) {
+      state.dateMode = dateMode;
+    }
+
+    const relativeDays = searchParams.get(URL_PARAMS.relativeDays);
+    if (relativeDays) {
+      state.relativeDays = parseInt(relativeDays, 10);
+    }
+
     // Read overlay active state explicitly
     const overlayActive = searchParams.get(URL_PARAMS.overlayActive);
     if (overlayActive !== null) {
@@ -184,6 +199,14 @@ export function useUrlState() {
         }
       }
 
+      // Update date mode and relative days
+      if (updates.dateMode !== undefined) {
+        params.set(URL_PARAMS.dateMode, updates.dateMode);
+      }
+      if (updates.relativeDays !== undefined) {
+        params.set(URL_PARAMS.relativeDays, updates.relativeDays.toString());
+      }
+
       // Update overlay active parameter explicitly
       if (updates.overlayActive !== undefined) {
         params.set(URL_PARAMS.overlayActive, updates.overlayActive.toString());
@@ -234,6 +257,8 @@ export function useUrlState() {
       params.set(URL_PARAMS.selectedMetric, state.selectedMetric);
       params.set(URL_PARAMS.dateFrom, formatDate(state.selectedDateRange.from));
       params.set(URL_PARAMS.dateTo, formatDate(state.selectedDateRange.to));
+      params.set(URL_PARAMS.dateMode, state.dateMode);
+      params.set(URL_PARAMS.relativeDays, state.relativeDays.toString());
       params.set(URL_PARAMS.groupBy, state.groupBy);
       params.set(URL_PARAMS.chartType, state.chartType);
       params.set(URL_PARAMS.granularity, state.granularity);

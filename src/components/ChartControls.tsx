@@ -215,3 +215,34 @@ export function DatePickerSelector({ onDateChange }) {
     </Select>
   );
 }
+
+export function DateModeSelector({ dateMode, onDateModeChange }) {
+  return (
+    <Select value={dateMode} onValueChange={onDateModeChange}>
+      <SelectTrigger className="cursor-pointer">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="custom">Custom</SelectItem>
+        <SelectItem value="relative">Relative</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+}
+
+export function RelativeDaysSelector({ relativeDays, onRelativeDaysChange }) {
+  return (
+    <Select
+      value={relativeDays.toString()}
+      onValueChange={(value) => onRelativeDaysChange(parseInt(value, 10))}
+    >
+      <SelectTrigger className="cursor-pointer">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="7">Last 7 days</SelectItem>
+        <SelectItem value="14">Last 14 days</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+}
