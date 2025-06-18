@@ -162,7 +162,6 @@ function DashboardContent() {
   }, [selectedDateRange]);
 
   const data = dataTables[selectedTable];
-  const config = dataSourceConfig[selectedTable];
 
   // Ensure groupBy is valid for the selectedTable, otherwise default to 'org'
   useEffect(() => {
