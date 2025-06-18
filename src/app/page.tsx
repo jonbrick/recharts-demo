@@ -348,8 +348,24 @@ function DashboardContent() {
   };
 
   const handleDateModeChange = (newDateMode: string) => {
-    setDateMode(newDateMode);
-    updateUrl({ dateMode: newDateMode });
+    if (newDateMode === "custom") {
+      // Preserve current relative date range when switching to custom
+      const currentRelativeRange = getRelativeDateRange(relativeDays);
+      setCustomDateRange(currentRelativeRange);
+      setDateMode(newDateMode);
+      updateUrl({
+        dateMode: newDateMode,
+        selectedDateRange: currentRelativeRange,
+      });
+    } else {
+      // Switch to relative mode, default to 7 days
+      setDateMode(newDateMode);
+      setRelativeDays(7);
+      updateUrl({
+        dateMode: newDateMode,
+        relativeDays: 7,
+      });
+    }
   };
 
   const handleRelativeDaysChange = (newRelativeDays: number) => {
@@ -471,6 +487,19 @@ function DashboardContent() {
             Metrics Building UX POC
           </h1>
           <div className="flex gap-2">
+            {(dateMode !== "relative" || relativeDays !== 7) && (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setDateMode("relative");
+                  setRelativeDays(7);
+                  updateUrl({ dateMode: "relative", relativeDays: 7 });
+                }}
+                className="cursor-pointer"
+              >
+                Reset range
+              </Button>
+            )}
             <DateModeSelector
               dateMode={dateMode}
               onDateModeChange={handleDateModeChange}
@@ -487,19 +516,6 @@ function DashboardContent() {
                 relativeDays={relativeDays}
                 onRelativeDaysChange={handleRelativeDaysChange}
               />
-            )}
-            {(dateMode !== "relative" || relativeDays !== 7) && (
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setDateMode("relative");
-                  setRelativeDays(7);
-                  updateUrl({ dateMode: "relative", relativeDays: 7 });
-                }}
-                className="cursor-pointer"
-              >
-                Reset range
-              </Button>
             )}
             <Button variant="primary" onClick={handleShare}>
               Share View

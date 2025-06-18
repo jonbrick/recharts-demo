@@ -6,7 +6,7 @@ export const POC_START_DATE = "2025-05-15";
 export const POC_END_DATE = "2025-05-30";
 
 // Current date for relative calculations
-export const TODAY = new Date("2025-05-24T00:00:00");
+export const TODAY = new Date("2025-05-25T00:00:00");
 
 // Helper function to calculate relative date ranges
 export const getRelativeDateRange = (days) => {
