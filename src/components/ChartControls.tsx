@@ -224,7 +224,7 @@ export function DateModeSelector({ dateMode, onDateModeChange }) {
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="relative">Relative</SelectItem>
-        <SelectItem value="custom">Custom</SelectItem>
+        <SelectItem value="custom">Datepicker</SelectItem>
       </SelectContent>
     </Select>
   );
