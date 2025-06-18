@@ -527,7 +527,7 @@ function DashboardContent() {
               />
             )}
             <Button variant="primary" onClick={handleShare}>
-              Share View
+              Save View
             </Button>
           </div>
         </div>
