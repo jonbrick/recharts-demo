@@ -173,6 +173,46 @@ function getDisplayName(key, dataSource, groupBy) {
 }
 
 /**
+ * Returns all possible groups for a given data source and groupBy type.
+ * This ensures we show all groups even if they have no data in the selected range.
+ * @param {string} dataSource - The data source type
+ * @param {string} groupBy - The grouping type
+ * @returns {string[]} Array of all possible group keys
+ */
+function getAllPossibleGroups(dataSource, groupBy) {
+  switch (groupBy) {
+    case "org":
+      return ["all"]; // Organization view has single group
+
+    case "team":
+      return ["platform", "product"];
+
+    case "person":
+      return [
+        "sarah_chen",
+        "mike_johnson",
+        "priya_patel",
+        "alex_kim",
+        "jordan_smith",
+        "maya_rodriguez",
+        "david_wilson",
+        "lisa_taylor",
+      ];
+
+    case "repo":
+      // For GitHub Actions
+      return ["platform-services", "product-api", "web-app", "mobile-app"];
+
+    case "service":
+      // For PagerDuty
+      return ["api", "web", "database", "auth"];
+
+    default:
+      return [];
+  }
+}
+
+/**
  * Calculates metrics from an array of raw event objects for a given data source.
  * @param {Object[]} events - Array of event objects.
  * @param {string} dataSource - The data source type.
@@ -383,12 +423,9 @@ export function groupEventsByType(
       : getFullDateRange();
   const grouped = {};
 
-  // First pass: discover ALL possible series from the entire dataset
-  const allSeries = new Set();
-  events.forEach((event) => {
-    const groupKey = getGroupingKey(event, dataSource, groupBy);
-    allSeries.add(groupKey);
-  });
+  // Get ALL possible series, not just from filtered events
+  const allSeriesArray = getAllPossibleGroups(dataSource, groupBy);
+  const allSeries = new Set(allSeriesArray);
 
   // Group events by series and date
   events.forEach((event) => {
@@ -425,8 +462,12 @@ export function groupEventsByType(
       // For math metrics with no data, use null; for count metrics, use 0
       if (eventsForDate.length === 0) {
         dayData[displayName] = isMathMetric(selectedMetric) ? null : 0;
+        dayData[`${displayName}_display`] = isMathMetric(selectedMetric)
+          ? "N/A"
+          : "0";
       } else {
         dayData[displayName] = metrics[selectedMetric];
+        dayData[`${displayName}_display`] = String(metrics[selectedMetric]);
       }
 
       // Add flag for tooltip logic

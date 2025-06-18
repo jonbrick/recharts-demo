@@ -235,25 +235,27 @@ export function DataTable({
               </td>
               {groupBy === "org" && !overlayActive ? (
                 <td className="border border-gray-200 px-4 py-3 text-gray-700">
-                  {formatValue(
-                    row[selectedMetric],
-                    column ? column.format : "number"
-                  )}
+                  {row[`${selectedMetric}_display`] ||
+                    formatValue(
+                      row[selectedMetric],
+                      column ? column.format : "number"
+                    )}
                 </td>
               ) : groupBy === "org" && overlayActive ? (
                 <>
                   <td className="border border-gray-200 px-4 py-3 text-gray-700">
-                    {formatValue(
-                      row[selectedMetric],
-                      column ? column.format : "number"
-                    )}
+                    {row[`${selectedMetric}_display`] ||
+                      formatValue(
+                        row[selectedMetric],
+                        column ? column.format : "number"
+                      )}
                   </td>
                   {overlayColumnKeys.map((key) => (
                     <td
                       key={key}
                       className="border border-gray-200 px-4 py-3 text-gray-700"
                     >
-                      {formatValue(row[key], "number")}
+                      {row[`${key}_display`] || formatValue(row[key], "number")}
                     </td>
                   ))}
                 </>
@@ -263,7 +265,7 @@ export function DataTable({
                     key={key}
                     className="border border-gray-200 px-4 py-3 text-gray-700"
                   >
-                    {formatValue(row[key], "number")}
+                    {row[`${key}_display`] || formatValue(row[key], "number")}
                   </td>
                 ))
               )}

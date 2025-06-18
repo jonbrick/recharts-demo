@@ -36,9 +36,13 @@ export function MetricsSummary({
   const metricLabel = metricConfig?.label || selectedMetric;
 
   // Render a single metric value
-  const renderMetricValue = (value) => (
-    <div className="text-3xl font-bold text-gray-800">{value.toFixed(1)}</div>
-  );
+  const renderMetricValue = (value) => {
+    const displayValue =
+      value === null || value === undefined ? "N/A" : Number(value).toFixed(1);
+    return (
+      <div className="text-3xl font-bold text-gray-800">{displayValue}</div>
+    );
+  };
 
   // Render a metric label
   const renderMetricLabel = (label) => {

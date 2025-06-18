@@ -85,6 +85,42 @@ Measures deployment activity:
 
 Every selection instantly updates the URL, creating a unique link to your exact configuration.
 
+key: num
+key_hasData: boolean
+key_display: num
+
+## Scenario 1: Count Metric WITH Data (e.g., Platform Team incidents)
+
+| Key                     | Value | What Recharts Displays | What Table Shows |
+| ----------------------- | ----- | ---------------------- | ---------------- |
+| `Platform Team`         | 3     | not shown              | not shown        |
+| `Platform Team_hasData` | true  | not shown              | not shown        |
+| `Platform Team_display` | 3     | `3`                    | `3`              |
+
+## Scenario 2: Count Metric NO Data (e.g., Product Team incidents)
+
+| Key                    | Value | What Recharts Displays | What Table Shows |
+| ---------------------- | ----- | ---------------------- | ---------------- |
+| `Product Team`         | 0     | not shown              | not shown        |
+| `Product Team_hasData` | false | not shown              | not shown        |
+| `Product Team_display` | 0     | `0`                    | `0`              |
+
+## Scenario 3: Math Metric WITH Data (e.g., Platform Team MTTR)
+
+| Key                     | Value | What Recharts Displays | What Table Shows |
+| ----------------------- | ----- | ---------------------- | ---------------- |
+| `Platform Team`         | 45.5  | not shown              | not shown        |
+| `Platform Team_hasData` | true  | not shown              | not shown        |
+| `Platform Team_display` | 45.5  | `45.5`                 | `45.5`           |
+
+## Scenario 4: Math Metric NO Data (e.g., Product Team MTTR)
+
+| Key                    | Value | What Recharts Displays | What Table Shows                 |
+| ---------------------- | ----- | ---------------------- | -------------------------------- |
+| `Product Team`         | null  | not shown              | not shown                        |
+| `Product Team_hasData` | false | not shown              | not shown                        |
+| `Product Team_display` | null  | not shown (skipped)    | "N/A" string via component logic |
+
 ## Controls
 
 | Control       | Level | Purpose                           | Affects       | Notes                              | Status |
