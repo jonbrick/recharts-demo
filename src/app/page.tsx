@@ -612,33 +612,14 @@ function DashboardContent() {
         <div className="flex flex-col gap-8">
           {/* Metrics Summary Card */}
           <div className="flex flex-col gap-6 border-b  border-gray-200  pb-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               <h2 className="text-md text-gray-600 font-medium">
-                Summary card controls:{" "}
-                {config.metrics.find((m) => m.key === selectedMetric)?.label ||
-                  (config.overlayMetric?.key === selectedMetric
-                    ? config.overlayMetric.label
-                    : selectedMetric)}{" "}
-                {overlayActive && overlayActiveTable && (
-                  <>
-                    {" × "}
-                    {dataSourceConfig[overlayActiveTable].metrics.find(
-                      (m) => m.key === overlayActiveMetric
-                    )?.label ||
-                      (dataSourceConfig[overlayActiveTable].overlayMetric
-                        ?.key === overlayActiveMetric
-                        ? dataSourceConfig[overlayActiveTable].overlayMetric
-                            .label
-                        : overlayActiveMetric)}
-                  </>
-                )}
+                Summary card controls
               </h2>
-              <div className="flex items-center gap-3">
-                <OperatorSelector
-                  operator={operator}
-                  onOperatorChange={handleOperatorChange}
-                />
-              </div>
+              <OperatorSelector
+                operator={operator}
+                onOperatorChange={handleOperatorChange}
+              />
             </div>
             <Card className="flex flex-col gap-4">
               <div className="flex items-start gap-4">
@@ -671,47 +652,29 @@ function DashboardContent() {
 
           {/* Chart Card */}
           <div className="flex flex-col gap-6 border-b  border-gray-200  pb-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               <h2 className="text-md text-gray-600 font-medium">
-                Trend controls:{" "}
-                {config.metrics.find((m) => m.key === selectedMetric)?.label ||
-                  (config.overlayMetric?.key === selectedMetric
-                    ? config.overlayMetric.label
-                    : selectedMetric)}{" "}
-                {overlayActive && overlayActiveTable && (
-                  <>
-                    {" × "}
-                    {dataSourceConfig[overlayActiveTable].metrics.find(
-                      (m) => m.key === overlayActiveMetric
-                    )?.label ||
-                      (dataSourceConfig[overlayActiveTable].overlayMetric
-                        ?.key === overlayActiveMetric
-                        ? dataSourceConfig[overlayActiveTable].overlayMetric
-                            .label
-                        : overlayActiveMetric)}
-                  </>
-                )}
-                {" over time"}
+                Trend controls
               </h2>
               <div className="flex items-center gap-3">
                 <GranularitySelector
                   granularity={granularity}
                   onGranularityChange={handleGranularityChange}
                 />
+                <ChartTypeSelector
+                  chartType={chartType}
+                  onChartTypeChange={handleChartTypeChange}
+                />
                 {overlayActive && !overlayConfiguring && (
                   <>
+                    <span className="text-sm text-gray-500">|</span>
                     <span className="text-sm text-gray-600">Overlay:</span>
                     <ChartTypeSelector
                       chartType={overlayActiveChartType}
                       onChartTypeChange={setOverlayActiveChartType}
                     />
-                    <span className="text-sm text-gray-500">|</span>
                   </>
                 )}
-                <ChartTypeSelector
-                  chartType={chartType}
-                  onChartTypeChange={handleChartTypeChange}
-                />
               </div>
             </div>
             <Card className="flex flex-col gap-4">
@@ -735,26 +698,9 @@ function DashboardContent() {
 
           {/* List Card */}
           <div className="flex flex-col gap-6 border-b  border-gray-200  pb-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               <h2 className="text-md text-gray-600 font-medium">
-                List card controls:{" "}
-                {config.metrics.find((m) => m.key === selectedMetric)?.label ||
-                  (config.overlayMetric?.key === selectedMetric
-                    ? config.overlayMetric.label
-                    : selectedMetric)}{" "}
-                {overlayActive && overlayActiveTable && (
-                  <>
-                    {" × "}
-                    {dataSourceConfig[overlayActiveTable].metrics.find(
-                      (m) => m.key === overlayActiveMetric
-                    )?.label ||
-                      (dataSourceConfig[overlayActiveTable].overlayMetric
-                        ?.key === overlayActiveMetric
-                        ? dataSourceConfig[overlayActiveTable].overlayMetric
-                            .label
-                        : overlayActiveMetric)}
-                  </>
-                )}
+                List card controls
               </h2>
               <div className="flex items-center gap-3">
                 <GranularitySelector
