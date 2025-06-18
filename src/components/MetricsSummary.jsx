@@ -11,8 +11,10 @@ export function MetricsSummary({
   operator,
   granularity,
   data,
-  overlayActive = false,
   className = undefined,
+  dateMode,
+  relativeDays,
+  selectedDateRange,
 }) {
   // Extract group keys (exclude 'name' and '_hasData' fields)
   const groupKeys = data?.[0]
@@ -39,11 +41,32 @@ export function MetricsSummary({
   );
 
   // Render a metric label
-  const renderMetricLabel = (label) => (
-    <div className="text-sm text-gray-600">
-      {overlayActive ? `${metricLabel} - ${label}` : label}
-    </div>
-  );
+  const renderMetricLabel = (label) => {
+    // Build the descriptive label
+    const operation = operator === "sum" ? "Total" : "Average";
+
+    // Format date range
+    let range;
+    if (dateMode === "relative") {
+      range = `last ${relativeDays} days`;
+    } else {
+      const fromMonth = selectedDateRange.from.getMonth() + 1;
+      const fromDay = selectedDateRange.from.getDate();
+      const toMonth = selectedDateRange.to.getMonth() + 1;
+      const toDay = selectedDateRange.to.getDate();
+      range = `${fromMonth}/${fromDay} - ${toMonth}/${toDay}`;
+    }
+
+    // Add group suffix only for non-org views (when isGrouped is true)
+    const suffix = isGrouped ? ` - ${label}` : "";
+
+    return (
+      <div className="text-sm text-gray-600">
+        {operation} {metricLabel.toLowerCase()} over {range}
+        {suffix}
+      </div>
+    );
+  };
 
   if (!isGrouped) {
     // Original behavior for org view

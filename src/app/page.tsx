@@ -629,7 +629,9 @@ function DashboardContent() {
                   operator={operator}
                   granularity={granularity}
                   data={chartData}
-                  overlayActive={overlayActive}
+                  dateMode={dateMode}
+                  relativeDays={relativeDays}
+                  selectedDateRange={selectedDateRange}
                 />
                 {overlayActive && overlayData && (
                   <>
@@ -641,7 +643,9 @@ function DashboardContent() {
                       operator={operator}
                       granularity={granularity}
                       data={overlayData}
-                      overlayActive={true}
+                      dateMode={dateMode}
+                      relativeDays={relativeDays}
+                      selectedDateRange={selectedDateRange}
                     />
                   </>
                 )}
