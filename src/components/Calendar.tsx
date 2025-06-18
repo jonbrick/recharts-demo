@@ -254,10 +254,11 @@ const Calendar = ({
         },
         Day: ({ date, displayMonth }: DayProps) => {
           const buttonRef = React.useRef<HTMLButtonElement>(null);
-          const { activeModifiers, buttonProps, divProps, isButton, isHidden } =
-            useDayRender(date, displayMonth, buttonRef);
-
-          const { selected, today, disabled, range_middle } = activeModifiers;
+          const { buttonProps, divProps, isButton, isHidden } = useDayRender(
+            date,
+            displayMonth,
+            buttonRef
+          );
 
           if (isHidden) {
             return <></>;
@@ -289,7 +290,7 @@ const Calendar = ({
               className={cx("relative", buttonClassName)}
             >
               {buttonChildren}
-              {today && (
+              {/* today && (
                 <span
                   className={cx(
                     "absolute inset-x-1/2 bottom-1.5 h-0.5 w-4 -translate-x-1/2 rounded-[2px]",
@@ -303,7 +304,7 @@ const Calendar = ({
                     }
                   )}
                 />
-              )}
+              ) */}
             </button>
           );
         },
