@@ -2779,7 +2779,7 @@ export const pagerDutyData = [
     resolved_at: "2025-05-09T15:15:00Z",
     severity: "low",
     users_affected: 35,
-    assigned_team: "platform",
+    assigned_team: "product",
     service: "frontend-app",
   },
 
@@ -2790,7 +2790,7 @@ export const pagerDutyData = [
     resolved_at: "2025-05-10T16:15:00Z",
     severity: "low",
     users_affected: 25,
-    assigned_team: "platform",
+    assigned_team: "product",
     service: "mobile-app",
   },
 
@@ -2801,7 +2801,7 @@ export const pagerDutyData = [
     resolved_at: "2025-05-12T12:30:00Z",
     severity: "low",
     users_affected: 35,
-    assigned_team: "platform",
+    assigned_team: "product",
     service: "frontend-app",
   },
 
@@ -2812,7 +2812,7 @@ export const pagerDutyData = [
     resolved_at: "2025-05-13T14:45:00Z",
     severity: "medium",
     users_affected: 180,
-    assigned_team: "product",
+    assigned_team: "platform",
     service: "data-pipeline",
   },
 
@@ -2823,7 +2823,7 @@ export const pagerDutyData = [
     resolved_at: "2025-05-14T16:15:00Z",
     severity: "low",
     users_affected: 45,
-    assigned_team: "platform",
+    assigned_team: "product",
     service: "mobile-app",
   },
 
@@ -2834,7 +2834,7 @@ export const pagerDutyData = [
     resolved_at: "2025-05-16T12:05:00Z",
     severity: "low",
     users_affected: 40,
-    assigned_team: "platform",
+    assigned_team: "product",
     service: "user-auth",
   },
 
@@ -2845,7 +2845,7 @@ export const pagerDutyData = [
     resolved_at: "2025-05-19T11:00:00Z",
     severity: "low",
     users_affected: 45,
-    assigned_team: "platform",
+    assigned_team: "product",
     service: "api-service",
   },
 
@@ -2856,7 +2856,7 @@ export const pagerDutyData = [
     resolved_at: "2025-05-20T17:45:00Z",
     severity: "low",
     users_affected: 50,
-    assigned_team: "platform",
+    assigned_team: "product",
     service: "frontend-app",
   },
   {
@@ -2865,7 +2865,7 @@ export const pagerDutyData = [
     resolved_at: "2025-05-20T18:30:00Z",
     severity: "high",
     users_affected: 500,
-    assigned_team: "platform",
+    assigned_team: "product",
     service: "data-pipeline",
   },
 
@@ -2876,7 +2876,7 @@ export const pagerDutyData = [
     resolved_at: "2025-05-21T15:10:00Z",
     severity: "critical",
     users_affected: 800,
-    assigned_team: "platform",
+    assigned_team: "product",
     service: "frontend-app",
   },
 
@@ -2887,7 +2887,7 @@ export const pagerDutyData = [
     resolved_at: "2025-05-22T12:45:00Z",
     severity: "medium",
     users_affected: 150,
-    assigned_team: "platform",
+    assigned_team: "product",
     service: "data-pipeline",
   },
 
@@ -2898,7 +2898,7 @@ export const pagerDutyData = [
     resolved_at: "2025-05-23T16:00:00Z",
     severity: "low",
     users_affected: 25,
-    assigned_team: "platform",
+    assigned_team: "product",
     service: "frontend-app",
   },
 
@@ -2909,7 +2909,7 @@ export const pagerDutyData = [
     resolved_at: "2025-05-26T10:30:00Z",
     severity: "low",
     users_affected: 30,
-    assigned_team: "platform",
+    assigned_team: "product",
     service: "user-auth",
   },
 
@@ -2920,7 +2920,7 @@ export const pagerDutyData = [
     resolved_at: "2025-05-27T12:30:00Z",
     severity: "medium",
     users_affected: 120,
-    assigned_team: "platform",
+    assigned_team: "product",
     service: "user-auth",
   },
 
@@ -2931,7 +2931,7 @@ export const pagerDutyData = [
     resolved_at: "2025-05-28T17:20:00Z",
     severity: "medium",
     users_affected: 200,
-    assigned_team: "platform",
+    assigned_team: "product",
     service: "mobile-app",
   },
 
@@ -2942,7 +2942,7 @@ export const pagerDutyData = [
     resolved_at: "2025-05-29T10:15:00Z",
     severity: "low",
     users_affected: 75,
-    assigned_team: "platform",
+    assigned_team: "product",
     service: "api-service",
   },
 
@@ -2953,7 +2953,7 @@ export const pagerDutyData = [
     resolved_at: "2025-05-30T19:30:00Z",
     severity: "critical",
     users_affected: 1500,
-    assigned_team: "platform",
+    assigned_team: "product",
     service: "payment-service",
   },
 
@@ -2964,7 +2964,7 @@ export const pagerDutyData = [
     resolved_at: "2025-06-01T16:15:00Z",
     severity: "low",
     users_affected: 45,
-    assigned_team: "platform",
+    assigned_team: "product",
     service: "mobile-app",
   },
 ];
