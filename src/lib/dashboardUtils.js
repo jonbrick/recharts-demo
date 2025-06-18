@@ -358,10 +358,25 @@ export function groupEventsByDate(
     const eventsForDate = grouped[date] || [];
     const metrics = calculateMetricsFromEvents(eventsForDate, dataSource);
 
-    return {
+    const result = {
       name: getDisplayName(date, dataSource, "time"),
       ...metrics,
     };
+
+    // Add _display values for each metric
+    const config = dataSourceConfig[dataSource];
+    const allMetrics = [...config.metrics];
+    if (config.overlayMetric) {
+      allMetrics.push(config.overlayMetric);
+    }
+
+    allMetrics.forEach((metric) => {
+      const value = result[metric.key];
+      result[`${metric.key}_display`] = value;
+      result[`${metric.key}_hasData`] = eventsForDate.length > 0;
+    });
+
+    return result;
   });
 }
 
@@ -410,6 +425,7 @@ export function groupEventsByType(
       );
       const metrics = calculateMetricsFromEvents(groupEvents, dataSource);
       result[displayName] = metrics[selectedMetric];
+      result[`${displayName}_display`] = metrics[selectedMetric];
       result[`${displayName}_hasData`] = groupEvents.length > 0;
     });
 
@@ -463,11 +479,11 @@ export function groupEventsByType(
       if (eventsForDate.length === 0) {
         dayData[displayName] = isMathMetric(selectedMetric) ? null : 0;
         dayData[`${displayName}_display`] = isMathMetric(selectedMetric)
-          ? "N/A"
-          : "0";
+          ? null
+          : 0;
       } else {
         dayData[displayName] = metrics[selectedMetric];
-        dayData[`${displayName}_display`] = String(metrics[selectedMetric]);
+        dayData[`${displayName}_display`] = metrics[selectedMetric];
       }
 
       // Add flag for tooltip logic
@@ -496,7 +512,10 @@ export function calculateAverageData(events, selectedTable) {
 
   const result = { name: "All Time" };
   [...config.metrics, config.overlayMetric].forEach((metric) => {
-    result[metric.key] = (metrics[metric.key] || 0) / dayCount;
+    const value = (metrics[metric.key] || 0) / dayCount;
+    result[metric.key] = value;
+    result[`${metric.key}_display`] = value;
+    result[`${metric.key}_hasData`] = events.length > 0;
   });
 
   return [result];
@@ -514,7 +533,10 @@ export function calculateSumData(events, selectedTable) {
 
   const result = { name: "All Time" };
   [...config.metrics, config.overlayMetric].forEach((metric) => {
-    result[metric.key] = metrics[metric.key] || 0;
+    const value = metrics[metric.key] || 0;
+    result[metric.key] = value;
+    result[`${metric.key}_display`] = value;
+    result[`${metric.key}_hasData`] = events.length > 0;
   });
 
   return [result];

@@ -213,13 +213,14 @@ function DashboardContent() {
     const startDate = selectedDateRange.from?.toISOString().split("T")[0];
     const endDate = selectedDateRange.to?.toISOString().split("T")[0];
 
+    let result;
     if (groupBy === "org") {
-      return granularity === "monthly"
-        ? groupEventsByDate(data, selectedTable, startDate, endDate)
-        : allTimeData;
+      result =
+        granularity === "monthly"
+          ? groupEventsByDate(data, selectedTable, startDate, endDate)
+          : allTimeData;
     } else {
-      // For non-org views, always use monthly granularity
-      return groupEventsByType(
+      result = groupEventsByType(
         data,
         selectedTable,
         groupBy,
@@ -229,6 +230,15 @@ function DashboardContent() {
         endDate
       );
     }
+
+    console.log("Chart Data Structure:", {
+      groupBy,
+      granularity,
+      firstRow: result?.[0],
+      rowCount: result?.length,
+    });
+
+    return result;
   }, [
     data,
     selectedTable,
