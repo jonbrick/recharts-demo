@@ -542,10 +542,6 @@ function DashboardContent() {
             onGroupByChange={handleGroupByChange}
             selectedTable={selectedTable}
           />
-          <GranularitySelector
-            granularity={granularity}
-            onGranularityChange={handleGranularityChange}
-          />
 
           <div className="flex items-center gap-2 ml-auto">
             {!overlayActive && (
@@ -611,164 +607,183 @@ function DashboardContent() {
           </div>
         )}
 
-        <div className="flex flex-col gap-4">
+        <div className="border-b border-gray-200" />
+
+        <div className="flex flex-col gap-8">
           {/* Metrics Summary Card */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h2 className="text-md text-gray-600 font-medium">
-              Summary card controls:{" "}
-              {config.metrics.find((m) => m.key === selectedMetric)?.label ||
-                (config.overlayMetric?.key === selectedMetric
-                  ? config.overlayMetric.label
-                  : selectedMetric)}{" "}
-              {overlayActive && overlayActiveTable && (
-                <>
-                  {" × "}
-                  {dataSourceConfig[overlayActiveTable].metrics.find(
-                    (m) => m.key === overlayActiveMetric
-                  )?.label ||
-                    (dataSourceConfig[overlayActiveTable].overlayMetric?.key ===
-                    overlayActiveMetric
-                      ? dataSourceConfig[overlayActiveTable].overlayMetric.label
-                      : overlayActiveMetric)}
-                </>
-              )}
-            </h2>
-            <div className="flex items-center gap-3">
-              <OperatorSelector
-                operator={operator}
-                onOperatorChange={handleOperatorChange}
-              />
+          <div className="flex flex-col gap-6 border-b  border-gray-200  pb-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <h2 className="text-md text-gray-600 font-medium">
+                Summary card controls:{" "}
+                {config.metrics.find((m) => m.key === selectedMetric)?.label ||
+                  (config.overlayMetric?.key === selectedMetric
+                    ? config.overlayMetric.label
+                    : selectedMetric)}{" "}
+                {overlayActive && overlayActiveTable && (
+                  <>
+                    {" × "}
+                    {dataSourceConfig[overlayActiveTable].metrics.find(
+                      (m) => m.key === overlayActiveMetric
+                    )?.label ||
+                      (dataSourceConfig[overlayActiveTable].overlayMetric
+                        ?.key === overlayActiveMetric
+                        ? dataSourceConfig[overlayActiveTable].overlayMetric
+                            .label
+                        : overlayActiveMetric)}
+                  </>
+                )}
+              </h2>
+              <div className="flex items-center gap-3">
+                <OperatorSelector
+                  operator={operator}
+                  onOperatorChange={handleOperatorChange}
+                />
+              </div>
             </div>
+            <Card className="flex flex-col gap-4">
+              <div className="flex items-start gap-4">
+                <MetricsSummary
+                  key={`${operator}-${selectedMetric}-${groupBy}-${granularity}`}
+                  selectedTable={selectedTable}
+                  selectedMetric={selectedMetric}
+                  operator={operator}
+                  granularity={granularity}
+                  data={chartData}
+                  overlayActive={overlayActive}
+                />
+                {overlayActive && overlayData && (
+                  <>
+                    <MetricsSummary
+                      className="border-l border-gray-200 dark:border-gray-700 pl-8"
+                      key={`overlay-${operator}-${overlayActiveMetric}-${overlayActiveGroupBy}-${granularity}`}
+                      selectedTable={overlayActiveTable}
+                      selectedMetric={overlayActiveMetric}
+                      operator={operator}
+                      granularity={granularity}
+                      data={overlayData}
+                      overlayActive={true}
+                    />
+                  </>
+                )}
+              </div>
+            </Card>
           </div>
-          <Card className="flex flex-col gap-4">
-            <div className="flex items-start gap-4">
-              <MetricsSummary
-                key={`${operator}-${selectedMetric}-${groupBy}-${granularity}`}
-                selectedTable={selectedTable}
-                selectedMetric={selectedMetric}
-                operator={operator}
-                granularity={granularity}
-                data={chartData}
-                overlayActive={overlayActive}
-              />
-              {overlayActive && overlayData && (
-                <>
-                  <MetricsSummary
-                    className="border-l border-gray-200 dark:border-gray-700 pl-8"
-                    key={`overlay-${operator}-${overlayActiveMetric}-${overlayActiveGroupBy}-${granularity}`}
-                    selectedTable={overlayActiveTable}
-                    selectedMetric={overlayActiveMetric}
-                    operator={operator}
-                    granularity={granularity}
-                    data={overlayData}
-                    overlayActive={true}
-                  />
-                </>
-              )}
-            </div>
-          </Card>
 
           {/* Chart Card */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h2 className="text-md text-gray-600 font-medium">
-              Trend controls:{" "}
-              {config.metrics.find((m) => m.key === selectedMetric)?.label ||
-                (config.overlayMetric?.key === selectedMetric
-                  ? config.overlayMetric.label
-                  : selectedMetric)}{" "}
-              {overlayActive && overlayActiveTable && (
-                <>
-                  {" × "}
-                  {dataSourceConfig[overlayActiveTable].metrics.find(
-                    (m) => m.key === overlayActiveMetric
-                  )?.label ||
-                    (dataSourceConfig[overlayActiveTable].overlayMetric?.key ===
-                    overlayActiveMetric
-                      ? dataSourceConfig[overlayActiveTable].overlayMetric.label
-                      : overlayActiveMetric)}
-                </>
-              )}
-              {" over time"}
-            </h2>
-            <div className="flex items-center gap-3">
-              {overlayActive && !overlayConfiguring && (
-                <>
-                  <span className="text-sm text-gray-600">Overlay:</span>
-                  <ChartTypeSelector
-                    chartType={overlayActiveChartType}
-                    onChartTypeChange={setOverlayActiveChartType}
-                  />
-                  <span className="text-sm text-gray-500">|</span>
-                </>
-              )}
-              <ChartTypeSelector
-                chartType={chartType}
-                onChartTypeChange={handleChartTypeChange}
-              />
+          <div className="flex flex-col gap-6 border-b  border-gray-200  pb-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <h2 className="text-md text-gray-600 font-medium">
+                Trend controls:{" "}
+                {config.metrics.find((m) => m.key === selectedMetric)?.label ||
+                  (config.overlayMetric?.key === selectedMetric
+                    ? config.overlayMetric.label
+                    : selectedMetric)}{" "}
+                {overlayActive && overlayActiveTable && (
+                  <>
+                    {" × "}
+                    {dataSourceConfig[overlayActiveTable].metrics.find(
+                      (m) => m.key === overlayActiveMetric
+                    )?.label ||
+                      (dataSourceConfig[overlayActiveTable].overlayMetric
+                        ?.key === overlayActiveMetric
+                        ? dataSourceConfig[overlayActiveTable].overlayMetric
+                            .label
+                        : overlayActiveMetric)}
+                  </>
+                )}
+                {" over time"}
+              </h2>
+              <div className="flex items-center gap-3">
+                <GranularitySelector
+                  granularity={granularity}
+                  onGranularityChange={handleGranularityChange}
+                />
+                {overlayActive && !overlayConfiguring && (
+                  <>
+                    <span className="text-sm text-gray-600">Overlay:</span>
+                    <ChartTypeSelector
+                      chartType={overlayActiveChartType}
+                      onChartTypeChange={setOverlayActiveChartType}
+                    />
+                    <span className="text-sm text-gray-500">|</span>
+                  </>
+                )}
+                <ChartTypeSelector
+                  chartType={chartType}
+                  onChartTypeChange={handleChartTypeChange}
+                />
+              </div>
             </div>
+            <Card className="flex flex-col gap-4">
+              <ChartRenderer
+                chartType={chartType}
+                currentData={chartData}
+                selectedTable={selectedTable}
+                selectedMetric={selectedMetric}
+                granularity={granularity}
+                groupBy={groupBy}
+                // Overlay props
+                overlayActive={overlayActive}
+                overlayData={overlayData}
+                overlayTable={overlayActiveTable}
+                overlayMetric={overlayActiveMetric}
+                overlayChartType={overlayActiveChartType}
+                overlayGroupBy={overlayActiveGroupBy}
+              />
+            </Card>
           </div>
-          <Card className="flex flex-col gap-4">
-            <ChartRenderer
-              chartType={chartType}
-              currentData={chartData}
-              selectedTable={selectedTable}
-              selectedMetric={selectedMetric}
-              granularity={granularity}
-              groupBy={groupBy}
-              // Overlay props
-              overlayActive={overlayActive}
-              overlayData={overlayData}
-              overlayTable={overlayActiveTable}
-              overlayMetric={overlayActiveMetric}
-              overlayChartType={overlayActiveChartType}
-              overlayGroupBy={overlayActiveGroupBy}
-            />
-          </Card>
 
           {/* List Card */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h2 className="text-md text-gray-600 font-medium">
-              List card controls:{" "}
-              {config.metrics.find((m) => m.key === selectedMetric)?.label ||
-                (config.overlayMetric?.key === selectedMetric
-                  ? config.overlayMetric.label
-                  : selectedMetric)}{" "}
-              {overlayActive && overlayActiveTable && (
-                <>
-                  {" × "}
-                  {dataSourceConfig[overlayActiveTable].metrics.find(
-                    (m) => m.key === overlayActiveMetric
-                  )?.label ||
-                    (dataSourceConfig[overlayActiveTable].overlayMetric?.key ===
-                    overlayActiveMetric
-                      ? dataSourceConfig[overlayActiveTable].overlayMetric.label
-                      : overlayActiveMetric)}
-                </>
-              )}
-            </h2>
-            <div className="flex items-center gap-3">
-              <ViewSelector
-                view={tableView}
-                onViewChange={handleTableViewChange}
-              />
+          <div className="flex flex-col gap-6 border-b  border-gray-200  pb-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <h2 className="text-md text-gray-600 font-medium">
+                List card controls:{" "}
+                {config.metrics.find((m) => m.key === selectedMetric)?.label ||
+                  (config.overlayMetric?.key === selectedMetric
+                    ? config.overlayMetric.label
+                    : selectedMetric)}{" "}
+                {overlayActive && overlayActiveTable && (
+                  <>
+                    {" × "}
+                    {dataSourceConfig[overlayActiveTable].metrics.find(
+                      (m) => m.key === overlayActiveMetric
+                    )?.label ||
+                      (dataSourceConfig[overlayActiveTable].overlayMetric
+                        ?.key === overlayActiveMetric
+                        ? dataSourceConfig[overlayActiveTable].overlayMetric
+                            .label
+                        : overlayActiveMetric)}
+                  </>
+                )}
+              </h2>
+              <div className="flex items-center gap-3">
+                <GranularitySelector
+                  granularity={granularity}
+                  onGranularityChange={handleGranularityChange}
+                />
+                <ViewSelector
+                  view={tableView}
+                  onViewChange={handleTableViewChange}
+                />
+              </div>
             </div>
+            <Card className="flex flex-col gap-4">
+              <DataTable
+                currentData={chartData}
+                selectedMetric={selectedMetric}
+                selectedTable={selectedTable}
+                granularity={granularity}
+                groupBy={groupBy}
+                viewMode={tableView}
+                rawData={dataTables[selectedTable]}
+                overlayActive={overlayActive}
+                overlayData={overlayData}
+                overlayMetric={overlayActiveMetric}
+                overlayTable={overlayActiveTable}
+                overlayGroupBy={overlayActiveGroupBy}
+              />
+            </Card>
           </div>
-          <Card className="flex flex-col gap-4">
-            <DataTable
-              currentData={chartData}
-              selectedMetric={selectedMetric}
-              selectedTable={selectedTable}
-              granularity={granularity}
-              groupBy={groupBy}
-              viewMode={tableView}
-              rawData={dataTables[selectedTable]}
-              overlayActive={overlayActive}
-              overlayData={overlayData}
-              overlayMetric={overlayActiveMetric}
-              overlayTable={overlayActiveTable}
-              overlayGroupBy={overlayActiveGroupBy}
-            />
-          </Card>
         </div>
       </div>
     </div>
