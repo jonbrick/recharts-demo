@@ -3,7 +3,7 @@
 export const dataSourceConfig = {
   githubPR: {
     name: "GitHub PRs",
-    title: "Pull Requests",
+    title: "Pull requests created",
     groupByOptions: [
       { value: "org", label: "🏢 Org View", icon: "🏢" },
       { value: "team", label: "👥 By Team", icon: "👥" },
@@ -12,34 +12,34 @@ export const dataSourceConfig = {
     metrics: [
       {
         key: "pullRequests",
-        label: "Pull Requests",
+        label: "Pull requests created",
         color: "#8884d8",
         description: "Daily PR count",
       },
       {
         key: "mergeRate",
-        label: "Merge Rate",
+        label: "Merge rate",
         color: "#82ca9d",
         description: "Percentage of PRs merged",
       },
       {
         key: "avgReviewTime",
-        label: "Review Time",
+        label: "Review time",
         color: "#ffc658",
         description: "Average review time in hours",
       },
     ],
     overlayMetric: {
       key: "linesChanged",
-      label: "Lines Changed",
+      label: "Lines changed",
       color: "#1e40af",
       description: "Total lines of code changed",
     },
     tableColumns: [
-      { key: "pullRequests", label: "Pull Requests", format: "number" },
-      { key: "mergeRate", label: "Merge Rate (%)", format: "percentage" },
-      { key: "avgReviewTime", label: "Review Time (hrs)", format: "decimal" },
-      { key: "linesChanged", label: "Lines Changed", format: "number" },
+      { key: "pullRequests", label: "Pull requests created", format: "number" },
+      { key: "mergeRate", label: "Merge rate (%)", format: "percentage" },
+      { key: "avgReviewTime", label: "Review time (hrs)", format: "decimal" },
+      { key: "linesChanged", label: "Lines changed", format: "number" },
     ],
   },
 
@@ -60,28 +60,28 @@ export const dataSourceConfig = {
       },
       {
         key: "successRate",
-        label: "Success Rate",
+        label: "Success rate",
         color: "#82ca9d",
         description: "Percentage of successful deployments",
       },
       {
         key: "buildTimeMinutes",
-        label: "Build Time",
+        label: "Build time",
         color: "#ffc658",
         description: "Average build duration in minutes",
       },
     ],
     overlayMetric: {
       key: "testsRun",
-      label: "Tests Run",
+      label: "Tests run",
       color: "#1e40af",
       description: "Total number of tests executed",
     },
     tableColumns: [
       { key: "deployments", label: "Deployments", format: "number" },
-      { key: "successRate", label: "Success Rate (%)", format: "percentage" },
-      { key: "buildTimeMinutes", label: "Build Time (min)", format: "decimal" },
-      { key: "testsRun", label: "Tests Run", format: "number" },
+      { key: "successRate", label: "Success rate (%)", format: "percentage" },
+      { key: "buildTimeMinutes", label: "Build time (min)", format: "decimal" },
+      { key: "testsRun", label: "Tests run", format: "number" },
     ],
   },
 
@@ -108,14 +108,14 @@ export const dataSourceConfig = {
       },
       {
         key: "criticalIncidents",
-        label: "Critical Incidents",
+        label: "Critical incidents",
         color: "#ffc658",
         description: "High-severity incidents",
       },
     ],
     overlayMetric: {
       key: "usersAffected",
-      label: "Users Affected",
+      label: "Users affected",
       color: "#1e40af",
       description: "Total users impacted",
     },
@@ -124,10 +124,10 @@ export const dataSourceConfig = {
       { key: "mttrMinutes", label: "MTTR (min)", format: "integer" },
       {
         key: "criticalIncidents",
-        label: "Critical Incidents",
+        label: "Critical incidents",
         format: "number",
       },
-      { key: "usersAffected", label: "Users Affected", format: "number" },
+      { key: "usersAffected", label: "Users affected", format: "number" },
     ],
   },
 };
