@@ -90,9 +90,7 @@ export function MetricsSummary({
     <div className={clsx("metrics-summary flex flex-wrap gap-8", className)}>
       {groupKeys.map((groupName) => {
         // Calculate value for this specific group
-        const groupValue = data.reduce((sum, row) => {
-          return sum + (row[groupName] || 0);
-        }, 0);
+        const groupValue = data[0]?.[groupName] || 0;
 
         const finalValue =
           operator === "average" && data.length > 0
