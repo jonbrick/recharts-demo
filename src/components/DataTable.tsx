@@ -121,18 +121,16 @@ export function DataTable({
   // Extract column keys based on groupBy
   const primaryColumnKeys =
     dataToDisplay.length > 0
-      ? Object.keys(dataToDisplay[0]).filter((key) => {
-          // For org view, we'll handle this differently
-          if (groupBy === "org") {
-            return false; // No dynamic columns for org view
-          }
-          // For other views, show all keys except 'name', '_hasData', and overlay columns
-          return (
-            key !== "name" &&
-            !key.endsWith("_hasData") &&
-            !key.endsWith("_overlay")
-          );
-        })
+      ? Object.keys(dataToDisplay[0])
+          .filter((key) => {
+            // For org view, we'll handle this differently
+            if (groupBy === "org") {
+              return false; // No dynamic columns for org view
+            }
+            // For other views, only show '_display' keys
+            return key.endsWith("_display") && !key.endsWith("_overlay");
+          })
+          .map((key) => key.replace("_display", "")) // Remove suffix for clean names
       : [];
 
   // Extract overlay column keys

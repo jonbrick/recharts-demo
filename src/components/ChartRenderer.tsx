@@ -112,10 +112,10 @@ export function AreaChartComponent({
         <Legend />
         {isMultiSeries ? (
           Object.keys(currentData[0] || {})
-            .filter((key) => key !== "name" && !key.endsWith("_hasData"))
+            .filter((key) => key.endsWith("_display"))
             .map((key, index) => (
               <Area
-                key={key}
+                key={key.replace("_display", "")}
                 type="monotone"
                 dataKey={key}
                 stroke={CHART_COLORS[index % CHART_COLORS.length]}
@@ -125,7 +125,7 @@ export function AreaChartComponent({
         ) : (
           <Area
             type="monotone"
-            dataKey={selectedMetric}
+            dataKey={`${selectedMetric}_display`}
             stroke="#8884d8"
             fill="#8884d8"
           />
@@ -143,9 +143,9 @@ export function StackedAreaChartComponent({
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0]).filter(
-        (key) => key !== "name" && !key.endsWith("_hasData")
-      )
+    ? Object.keys(currentData[0])
+        .filter((key) => key.endsWith("_display"))
+        .map((key) => key.replace("_display", ""))
     : [selectedMetric];
 
   // Format Y-axis tick for MTTR
@@ -161,9 +161,9 @@ export function StackedAreaChartComponent({
   // Handle null values properly - keep nulls for math metrics, convert to 0 for count metrics
   const filteredData = currentData.map((point) => ({
     ...point,
-    [selectedMetric]: isMathMetric(selectedMetric)
-      ? point[selectedMetric] // Keep null for math metrics (chart will skip points)
-      : point[selectedMetric] ?? 0, // Convert null to 0 for count metrics
+    [`${selectedMetric}_display`]: isMathMetric(selectedMetric)
+      ? point[`${selectedMetric}_display`] // Keep null for math metrics (chart will skip points)
+      : point[`${selectedMetric}_display`] ?? 0, // Convert null to 0 for count metrics
   }));
 
   return (
@@ -197,7 +197,9 @@ export function StackedAreaChartComponent({
           <Area
             key={key}
             type="monotone"
-            dataKey={isMultiSeries ? key : selectedMetric}
+            dataKey={
+              isMultiSeries ? `${key}_display` : `${selectedMetric}_display`
+            }
             stackId="team"
             stroke={CHART_COLORS[index % CHART_COLORS.length]}
             fill={CHART_COLORS[index % CHART_COLORS.length]}
@@ -225,9 +227,9 @@ export function PercentAreaChartComponent({
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0]).filter(
-        (key) => key !== "name" && !key.endsWith("_hasData")
-      )
+    ? Object.keys(currentData[0])
+        .filter((key) => key.endsWith("_display"))
+        .map((key) => key.replace("_display", ""))
     : [selectedMetric];
 
   // Format Y-axis tick for percentages
@@ -243,7 +245,7 @@ export function PercentAreaChartComponent({
 
     // Calculate total for this data point
     const total = seriesKeys.reduce((sum, key) => {
-      const value = point[key] || 0;
+      const value = point[`${key}_display`] || 0;
       return sum + value;
     }, 0);
 
@@ -260,7 +262,7 @@ export function PercentAreaChartComponent({
     // Convert each value to percentage
     const result = { name: point.name };
     seriesKeys.forEach((key) => {
-      const value = point[key] || 0;
+      const value = point[`${key}_display`] || 0;
       result[key] = (value / total) * 100;
       result[`${key}_hasData`] = point[`${key}_hasData`];
     });
@@ -299,7 +301,7 @@ export function PercentAreaChartComponent({
           <Area
             key={key}
             type="monotone"
-            dataKey={isMultiSeries ? key : selectedMetric}
+            dataKey={isMultiSeries ? key : `${selectedMetric}_display`}
             stackId="team"
             stroke={CHART_COLORS[index % CHART_COLORS.length]}
             fill={CHART_COLORS[index % CHART_COLORS.length]}
@@ -327,9 +329,9 @@ export function LineChartComponent({
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0]).filter(
-        (key) => key !== "name" && !key.endsWith("_hasData")
-      )
+    ? Object.keys(currentData[0])
+        .filter((key) => key.endsWith("_display"))
+        .map((key) => key.replace("_display", ""))
     : [selectedMetric];
 
   // Format Y-axis tick for MTTR
@@ -345,9 +347,9 @@ export function LineChartComponent({
   // Handle null values properly - keep nulls for math metrics, convert to 0 for count metrics
   const filteredData = currentData.map((point) => ({
     ...point,
-    [selectedMetric]: isMathMetric(selectedMetric)
-      ? point[selectedMetric] // Keep null for math metrics (chart will skip points)
-      : point[selectedMetric] ?? 0, // Convert null to 0 for count metrics
+    [`${selectedMetric}_display`]: isMathMetric(selectedMetric)
+      ? point[`${selectedMetric}_display`] // Keep null for math metrics (chart will skip points)
+      : point[`${selectedMetric}_display`] ?? 0, // Convert null to 0 for count metrics
   }));
 
   return (
@@ -377,24 +379,24 @@ export function LineChartComponent({
         />
         <Legend />
 
-        {seriesKeys
-          .filter((key) => !key.endsWith("_hasData"))
-          .map((key, index) => (
-            <Line
-              key={key}
-              type="monotone"
-              dataKey={isMultiSeries ? key : selectedMetric}
-              stroke={CHART_COLORS[index % CHART_COLORS.length]}
-              strokeWidth={3}
-              dot={{
-                fill: CHART_COLORS[index % CHART_COLORS.length],
-                strokeWidth: 2,
-                r: 4,
-              }}
-              name={isMultiSeries ? key : "Organization"}
-              connectNulls={false}
-            />
-          ))}
+        {seriesKeys.map((key, index) => (
+          <Line
+            key={key}
+            type="monotone"
+            dataKey={
+              isMultiSeries ? `${key}_display` : `${selectedMetric}_display`
+            }
+            stroke={CHART_COLORS[index % CHART_COLORS.length]}
+            strokeWidth={3}
+            dot={{
+              fill: CHART_COLORS[index % CHART_COLORS.length],
+              strokeWidth: 2,
+              r: 4,
+            }}
+            name={isMultiSeries ? key : "Organization"}
+            connectNulls={false}
+          />
+        ))}
       </LineChart>
     </ResponsiveContainer>
   );
@@ -408,9 +410,9 @@ export function VerticalBarChartComponent({
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0]).filter(
-        (key) => key !== "name" && !key.endsWith("_hasData")
-      )
+    ? Object.keys(currentData[0])
+        .filter((key) => key.endsWith("_display"))
+        .map((key) => key.replace("_display", ""))
     : [selectedMetric];
 
   // Format Y-axis tick for MTTR
@@ -450,18 +452,19 @@ export function VerticalBarChartComponent({
         />
         <Legend />
 
-        {seriesKeys
-          .filter((key) => !key.endsWith("_hasData"))
-          .map((key, index) => {
-            const dataKey = isMultiSeries ? key : selectedMetric;
-            return (
-              <Bar
-                key={key}
-                dataKey={dataKey}
-                fill={CHART_COLORS[index % CHART_COLORS.length]}
-              />
-            );
-          })}
+        {seriesKeys.map((key, index) => {
+          const dataKey = isMultiSeries
+            ? `${key}_display`
+            : `${selectedMetric}_display`;
+          return (
+            <Bar
+              key={key}
+              dataKey={dataKey}
+              fill={CHART_COLORS[index % CHART_COLORS.length]}
+              name={isMultiSeries ? key : "Organization"}
+            />
+          );
+        })}
       </BarChart>
     </ResponsiveContainer>
   );
@@ -475,9 +478,9 @@ export function StackedVerticalBarChartComponent({
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0]).filter(
-        (key) => key !== "name" && !key.endsWith("_hasData")
-      )
+    ? Object.keys(currentData[0])
+        .filter((key) => key.endsWith("_display"))
+        .map((key) => key.replace("_display", ""))
     : [selectedMetric];
 
   // Format Y-axis tick for MTTR
@@ -517,17 +520,17 @@ export function StackedVerticalBarChartComponent({
         />
         <Legend />
 
-        {seriesKeys.map((key, index) => {
-          const dataKey = isMultiSeries ? key : selectedMetric;
-          return (
-            <Bar
-              key={key}
-              dataKey={dataKey}
-              stackId="team"
-              fill={CHART_COLORS[index % CHART_COLORS.length]}
-            />
-          );
-        })}
+        {seriesKeys.map((key, index) => (
+          <Bar
+            key={key}
+            dataKey={
+              isMultiSeries ? `${key}_display` : `${selectedMetric}_display`
+            }
+            stackId="team"
+            fill={CHART_COLORS[index % CHART_COLORS.length]}
+            name={isMultiSeries ? key : "Organization"}
+          />
+        ))}
       </BarChart>
     </ResponsiveContainer>
   );
@@ -541,69 +544,9 @@ export function HorizontalBarChartComponent({
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
   const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0]).filter(
-        (key) => key !== "name" && !key.endsWith("_hasData")
-      )
-    : [selectedMetric];
-
-  return (
-    <ResponsiveContainer width="100%" height={400}>
-      <BarChart
-        layout="vertical"
-        data={currentData}
-        margin={{ top: 20, right: 30, left: 80, bottom: 5 }}
-      >
-        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-        <XAxis
-          type="number"
-          tick={{ fill: "#666" }}
-          axisLine={{ stroke: "#ccc" }}
-        />
-        <YAxis
-          type="category"
-          dataKey="name"
-          tick={{ fill: "#666" }}
-          axisLine={{ stroke: "#ccc" }}
-          width={70}
-        />
-        <Tooltip
-          content={
-            <CustomTooltip
-              selectedMetric={selectedMetric}
-              isMultiSeries={isMultiSeries}
-            />
-          }
-        />
-        <Legend />
-
-        {seriesKeys
-          .filter((key) => !key.endsWith("_hasData"))
-          .map((key, index) => {
-            const dataKey = isMultiSeries ? key : selectedMetric;
-            return (
-              <Bar
-                key={key}
-                dataKey={dataKey}
-                fill={CHART_COLORS[index % CHART_COLORS.length]}
-              />
-            );
-          })}
-      </BarChart>
-    </ResponsiveContainer>
-  );
-}
-
-export function StackedHorizontalBarChartComponent({
-  currentData,
-  selectedMetric,
-  groupBy,
-}: ChartComponentProps) {
-  // Check if this is multi-series data
-  const isMultiSeries = groupBy !== "org" && currentData.length > 0;
-  const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0]).filter(
-        (key) => key !== "name" && !key.endsWith("_hasData")
-      )
+    ? Object.keys(currentData[0])
+        .filter((key) => key.endsWith("_display"))
+        .map((key) => key.replace("_display", ""))
     : [selectedMetric];
 
   return (
@@ -637,13 +580,77 @@ export function StackedHorizontalBarChartComponent({
         <Legend />
 
         {seriesKeys.map((key, index) => {
-          const dataKey = isMultiSeries ? key : selectedMetric;
+          const dataKey = isMultiSeries
+            ? `${key}_display`
+            : `${selectedMetric}_display`;
+          return (
+            <Bar
+              key={key}
+              dataKey={dataKey}
+              fill={CHART_COLORS[index % CHART_COLORS.length]}
+              name={isMultiSeries ? key : "Organization"}
+            />
+          );
+        })}
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+export function StackedHorizontalBarChartComponent({
+  currentData,
+  selectedMetric,
+  groupBy,
+}: ChartComponentProps) {
+  // Check if this is multi-series data
+  const isMultiSeries = groupBy !== "org" && currentData.length > 0;
+  const seriesKeys = isMultiSeries
+    ? Object.keys(currentData[0])
+        .filter((key) => key.endsWith("_display"))
+        .map((key) => key.replace("_display", ""))
+    : [selectedMetric];
+
+  return (
+    <ResponsiveContainer width="100%" height={400}>
+      <BarChart
+        layout="vertical"
+        data={currentData}
+        margin={{ top: 20, right: 30, left: 80, bottom: 5 }}
+      >
+        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+        <XAxis
+          type="number"
+          tick={{ fill: "#666" }}
+          axisLine={{ stroke: "#ccc" }}
+        />
+        <YAxis
+          type="category"
+          dataKey="name"
+          tick={{ fill: "#666" }}
+          axisLine={{ stroke: "#ccc" }}
+          width={70}
+        />
+        <Tooltip
+          content={
+            <CustomTooltip
+              selectedMetric={selectedMetric}
+              isMultiSeries={isMultiSeries}
+            />
+          }
+        />
+        <Legend />
+
+        {seriesKeys.map((key, index) => {
+          const dataKey = isMultiSeries
+            ? `${key}_display`
+            : `${selectedMetric}_display`;
           return (
             <Bar
               key={key}
               dataKey={dataKey}
               stackId="team"
               fill={CHART_COLORS[index % CHART_COLORS.length]}
+              name={isMultiSeries ? key : "Organization"}
             />
           );
         })}
@@ -699,13 +706,12 @@ function ComposedChartComponent({
   // Check if primary chart is multi-series
   const isMultiSeries = groupBy !== "org" && mergedData.length > 0;
   const seriesKeys = isMultiSeries
-    ? Object.keys(mergedData[0]).filter(
-        (key) =>
-          key !== "name" &&
-          !key.startsWith("overlay_") &&
-          !key.endsWith("_hasData")
-      )
-    : [selectedMetric];
+    ? Object.keys(mergedData[0])
+        .filter(
+          (key) => key.endsWith("_display") && !key.startsWith("overlay_")
+        )
+        .map((key) => key.replace("_display", "")) // Remove suffix for clean names
+    : [selectedMetric]; // Remove the _display here since we add it later
 
   // Detect overlay series
   const isOverlayMultiSeries =
@@ -805,7 +811,9 @@ function ComposedChartComponent({
 
         {/* Primary dataset */}
         {seriesKeys.map((key, index) => {
-          const dataKey = isMultiSeries ? key : selectedMetric;
+          const dataKey = isMultiSeries
+            ? `${key}_display`
+            : `${selectedMetric}_display`;
           const color = CHART_COLORS[index % CHART_COLORS.length];
           const name = isMultiSeries
             ? key

@@ -558,12 +558,12 @@ export function calculateMetricValue(
 ) {
   // For all-time view, we already have the aggregated value
   if (granularity === "all-time") {
-    return currentData[0]?.[selectedMetric] || 0;
+    return currentData[0]?.[`${selectedMetric}_display`] || 0;
   }
 
   // For monthly view, we need to aggregate the daily values
   const total = currentData.reduce(
-    (sum, row) => sum + (row[selectedMetric] || 0),
+    (sum, row) => sum + (row[`${selectedMetric}_display`] || 0),
     0
   );
   return operator === "average" ? total / currentData.length : total;

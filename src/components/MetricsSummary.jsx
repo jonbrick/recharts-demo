@@ -16,11 +16,11 @@ export function MetricsSummary({
   relativeDays,
   selectedDateRange,
 }) {
-  // Extract group keys (exclude 'name' and '_hasData' fields)
+  // Extract group keys (only use '_display' fields)
   const groupKeys = data?.[0]
-    ? Object.keys(data[0]).filter(
-        (k) => k !== "name" && !k.endsWith("_hasData")
-      )
+    ? Object.keys(data[0])
+        .filter((k) => k.endsWith("_display") && k !== "name")
+        .map((k) => k.replace("_display", "")) // Remove the suffix for the key name
     : [];
 
   // Check if we have grouped data (multiple columns beyond just metrics)
@@ -95,7 +95,7 @@ export function MetricsSummary({
       {groupKeys.map((groupName) => {
         // Sum all values for this group across all time periods
         const groupTotal = data.reduce((sum, row) => {
-          return sum + (row[groupName] || 0);
+          return sum + (row[`${groupName}_display`] || 0);
         }, 0);
 
         const finalValue =
