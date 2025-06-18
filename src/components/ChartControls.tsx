@@ -246,3 +246,88 @@ export function RelativeDaysSelector({ relativeDays, onRelativeDaysChange }) {
     </Select>
   );
 }
+
+export function FilterSelector() {
+  return (
+    <Select value="No Filter" onValueChange={() => {}}>
+      <SelectTrigger className="cursor-pointer">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="No Filter">Filter</SelectItem>
+        <SelectItem value="Filter by Team">Filter by Team</SelectItem>
+        <SelectItem value="Filter by Person">Filter by Person</SelectItem>
+        <SelectItem value="Filter by Repo">Filter by Repo</SelectItem>
+        <SelectItem value="Filter by Service">Filter by Service</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+}
+
+export function ComparisonModeSelector() {
+  return (
+    <Select value="Compare Datasets" onValueChange={() => {}}>
+      <SelectTrigger className="cursor-pointer">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="Compare Datasets">Compare Datasets</SelectItem>
+        <SelectItem value="vs Previous Period">vs Previous Period</SelectItem>
+        <SelectItem value="vs Last Month">vs Last Month</SelectItem>
+        <SelectItem value="vs Organization Average">
+          vs Organization Average
+        </SelectItem>
+        <SelectItem value="vs Team Average">vs Team Average</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+}
+
+export function DisplayLimitSelector() {
+  return (
+    <Select value="No clamping" onValueChange={() => {}}>
+      <SelectTrigger className="cursor-pointer">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="No clamping">No clamping</SelectItem>
+        <SelectItem value="Top 5">Top 5</SelectItem>
+        <SelectItem value="Top 10">Top 10</SelectItem>
+        <SelectItem value="Bottom 5">Bottom 5</SelectItem>
+        <SelectItem value="Bottom 10">Bottom 10</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+}
+
+export function DisplaySortSelector() {
+  return (
+    <Select value="Sort by date" onValueChange={() => {}}>
+      <SelectTrigger className="cursor-pointer">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="Sort by date">Sort by date</SelectItem>
+        <SelectItem value="Sort by alphabetical">
+          Sort by Alphabetical
+        </SelectItem>
+      </SelectContent>
+    </Select>
+  );
+}
+
+export function CardSizeSelector() {
+  return (
+    <Select value="Medium (768px)" onValueChange={() => {}}>
+      <SelectTrigger className="cursor-pointer">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="Small (320px)">Small (320px)</SelectItem>
+        <SelectItem value="Medium (768px)">Medium (768px)</SelectItem>
+        <SelectItem value="Large (1024px)">Large (1024px)</SelectItem>
+        <SelectItem value="XL (1440px)">XL (1440px)</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+}

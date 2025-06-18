@@ -14,7 +14,13 @@ import {
   ViewSelector,
   DateModeSelector,
   RelativeDaysSelector,
+  FilterSelector,
+  ComparisonModeSelector,
+  DisplayLimitSelector,
+  DisplaySortSelector,
+  CardSizeSelector,
 } from "../components/ChartControls";
+import { Tabs, TabsList, TabsTrigger } from "../components/Tabs";
 import { MetricsSummary } from "../components/MetricsSummary";
 import { ChartRenderer } from "../components/ChartRenderer";
 import { DateRangePicker, type DateRange } from "../components/DatePicker";
@@ -475,16 +481,50 @@ function DashboardContent() {
 
     const shareUrl = getShareableUrl(currentState);
 
-    // Copy to clipboard
-    navigator.clipboard
-      .writeText(shareUrl)
-      .then(() => {
+    // Check if clipboard API is available
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      // Copy to clipboard using modern API
+      navigator.clipboard
+        .writeText(shareUrl)
+        .then(() => {
+          alert("Dashboard URL copied to clipboard!");
+        })
+        .catch((err) => {
+          console.error("Failed to copy URL:", err);
+          // Fallback to manual copy
+          fallbackCopyToClipboard(shareUrl);
+        });
+    } else {
+      // Fallback for environments without clipboard API
+      fallbackCopyToClipboard(shareUrl);
+    }
+  };
+
+  // Fallback clipboard function
+  const fallbackCopyToClipboard = (text: string) => {
+    try {
+      // Create a temporary textarea element
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      const successful = document.execCommand("copy");
+      document.body.removeChild(textArea);
+
+      if (successful) {
         alert("Dashboard URL copied to clipboard!");
-      })
-      .catch((err) => {
-        console.error("Failed to copy URL:", err);
-        alert("Failed to copy URL. Check console for details.");
-      });
+      } else {
+        alert("Failed to copy URL. Please copy manually: " + text);
+      }
+    } catch (err) {
+      console.error("Fallback copy failed:", err);
+      alert("Failed to copy URL. Please copy manually: " + text);
+    }
   };
 
   return (
@@ -526,6 +566,9 @@ function DashboardContent() {
                 onRelativeDaysChange={handleRelativeDaysChange}
               />
             )}
+            <div className="flex items-center gap-4">
+              <FilterSelector />
+            </div>
             <Button variant="primary" onClick={handleShare}>
               Save View
             </Button>
@@ -535,36 +578,41 @@ function DashboardContent() {
         {/* Divider */}
         <div className="border-b border-gray-200" />
 
-        {/* Controls row */}
-        <div className="flex items-center gap-4">
-          <DataSourceSelector
-            selectedTable={selectedTable}
-            onTableChange={handleTableChange}
-          />
-          <MetricSelector
-            selectedTable={selectedTable}
-            selectedMetric={selectedMetric}
-            onMetricChange={handleMetricChange}
-          />
-          <GroupBySelector
-            groupBy={groupBy}
-            onGroupByChange={handleGroupByChange}
-            selectedTable={selectedTable}
-          />
+        <div className="flex flex-col gap-4">
+          {/* Data controls */}
+          <h2 className="text-sm font-medium text-gray-600">Data controls</h2>
 
-          <div className="flex items-center gap-2 ml-auto">
-            {!overlayActive && (
-              <Button variant="secondary" onClick={handleAddOverlay}>
-                Add Overlay
-              </Button>
-            )}
+          {/* Controls row */}
+          <div className="flex items-center gap-4">
+            <DataSourceSelector
+              selectedTable={selectedTable}
+              onTableChange={handleTableChange}
+            />
+            <MetricSelector
+              selectedTable={selectedTable}
+              selectedMetric={selectedMetric}
+              onMetricChange={handleMetricChange}
+            />
+            <GroupBySelector
+              groupBy={groupBy}
+              onGroupByChange={handleGroupByChange}
+              selectedTable={selectedTable}
+            />
+
+            <div className="flex items-center gap-2 ml-auto">
+              {!overlayActive && (
+                <Button variant="secondary" onClick={handleAddOverlay}>
+                  Add Comparison
+                </Button>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Overlay Configuration Controls */}
         {overlayConfiguring && (
           <div className="flex items-center gap-4 bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-            <span className="text-sm font-medium text-gray-600">Overlay:</span>
+            <ComparisonModeSelector />
             <DataSourceSelector
               selectedTable={overlayConfigTable}
               onTableChange={setOverlayConfigTable}
@@ -580,11 +628,11 @@ function DashboardContent() {
               selectedTable={overlayConfigTable}
             />
             <div className="flex items-center gap-2 ml-auto">
-              <Button variant="primary" onClick={handleSaveOverlay}>
-                Add Overlay
-              </Button>
               <Button variant="secondary" onClick={handleCancelOverlay}>
                 Cancel
+              </Button>
+              <Button variant="primary" onClick={handleSaveOverlay}>
+                Add Comparison
               </Button>
             </div>
           </div>
@@ -593,7 +641,7 @@ function DashboardContent() {
         {/* Active Overlay Controls */}
         {overlayActive && !overlayConfiguring && (
           <div className="flex items-center gap-4 bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-            <span className="text-sm font-medium text-gray-600">Overlay:</span>
+            <ComparisonModeSelector />
             <DataSourceSelector
               selectedTable={overlayActiveTable}
               onTableChange={setOverlayActiveTable}
@@ -618,11 +666,43 @@ function DashboardContent() {
 
         <div className="border-b border-gray-200" />
 
+        <div className="flex flex-col gap-4">
+          {/* Display controls */}
+          <h2 className="text-sm font-medium text-gray-600">
+            Display controls
+          </h2>
+
+          {/* View Controls */}
+          <div className="flex items-center gap-4">
+            <DisplayLimitSelector />
+            <DisplaySortSelector />
+            <div className="ml-auto">
+              <CardSizeSelector />
+            </div>
+          </div>
+        </div>
+
+        {/* Display Controls - Tab Navigation */}
+        <Tabs defaultValue="Demo" className="pt-2 w-full">
+          <TabsList variant="line">
+            <TabsTrigger value="Demo">Demo</TabsTrigger>
+            <TabsTrigger value="Summary" disabled>
+              Summary
+            </TabsTrigger>
+            <TabsTrigger value="Chart" disabled>
+              Chart
+            </TabsTrigger>
+            <TabsTrigger value="List" disabled>
+              List
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
         <div className="flex flex-col gap-8">
           {/* Metrics Summary Card */}
           <div className="flex flex-col gap-6 border-b  border-gray-200  pb-8">
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <h2 className="text-md text-gray-600 font-medium">
+              <h2 className="text-sm text-gray-600 font-medium">
                 Summary card controls
               </h2>
               <OperatorSelector
@@ -666,7 +746,7 @@ function DashboardContent() {
           {/* Chart Card */}
           <div className="flex flex-col gap-6 border-b  border-gray-200  pb-8">
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <h2 className="text-md text-gray-600 font-medium">
+              <h2 className="text-sm text-gray-600 font-medium">
                 Trend controls
               </h2>
               <div className="flex items-center gap-3">
@@ -681,7 +761,6 @@ function DashboardContent() {
                 {overlayActive && !overlayConfiguring && (
                   <>
                     <span className="text-sm text-gray-500">|</span>
-                    <span className="text-sm text-gray-600">Overlay:</span>
                     <ChartTypeSelector
                       chartType={overlayActiveChartType}
                       onChartTypeChange={setOverlayActiveChartType}
@@ -712,7 +791,7 @@ function DashboardContent() {
           {/* List Card */}
           <div className="flex flex-col gap-6 border-b  border-gray-200  pb-8">
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <h2 className="text-md text-gray-600 font-medium">
+              <h2 className="text-sm text-gray-600 font-medium">
                 List card controls
               </h2>
               <div className="flex items-center gap-3">
