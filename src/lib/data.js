@@ -98,8 +98,8 @@ export const githubPRData = [
   },
   {
     id: "pr-008",
-    created_at: "2025-05-15T10:30:00Z",
-    merged_at: "2025-05-15T14:20:00Z",
+    created_at: "2025-05-18T10:30:00Z",
+    merged_at: "2025-05-18T14:20:00Z",
     author: "priya_patel",
     team: "product",
     lines_added: 267,
@@ -108,8 +108,8 @@ export const githubPRData = [
   },
   {
     id: "pr-009",
-    created_at: "2025-05-16T11:20:00Z",
-    merged_at: "2025-05-16T16:30:00Z",
+    created_at: "2025-05-12T11:20:00Z",
+    merged_at: "2025-05-12T16:30:00Z",
     author: "alex_kim",
     team: "product",
     lines_added: 234,
@@ -466,7 +466,7 @@ export const githubPRData = [
   },
   {
     id: "pr-044",
-    created_at: "2025-05-16T13:15:00Z",
+    created_at: "2025-05-12T13:15:00Z",
     merged_at: null,
     author: "jordan_smith",
     team: "product",
@@ -476,7 +476,7 @@ export const githubPRData = [
   },
   {
     id: "pr-045",
-    created_at: "2025-05-16T14:30:00Z",
+    created_at: "2025-05-12T14:30:00Z",
     merged_at: null,
     author: "priya_patel",
     team: "product",
@@ -652,8 +652,8 @@ export const githubPRData = [
   },
   {
     id: "pr-062",
-    created_at: "2025-05-16T15:30:00Z",
-    merged_at: "2025-05-16T17:15:00Z",
+    created_at: "2025-05-12T15:30:00Z",
+    merged_at: "2025-05-12T17:15:00Z",
     author: "david_wilson",
     team: "platform",
     lines_added: 156,
