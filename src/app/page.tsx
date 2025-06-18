@@ -611,56 +611,36 @@ function DashboardContent() {
           </div>
         )}
 
-        <div className="flex flex-col gap-6">
-          <h2 className="text-2xl font-semibold text-gray-700">
-            {config.metrics.find((m) => m.key === selectedMetric)?.label ||
-              (config.overlayMetric?.key === selectedMetric
-                ? config.overlayMetric.label
-                : selectedMetric)}
-            {overlayActive && overlayActiveTable && (
-              <>
-                {" × "}
-                {dataSourceConfig[overlayActiveTable].metrics.find(
-                  (m) => m.key === overlayActiveMetric
-                )?.label ||
-                  (dataSourceConfig[overlayActiveTable].overlayMetric?.key ===
-                  overlayActiveMetric
-                    ? dataSourceConfig[overlayActiveTable].overlayMetric.label
-                    : overlayActiveMetric)}
-              </>
-            )}
-          </h2>
-
+        <div className="flex flex-col gap-4">
           {/* Metrics Summary Card */}
-          <Card className="flex flex-col gap-4">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <h3 className="text-lg text-gray-600 font-medium">
-                Summary Card:{" "}
-                {config.metrics.find((m) => m.key === selectedMetric)?.label ||
-                  (config.overlayMetric?.key === selectedMetric
-                    ? config.overlayMetric.label
-                    : selectedMetric)}{" "}
-                {overlayActive && overlayActiveTable && (
-                  <>
-                    {" × "}
-                    {dataSourceConfig[overlayActiveTable].metrics.find(
-                      (m) => m.key === overlayActiveMetric
-                    )?.label ||
-                      (dataSourceConfig[overlayActiveTable].overlayMetric
-                        ?.key === overlayActiveMetric
-                        ? dataSourceConfig[overlayActiveTable].overlayMetric
-                            .label
-                        : overlayActiveMetric)}
-                  </>
-                )}
-              </h3>
-              <div className="flex items-center gap-3">
-                <OperatorSelector
-                  operator={operator}
-                  onOperatorChange={handleOperatorChange}
-                />
-              </div>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <h2 className="text-md text-gray-600 font-medium">
+              Summary card controls:{" "}
+              {config.metrics.find((m) => m.key === selectedMetric)?.label ||
+                (config.overlayMetric?.key === selectedMetric
+                  ? config.overlayMetric.label
+                  : selectedMetric)}{" "}
+              {overlayActive && overlayActiveTable && (
+                <>
+                  {" × "}
+                  {dataSourceConfig[overlayActiveTable].metrics.find(
+                    (m) => m.key === overlayActiveMetric
+                  )?.label ||
+                    (dataSourceConfig[overlayActiveTable].overlayMetric?.key ===
+                    overlayActiveMetric
+                      ? dataSourceConfig[overlayActiveTable].overlayMetric.label
+                      : overlayActiveMetric)}
+                </>
+              )}
+            </h2>
+            <div className="flex items-center gap-3">
+              <OperatorSelector
+                operator={operator}
+                onOperatorChange={handleOperatorChange}
+              />
             </div>
+          </div>
+          <Card className="flex flex-col gap-4">
             <div className="flex items-start gap-4">
               <MetricsSummary
                 key={`${operator}-${selectedMetric}-${groupBy}-${granularity}`}
@@ -689,46 +669,45 @@ function DashboardContent() {
           </Card>
 
           {/* Chart Card */}
-          <Card className="flex flex-col gap-4">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <h3 className="text-lg text-gray-600 font-medium">
-                Trend Card:{" "}
-                {config.metrics.find((m) => m.key === selectedMetric)?.label ||
-                  (config.overlayMetric?.key === selectedMetric
-                    ? config.overlayMetric.label
-                    : selectedMetric)}{" "}
-                {overlayActive && overlayActiveTable && (
-                  <>
-                    {" × "}
-                    {dataSourceConfig[overlayActiveTable].metrics.find(
-                      (m) => m.key === overlayActiveMetric
-                    )?.label ||
-                      (dataSourceConfig[overlayActiveTable].overlayMetric
-                        ?.key === overlayActiveMetric
-                        ? dataSourceConfig[overlayActiveTable].overlayMetric
-                            .label
-                        : overlayActiveMetric)}
-                  </>
-                )}
-                {" over time"}
-              </h3>
-              <div className="flex items-center gap-3">
-                {overlayActive && !overlayConfiguring && (
-                  <>
-                    <span className="text-sm text-gray-600">Overlay:</span>
-                    <ChartTypeSelector
-                      chartType={overlayActiveChartType}
-                      onChartTypeChange={setOverlayActiveChartType}
-                    />
-                    <span className="text-sm text-gray-500">|</span>
-                  </>
-                )}
-                <ChartTypeSelector
-                  chartType={chartType}
-                  onChartTypeChange={handleChartTypeChange}
-                />
-              </div>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <h2 className="text-md text-gray-600 font-medium">
+              Trend controls:{" "}
+              {config.metrics.find((m) => m.key === selectedMetric)?.label ||
+                (config.overlayMetric?.key === selectedMetric
+                  ? config.overlayMetric.label
+                  : selectedMetric)}{" "}
+              {overlayActive && overlayActiveTable && (
+                <>
+                  {" × "}
+                  {dataSourceConfig[overlayActiveTable].metrics.find(
+                    (m) => m.key === overlayActiveMetric
+                  )?.label ||
+                    (dataSourceConfig[overlayActiveTable].overlayMetric?.key ===
+                    overlayActiveMetric
+                      ? dataSourceConfig[overlayActiveTable].overlayMetric.label
+                      : overlayActiveMetric)}
+                </>
+              )}
+              {" over time"}
+            </h2>
+            <div className="flex items-center gap-3">
+              {overlayActive && !overlayConfiguring && (
+                <>
+                  <span className="text-sm text-gray-600">Overlay:</span>
+                  <ChartTypeSelector
+                    chartType={overlayActiveChartType}
+                    onChartTypeChange={setOverlayActiveChartType}
+                  />
+                  <span className="text-sm text-gray-500">|</span>
+                </>
+              )}
+              <ChartTypeSelector
+                chartType={chartType}
+                onChartTypeChange={handleChartTypeChange}
+              />
             </div>
+          </div>
+          <Card className="flex flex-col gap-4">
             <ChartRenderer
               chartType={chartType}
               currentData={chartData}
@@ -746,36 +725,35 @@ function DashboardContent() {
             />
           </Card>
 
-          {/* Table Card */}
-          <Card className="flex flex-col gap-4">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <h3 className="text-lg text-gray-600 font-medium">
-                Table Card:{" "}
-                {config.metrics.find((m) => m.key === selectedMetric)?.label ||
-                  (config.overlayMetric?.key === selectedMetric
-                    ? config.overlayMetric.label
-                    : selectedMetric)}{" "}
-                {overlayActive && overlayActiveTable && (
-                  <>
-                    {" × "}
-                    {dataSourceConfig[overlayActiveTable].metrics.find(
-                      (m) => m.key === overlayActiveMetric
-                    )?.label ||
-                      (dataSourceConfig[overlayActiveTable].overlayMetric
-                        ?.key === overlayActiveMetric
-                        ? dataSourceConfig[overlayActiveTable].overlayMetric
-                            .label
-                        : overlayActiveMetric)}
-                  </>
-                )}
-              </h3>
-              <div className="flex items-center gap-3">
-                <ViewSelector
-                  view={tableView}
-                  onViewChange={handleTableViewChange}
-                />
-              </div>
+          {/* List Card */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <h2 className="text-md text-gray-600 font-medium">
+              List card controls:{" "}
+              {config.metrics.find((m) => m.key === selectedMetric)?.label ||
+                (config.overlayMetric?.key === selectedMetric
+                  ? config.overlayMetric.label
+                  : selectedMetric)}{" "}
+              {overlayActive && overlayActiveTable && (
+                <>
+                  {" × "}
+                  {dataSourceConfig[overlayActiveTable].metrics.find(
+                    (m) => m.key === overlayActiveMetric
+                  )?.label ||
+                    (dataSourceConfig[overlayActiveTable].overlayMetric?.key ===
+                    overlayActiveMetric
+                      ? dataSourceConfig[overlayActiveTable].overlayMetric.label
+                      : overlayActiveMetric)}
+                </>
+              )}
+            </h2>
+            <div className="flex items-center gap-3">
+              <ViewSelector
+                view={tableView}
+                onViewChange={handleTableViewChange}
+              />
             </div>
+          </div>
+          <Card className="flex flex-col gap-4">
             <DataTable
               currentData={chartData}
               selectedMetric={selectedMetric}
