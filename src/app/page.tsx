@@ -20,7 +20,7 @@ import {
   DisplaySortSelector,
   CardSizeSelector,
 } from "../components/ChartControls";
-import { Tabs, TabsList, TabsTrigger } from "../components/Tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/Tabs";
 import { MetricsSummary } from "../components/MetricsSummary";
 import { ChartRenderer } from "../components/ChartRenderer";
 import { DateRangePicker, type DateRange } from "../components/DatePicker";
@@ -44,6 +44,166 @@ import {
 import { Card } from "../components/Card";
 import { Button } from "../components/Button";
 import { DataTable } from "../components/DataTable";
+
+// Reusable card components to reduce duplication
+const MetricsSummaryCard = ({
+  operator,
+  onOperatorChange,
+  selectedTable,
+  selectedMetric,
+  granularity,
+  chartData,
+  dateMode,
+  relativeDays,
+  selectedDateRange,
+  overlayActive,
+  overlayData,
+  overlayActiveTable,
+  overlayActiveMetric,
+  overlayActiveGroupBy,
+}) => (
+  <div className="flex flex-col gap-4 pb-8">
+    <h2 className="text-md font-medium">Summary Card</h2>
+    <div>
+      <OperatorSelector
+        operator={operator}
+        onOperatorChange={onOperatorChange}
+      />
+    </div>
+    <Card className="flex flex-col gap-4">
+      <div className="flex items-start gap-4">
+        <MetricsSummary
+          key={`${operator}-${selectedMetric}-${selectedTable}-${granularity}`}
+          selectedTable={selectedTable}
+          selectedMetric={selectedMetric}
+          operator={operator}
+          granularity={granularity}
+          data={chartData}
+          dateMode={dateMode}
+          relativeDays={relativeDays}
+          selectedDateRange={selectedDateRange}
+        />
+        {overlayActive && overlayData && (
+          <MetricsSummary
+            className="border-l border-gray-200 dark:border-gray-700 pl-8"
+            key={`overlay-${operator}-${overlayActiveMetric}-${overlayActiveGroupBy}-${granularity}`}
+            selectedTable={overlayActiveTable}
+            selectedMetric={overlayActiveMetric}
+            operator={operator}
+            granularity={granularity}
+            data={overlayData}
+            dateMode={dateMode}
+            relativeDays={relativeDays}
+            selectedDateRange={selectedDateRange}
+          />
+        )}
+      </div>
+    </Card>
+  </div>
+);
+
+const ChartCard = ({
+  granularity,
+  onGranularityChange,
+  chartType,
+  onChartTypeChange,
+  overlayActive,
+  overlayConfiguring,
+  overlayActiveChartType,
+  setOverlayActiveChartType,
+  chartData,
+  selectedTable,
+  selectedMetric,
+  groupBy,
+  overlayData,
+  overlayActiveTable,
+  overlayActiveMetric,
+  overlayActiveGroupBy,
+}) => (
+  <div className="flex flex-col gap-4 pb-8">
+    <h2 className="text-md font-medium">Trend Card</h2>
+    <div className="flex gap-4">
+      <GranularitySelector
+        granularity={granularity}
+        onGranularityChange={onGranularityChange}
+      />
+      <ChartTypeSelector
+        chartType={chartType}
+        onChartTypeChange={onChartTypeChange}
+      />
+      {overlayActive && !overlayConfiguring && (
+        <>
+          <div className="border-l border-gray-200 h-full w-px pl-4 ">
+            <ChartTypeSelector
+              chartType={overlayActiveChartType}
+              onChartTypeChange={setOverlayActiveChartType}
+            />
+          </div>
+        </>
+      )}
+    </div>
+    <Card className="flex flex-col gap-4">
+      <ChartRenderer
+        chartType={chartType}
+        currentData={chartData}
+        selectedTable={selectedTable}
+        selectedMetric={selectedMetric}
+        granularity={granularity}
+        groupBy={groupBy}
+        overlayActive={overlayActive}
+        overlayData={overlayData}
+        overlayTable={overlayActiveTable}
+        overlayMetric={overlayActiveMetric}
+        overlayChartType={overlayActiveChartType}
+        overlayGroupBy={overlayActiveGroupBy}
+      />
+    </Card>
+  </div>
+);
+
+const ListCard = ({
+  granularity,
+  onGranularityChange,
+  tableView,
+  onTableViewChange,
+  chartData,
+  selectedMetric,
+  selectedTable,
+  groupBy,
+  dataTables,
+  overlayActive,
+  overlayData,
+  overlayActiveMetric,
+  overlayActiveTable,
+  overlayActiveGroupBy,
+}) => (
+  <div className="flex flex-col gap-4 pb-8">
+    <h2 className="text-md font-medium">List Card</h2>
+    <div className="flex gap-4">
+      <GranularitySelector
+        granularity={granularity}
+        onGranularityChange={onGranularityChange}
+      />
+      <ViewSelector view={tableView} onViewChange={onTableViewChange} />
+    </div>
+    <Card className="flex flex-col gap-4">
+      <DataTable
+        currentData={chartData}
+        selectedMetric={selectedMetric}
+        selectedTable={selectedTable}
+        granularity={granularity}
+        groupBy={groupBy}
+        viewMode={tableView}
+        rawData={dataTables[selectedTable]}
+        overlayActive={overlayActive}
+        overlayData={overlayData}
+        overlayMetric={overlayActiveMetric}
+        overlayTable={overlayActiveTable}
+        overlayGroupBy={overlayActiveGroupBy}
+      />
+    </Card>
+  </div>
+);
 
 function DashboardContent() {
   const [chartType, setChartType] = useState("line");
@@ -453,11 +613,6 @@ function DashboardContent() {
     // Also clear config states
     setOverlayConfigTable("");
     setOverlayConfigMetric("");
-    setOverlayConfigGroupBy("org");
-    setOverlayConfigChartType("line");
-
-    // Update URL to remove overlay
-    updateUrl({ overlayActive: false });
   };
 
   const handleShare = () => {
@@ -579,10 +734,7 @@ function DashboardContent() {
         <div className="border-b border-gray-200" />
 
         <div className="flex flex-col gap-4">
-          {/* Data controls */}
-          <h2 className="text-sm font-medium text-gray-600">Data controls</h2>
-
-          {/* Controls row */}
+          {/* Data controls row */}
           <div className="flex items-center gap-4">
             <DataSourceSelector
               selectedTable={selectedTable}
@@ -668,161 +820,146 @@ function DashboardContent() {
 
         <div className="flex flex-col gap-4">
           {/* Display controls */}
-          <h2 className="text-sm font-medium text-gray-600">
-            Display controls
-          </h2>
-
           {/* View Controls */}
           <div className="flex items-center gap-4">
             <DisplayLimitSelector />
             <DisplaySortSelector />
-            <div className="ml-auto">
-              <CardSizeSelector />
-            </div>
+            <CardSizeSelector />
           </div>
         </div>
 
         {/* Display Controls - Tab Navigation */}
         <Tabs defaultValue="Demo" className="pt-2 w-full">
-          <TabsList variant="line">
+          <TabsList className="mb-6" variant="line">
             <TabsTrigger value="Demo">Demo</TabsTrigger>
-            <TabsTrigger value="Summary" disabled>
-              Summary
-            </TabsTrigger>
-            <TabsTrigger value="Chart" disabled>
-              Chart
-            </TabsTrigger>
-            <TabsTrigger value="List" disabled>
-              List
-            </TabsTrigger>
+            <TabsTrigger value="Summary">Summary Card</TabsTrigger>
+            <TabsTrigger value="Chart">Chart Card</TabsTrigger>
+            <TabsTrigger value="List">List Card</TabsTrigger>
           </TabsList>
-        </Tabs>
 
-        <div className="flex flex-col gap-8">
-          {/* Metrics Summary Card */}
-          <div className="flex flex-col gap-6 border-b  border-gray-200  pb-8">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <h2 className="text-sm text-gray-600 font-medium">
-                Summary card controls
-              </h2>
-              <OperatorSelector
+          {/* Demo Tab - Shows all cards */}
+          <TabsContent value="Demo">
+            <div className="flex flex-col gap-8">
+              {/* Metrics Summary Card */}
+              <MetricsSummaryCard
                 operator={operator}
                 onOperatorChange={handleOperatorChange}
+                selectedTable={selectedTable}
+                selectedMetric={selectedMetric}
+                granularity={granularity}
+                chartData={chartData}
+                dateMode={dateMode}
+                relativeDays={relativeDays}
+                selectedDateRange={selectedDateRange}
+                overlayActive={overlayActive}
+                overlayData={overlayData}
+                overlayActiveTable={overlayActiveTable}
+                overlayActiveMetric={overlayActiveMetric}
+                overlayActiveGroupBy={overlayActiveGroupBy}
               />
-            </div>
-            <Card className="flex flex-col gap-4">
-              <div className="flex items-start gap-4">
-                <MetricsSummary
-                  key={`${operator}-${selectedMetric}-${groupBy}-${granularity}`}
-                  selectedTable={selectedTable}
-                  selectedMetric={selectedMetric}
-                  operator={operator}
-                  granularity={granularity}
-                  data={chartData}
-                  dateMode={dateMode}
-                  relativeDays={relativeDays}
-                  selectedDateRange={selectedDateRange}
-                />
-                {overlayActive && overlayData && (
-                  <>
-                    <MetricsSummary
-                      className="border-l border-gray-200 dark:border-gray-700 pl-8"
-                      key={`overlay-${operator}-${overlayActiveMetric}-${overlayActiveGroupBy}-${granularity}`}
-                      selectedTable={overlayActiveTable}
-                      selectedMetric={overlayActiveMetric}
-                      operator={operator}
-                      granularity={granularity}
-                      data={overlayData}
-                      dateMode={dateMode}
-                      relativeDays={relativeDays}
-                      selectedDateRange={selectedDateRange}
-                    />
-                  </>
-                )}
-              </div>
-            </Card>
-          </div>
 
-          {/* Chart Card */}
-          <div className="flex flex-col gap-6 border-b  border-gray-200  pb-8">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <h2 className="text-sm text-gray-600 font-medium">
-                Trend controls
-              </h2>
-              <div className="flex items-center gap-3">
-                <GranularitySelector
-                  granularity={granularity}
-                  onGranularityChange={handleGranularityChange}
-                />
-                <ChartTypeSelector
-                  chartType={chartType}
-                  onChartTypeChange={handleChartTypeChange}
-                />
-                {overlayActive && !overlayConfiguring && (
-                  <>
-                    <span className="text-sm text-gray-500">|</span>
-                    <ChartTypeSelector
-                      chartType={overlayActiveChartType}
-                      onChartTypeChange={setOverlayActiveChartType}
-                    />
-                  </>
-                )}
-              </div>
-            </div>
-            <Card className="flex flex-col gap-4">
-              <ChartRenderer
+              {/* Chart Card */}
+              <ChartCard
+                granularity={granularity}
+                onGranularityChange={handleGranularityChange}
                 chartType={chartType}
-                currentData={chartData}
+                onChartTypeChange={handleChartTypeChange}
+                overlayActive={overlayActive}
+                overlayConfiguring={overlayConfiguring}
+                overlayActiveChartType={overlayActiveChartType}
+                setOverlayActiveChartType={setOverlayActiveChartType}
+                chartData={chartData}
                 selectedTable={selectedTable}
                 selectedMetric={selectedMetric}
-                granularity={granularity}
                 groupBy={groupBy}
-                // Overlay props
-                overlayActive={overlayActive}
                 overlayData={overlayData}
-                overlayTable={overlayActiveTable}
-                overlayMetric={overlayActiveMetric}
-                overlayChartType={overlayActiveChartType}
-                overlayGroupBy={overlayActiveGroupBy}
+                overlayActiveTable={overlayActiveTable}
+                overlayActiveMetric={overlayActiveMetric}
+                overlayActiveGroupBy={overlayActiveGroupBy}
               />
-            </Card>
-          </div>
 
-          {/* List Card */}
-          <div className="flex flex-col gap-6 border-b  border-gray-200  pb-8">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-              <h2 className="text-sm text-gray-600 font-medium">
-                List card controls
-              </h2>
-              <div className="flex items-center gap-3">
-                <GranularitySelector
-                  granularity={granularity}
-                  onGranularityChange={handleGranularityChange}
-                />
-                <ViewSelector
-                  view={tableView}
-                  onViewChange={handleTableViewChange}
-                />
-              </div>
-            </div>
-            <Card className="flex flex-col gap-4">
-              <DataTable
-                currentData={chartData}
+              {/* List Card */}
+              <ListCard
+                granularity={granularity}
+                onGranularityChange={handleGranularityChange}
+                tableView={tableView}
+                onTableViewChange={handleTableViewChange}
+                chartData={chartData}
                 selectedMetric={selectedMetric}
                 selectedTable={selectedTable}
-                granularity={granularity}
                 groupBy={groupBy}
-                viewMode={tableView}
-                rawData={dataTables[selectedTable]}
+                dataTables={dataTables}
                 overlayActive={overlayActive}
                 overlayData={overlayData}
-                overlayMetric={overlayActiveMetric}
-                overlayTable={overlayActiveTable}
-                overlayGroupBy={overlayActiveGroupBy}
+                overlayActiveMetric={overlayActiveMetric}
+                overlayActiveTable={overlayActiveTable}
+                overlayActiveGroupBy={overlayActiveGroupBy}
               />
-            </Card>
-          </div>
-        </div>
+            </div>
+          </TabsContent>
+
+          {/* Summary Tab - Shows only metrics summary */}
+          <TabsContent value="Summary">
+            <MetricsSummaryCard
+              operator={operator}
+              onOperatorChange={handleOperatorChange}
+              selectedTable={selectedTable}
+              selectedMetric={selectedMetric}
+              granularity={granularity}
+              chartData={chartData}
+              dateMode={dateMode}
+              relativeDays={relativeDays}
+              selectedDateRange={selectedDateRange}
+              overlayActive={overlayActive}
+              overlayData={overlayData}
+              overlayActiveTable={overlayActiveTable}
+              overlayActiveMetric={overlayActiveMetric}
+              overlayActiveGroupBy={overlayActiveGroupBy}
+            />
+          </TabsContent>
+
+          {/* Chart Tab - Shows only chart */}
+          <TabsContent value="Chart">
+            <ChartCard
+              granularity={granularity}
+              onGranularityChange={handleGranularityChange}
+              chartType={chartType}
+              onChartTypeChange={handleChartTypeChange}
+              overlayActive={overlayActive}
+              overlayConfiguring={overlayConfiguring}
+              overlayActiveChartType={overlayActiveChartType}
+              setOverlayActiveChartType={setOverlayActiveChartType}
+              chartData={chartData}
+              selectedTable={selectedTable}
+              selectedMetric={selectedMetric}
+              groupBy={groupBy}
+              overlayData={overlayData}
+              overlayActiveTable={overlayActiveTable}
+              overlayActiveMetric={overlayActiveMetric}
+              overlayActiveGroupBy={overlayActiveGroupBy}
+            />
+          </TabsContent>
+
+          {/* List Tab - Shows only list */}
+          <TabsContent value="List">
+            <ListCard
+              granularity={granularity}
+              onGranularityChange={handleGranularityChange}
+              tableView={tableView}
+              onTableViewChange={handleTableViewChange}
+              chartData={chartData}
+              selectedMetric={selectedMetric}
+              selectedTable={selectedTable}
+              groupBy={groupBy}
+              dataTables={dataTables}
+              overlayActive={overlayActive}
+              overlayData={overlayData}
+              overlayActiveMetric={overlayActiveMetric}
+              overlayActiveTable={overlayActiveTable}
+              overlayActiveGroupBy={overlayActiveGroupBy}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
