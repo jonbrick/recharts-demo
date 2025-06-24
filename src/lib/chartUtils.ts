@@ -164,11 +164,20 @@ export function generateDynamicLabel({
     range = `${fromMonth}/${fromDay} - ${toMonth}/${toDay}`;
   }
 
-  // Add group suffix for non-org views
-  const suffix =
-    groupBy !== "org"
-      ? ` - By ${groupBy.charAt(0).toUpperCase() + groupBy.slice(1)}`
-      : "";
+  // Add group suffix for non-org views with proper labels
+  let suffix = "";
+  if (groupBy !== "org") {
+    const groupLabels: { [key: string]: string } = {
+      team: "Team",
+      person: "Individual",
+      repo: "Repository",
+      service: "Service",
+    };
+    const groupLabel =
+      groupLabels[groupBy] ||
+      groupBy.charAt(0).toUpperCase() + groupBy.slice(1);
+    suffix = ` - By ${groupLabel}`;
+  }
 
   return `${metricLabel} over ${range}${suffix}`;
 }
