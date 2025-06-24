@@ -15,6 +15,9 @@ interface DashboardState {
   selectedDateRange: DateRange;
   dateMode: string;
   relativeDays: number;
+  summaryComparisonMode: string;
+  chartComparisonMode: string;
+  listComparisonMode: string;
   overlayActive: boolean;
   overlayActiveTable: string;
   overlayActiveMetric: string;
@@ -47,6 +50,9 @@ const URL_PARAMS = {
   granularity: "gran",
   operator: "op",
   tableView: "table",
+  summaryComparisonMode: "s_comp",
+  chartComparisonMode: "c_comp",
+  listComparisonMode: "l_comp",
   overlayActive: "overlay",
   overlayActiveTable: "o_source",
   overlayActiveMetric: "o_metric",
@@ -145,6 +151,26 @@ export function useUrlState() {
     const relativeDays = searchParams.get(URL_PARAMS.relativeDays);
     if (relativeDays) {
       state.relativeDays = parseInt(relativeDays, 10);
+    }
+
+    // Read card-specific comparison modes
+    const summaryComparisonMode = searchParams.get(
+      URL_PARAMS.summaryComparisonMode
+    );
+    if (summaryComparisonMode) {
+      state.summaryComparisonMode = summaryComparisonMode;
+    }
+
+    const chartComparisonMode = searchParams.get(
+      URL_PARAMS.chartComparisonMode
+    );
+    if (chartComparisonMode) {
+      state.chartComparisonMode = chartComparisonMode;
+    }
+
+    const listComparisonMode = searchParams.get(URL_PARAMS.listComparisonMode);
+    if (listComparisonMode) {
+      state.listComparisonMode = listComparisonMode;
     }
 
     // Read overlay active state explicitly
@@ -285,7 +311,21 @@ export function useUrlState() {
         params.set(URL_PARAMS.relativeDays, updates.relativeDays.toString());
       }
 
-      // Update overlay active parameter explicitly
+      // Update comparison mode
+      if (updates.summaryComparisonMode !== undefined) {
+        params.set(
+          URL_PARAMS.summaryComparisonMode,
+          updates.summaryComparisonMode
+        );
+      }
+      if (updates.chartComparisonMode !== undefined) {
+        params.set(URL_PARAMS.chartComparisonMode, updates.chartComparisonMode);
+      }
+      if (updates.listComparisonMode !== undefined) {
+        params.set(URL_PARAMS.listComparisonMode, updates.listComparisonMode);
+      }
+
+      // Read overlay active state explicitly
       if (updates.overlayActive !== undefined) {
         params.set(URL_PARAMS.overlayActive, updates.overlayActive.toString());
 
@@ -387,6 +427,9 @@ export function useUrlState() {
       params.set(URL_PARAMS.granularity, state.granularity);
       params.set(URL_PARAMS.operator, state.operator);
       params.set(URL_PARAMS.tableView, state.tableView);
+      params.set(URL_PARAMS.summaryComparisonMode, state.summaryComparisonMode);
+      params.set(URL_PARAMS.chartComparisonMode, state.chartComparisonMode);
+      params.set(URL_PARAMS.listComparisonMode, state.listComparisonMode);
 
       // Add overlay params if active
       if (

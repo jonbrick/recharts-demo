@@ -87,20 +87,20 @@ const MetricsSummaryCard = ({
         </div>
       )}
     </div>
-    <div className="flex gap-4">
-      <OperatorSelector
-        operator={operator}
-        onOperatorChange={onOperatorChange}
-      />
+    <div className="flex gap-2">
       <GroupBySelector
         groupBy={groupBy}
         onGroupByChange={onGroupByChange}
         selectedTable={selectedTable}
       />
+      <OperatorSelector
+        operator={operator}
+        onOperatorChange={onOperatorChange}
+      />
       {overlayActive && (
         <>
-          <div className="border-l border-gray-200 h-full pl-4">
-            <div className="flex items-center gap-4 w-full">
+          <div className="border-l border-gray-200 h-full pl-2">
+            <div className="flex items-center gap-2 w-full">
               <CompareDatasetsSelector />
               <GroupBySelector
                 groupBy={overlayActiveGroupBy}
@@ -187,23 +187,18 @@ const ChartCard = ({
         </div>
       )}
     </div>
-    <div className="flex gap-4 flex-wrap">
-      <div className="min-w-[120px]">
-        <GranularitySelector
-          granularity={granularity}
-          onGranularityChange={onGranularityChange}
-        />
-      </div>
-      <div className="min-w-[120px]">
-        <DisplayLimitSelector />
-      </div>
-      <div className="min-w-[120px]">
-        <GroupBySelector
-          groupBy={chartGroupBy}
-          onGroupByChange={onChartGroupByChange}
-          selectedTable={selectedTable}
-        />
-      </div>
+    <div className="flex gap-2 flex-wrap">
+      <GroupBySelector
+        groupBy={chartGroupBy}
+        onGroupByChange={onChartGroupByChange}
+        selectedTable={selectedTable}
+      />
+      <GranularitySelector
+        granularity={granularity}
+        onGranularityChange={onGranularityChange}
+      />
+      <DisplayLimitSelector />
+
       <div className="min-w-[120px]">
         <ChartTypeSelector
           chartType={chartType}
@@ -212,24 +207,18 @@ const ChartCard = ({
       </div>
       {chartOverlayActive && overlayActiveTable && (
         <>
-          <div className="border-l border-gray-200 h-full pl-4">
-            <div className="flex items-center gap-4 w-full flex-wrap">
-              <div className="min-w-[120px]">
-                <CompareDatasetsSelector />
-              </div>
-              <div className="min-w-[120px]">
-                <GroupBySelector
-                  groupBy={chartOverlayGroupBy}
-                  onGroupByChange={onChartOverlayGroupByChange}
-                  selectedTable={overlayActiveTable}
-                />
-              </div>
-              <div className="min-w-[120px]">
-                <ChartTypeSelector
-                  chartType={overlayActiveChartType}
-                  onChartTypeChange={setOverlayActiveChartType}
-                />
-              </div>
+          <div className="border-l border-gray-200 h-full pl-2">
+            <div className="flex items-center gap-2 w-full flex-wrap">
+              <CompareDatasetsSelector />
+              <GroupBySelector
+                groupBy={chartOverlayGroupBy}
+                onGroupByChange={onChartOverlayGroupByChange}
+                selectedTable={overlayActiveTable}
+              />
+              <ChartTypeSelector
+                chartType={overlayActiveChartType}
+                onChartTypeChange={setOverlayActiveChartType}
+              />
             </div>
           </div>
         </>
@@ -299,30 +288,22 @@ const ListCard = ({
         </div>
       )}
     </div>
-    <div className="flex gap-4 flex-wrap">
-      <div className="min-w-[120px]">
-        <GranularitySelector
-          granularity={granularity}
-          onGranularityChange={onGranularityChange}
-        />
-      </div>
-      <div className="min-w-[120px]">
-        <DisplayLimitSelector />
-      </div>
-      <div className="min-w-[120px]">
-        <DisplaySortSelector />
-      </div>
-      <div className="min-w-[120px]">
-        <ViewSelector view={tableView} onViewChange={onTableViewChange} />
-      </div>
+    <div className="flex gap-2 flex-wrap">
       <GroupBySelector
         groupBy={groupBy}
         onGroupByChange={onGroupByChange}
         selectedTable={selectedTable}
       />
+      <GranularitySelector
+        granularity={granularity}
+        onGranularityChange={onGranularityChange}
+      />
+      <DisplayLimitSelector />
+      <DisplaySortSelector />
+      <ViewSelector view={tableView} onViewChange={onTableViewChange} />
       {overlayActive && (
         <>
-          <div className="border-l border-gray-200 h-full pl-4">
+          <div className="border-l border-gray-200 h-full pl-2">
             <div className="flex items-center gap-4 w-full">
               <CompareDatasetsSelector />
               <GroupBySelector
@@ -407,6 +388,14 @@ function DashboardContent() {
   const [listOverlayActive, setListOverlayActive] = useState(false);
   const [listOverlayGroupBy, setListOverlayGroupBy] = useState("org");
 
+  // Card-specific comparison mode states
+  const [summaryComparisonMode, setSummaryComparisonMode] =
+    useState("Compare Datasets");
+  const [chartComparisonMode, setChartComparisonMode] =
+    useState("Compare Datasets");
+  const [listComparisonMode, setListComparisonMode] =
+    useState("Compare Datasets");
+
   // Initialize URL state management
   const { getStateFromUrl, updateUrl, getShareableUrl } = useUrlState();
   const searchParams = useSearchParams();
@@ -439,9 +428,9 @@ function DashboardContent() {
         setOverlayActiveChartType(state.overlayActiveChartType);
 
       // Load summary card state
-      setSummaryGroupBy(state.summaryGroupBy);
-      setSummaryOverlayActive(state.summaryOverlayActive);
-      setSummaryOverlayGroupBy(state.summaryOverlayGroupBy);
+      setSummaryGroupBy(state.summaryGroupBy || "org");
+      setSummaryOverlayActive(state.summaryOverlayActive || false);
+      setSummaryOverlayGroupBy(state.summaryOverlayGroupBy || "org");
 
       // Initialize chart-specific state from URL
       setChartGroupBy(state.chartGroupBy || "org");
@@ -1038,6 +1027,9 @@ function DashboardContent() {
       selectedDateRange,
       dateMode,
       relativeDays,
+      summaryComparisonMode: summaryComparisonMode,
+      chartComparisonMode: chartComparisonMode,
+      listComparisonMode: listComparisonMode,
       overlayActive,
       overlayActiveTable,
       overlayActiveMetric,
