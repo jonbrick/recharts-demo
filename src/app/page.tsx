@@ -18,7 +18,6 @@ import {
   ComparisonModeSelector,
   DisplayLimitSelector,
   DisplaySortSelector,
-  CardSizeSelector,
   CompareDatasetsSelector,
 } from "../components/ChartControls";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/Tabs";
@@ -193,6 +192,7 @@ const ChartCard = ({
         granularity={granularity}
         onGranularityChange={onGranularityChange}
       />
+      <DisplayLimitSelector />
       <GroupBySelector
         groupBy={chartGroupBy}
         onGroupByChange={onChartGroupByChange}
@@ -269,6 +269,8 @@ const ListCard = ({
         granularity={granularity}
         onGranularityChange={onGranularityChange}
       />
+      <DisplayLimitSelector />
+      <DisplaySortSelector />
       <ViewSelector view={tableView} onViewChange={onTableViewChange} />
     </div>
     <Card className="flex flex-col gap-4">
@@ -1111,18 +1113,6 @@ function DashboardContent() {
             </div>
           </div>
         )}
-
-        <div className="border-b border-gray-200" />
-
-        <div className="flex flex-col gap-4">
-          {/* Display controls */}
-          {/* View Controls */}
-          <div className="flex items-center gap-4">
-            <DisplayLimitSelector />
-            <DisplaySortSelector />
-            <CardSizeSelector />
-          </div>
-        </div>
 
         {/* Display Controls - Tab Navigation */}
         <Tabs defaultValue="Demo" className="pt-2 w-full">
