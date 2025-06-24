@@ -15,6 +15,9 @@ export function MetricsSummary({
   dateMode,
   relativeDays,
   selectedDateRange,
+  comparisonData = null,
+  comparisonMode = null,
+  comparisonMetric = null,
 }) {
   // Extract group keys (only use '_display' fields)
   const groupKeys = data?.[0]
@@ -35,12 +38,107 @@ export function MetricsSummary({
   const metricConfig = allMetrics.find((m) => m.key === selectedMetric);
   const metricLabel = metricConfig?.label || selectedMetric;
 
+  // Calculate comparison values and percent change
+  const getComparisonValues = () => {
+    if (!comparisonData || !comparisonMode) return null;
+
+    const primaryValue = calculateMetricValue(
+      data,
+      selectedMetric,
+      granularity,
+      operator
+    );
+    const comparisonValue = calculateMetricValue(
+      comparisonData,
+      comparisonMetric || selectedMetric,
+      granularity,
+      operator
+    );
+
+    if (primaryValue === 0 || comparisonValue === 0) return null;
+
+    const percentChange =
+      ((primaryValue - comparisonValue) / comparisonValue) * 100;
+    const isPositive = percentChange > 0;
+
+    return {
+      comparisonValue,
+      percentChange,
+      isPositive,
+      displayValue:
+        comparisonValue === null || comparisonValue === undefined
+          ? "N/A"
+          : Number(comparisonValue).toFixed(1),
+    };
+  };
+
+  // Calculate comparison values for grouped data
+  const getGroupComparisonValues = (groupName) => {
+    if (!comparisonData || !comparisonMode) return null;
+
+    // Calculate primary value for this specific group
+    const groupTotal = data.reduce((sum, row) => {
+      return sum + (row[`${groupName}_display`] || 0);
+    }, 0);
+    const primaryValue =
+      operator === "average" && data.length > 0
+        ? groupTotal / data.length
+        : groupTotal;
+
+    // Calculate comparison value for this specific group
+    const comparisonGroupTotal = comparisonData.reduce((sum, row) => {
+      return sum + (row[`${groupName}_display`] || 0);
+    }, 0);
+    const comparisonValue =
+      operator === "average" && comparisonData.length > 0
+        ? comparisonGroupTotal / comparisonData.length
+        : comparisonGroupTotal;
+
+    if (primaryValue === 0 || comparisonValue === 0) return null;
+
+    const percentChange =
+      ((primaryValue - comparisonValue) / comparisonValue) * 100;
+    const isPositive = percentChange > 0;
+
+    return {
+      comparisonValue,
+      percentChange,
+      isPositive,
+      displayValue:
+        comparisonValue === null || comparisonValue === undefined
+          ? "N/A"
+          : Number(comparisonValue).toFixed(1),
+    };
+  };
+
+  const comparisonValues = getComparisonValues();
+
   // Render a single metric value
   const renderMetricValue = (value) => {
     const displayValue =
       value === null || value === undefined ? "N/A" : Number(value).toFixed(1);
     return (
-      <div className="text-3xl font-bold text-gray-800">{displayValue}</div>
+      <div>
+        <div className="text-3xl font-bold text-gray-800">{displayValue}</div>
+        {comparisonValues && (
+          <div className="flex items-center gap-2 mt-1">
+            <span
+              className={`text-sm font-medium ${
+                comparisonValues.isPositive ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {comparisonValues.isPositive ? "+" : ""}
+              {comparisonValues.percentChange.toFixed(1)}%
+            </span>
+            <span className="text-sm text-gray-500">
+              {comparisonValues.displayValue}{" "}
+              {comparisonMode === "vs Previous Period"
+                ? "prev period"
+                : "comparison"}
+            </span>
+          </div>
+        )}
+      </div>
     );
   };
 
@@ -103,10 +201,39 @@ export function MetricsSummary({
             ? groupTotal / data.length
             : groupTotal;
 
+        // Get comparison values for this specific group
+        const groupComparisonValues = getGroupComparisonValues(groupName);
+
         return (
           <div key={groupName}>
             {renderMetricLabel(groupName)}
-            {renderMetricValue(finalValue)}
+            <div>
+              <div className="text-3xl font-bold text-gray-800">
+                {finalValue === null || finalValue === undefined
+                  ? "N/A"
+                  : Number(finalValue).toFixed(1)}
+              </div>
+              {groupComparisonValues && (
+                <div className="flex items-center gap-2 mt-1">
+                  <span
+                    className={`text-sm font-medium ${
+                      groupComparisonValues.isPositive
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {groupComparisonValues.isPositive ? "+" : ""}
+                    {groupComparisonValues.percentChange.toFixed(1)}%
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    {groupComparisonValues.displayValue}{" "}
+                    {comparisonMode === "vs Previous Period"
+                      ? "prev period"
+                      : "comparison"}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
         );
       })}

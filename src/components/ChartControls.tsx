@@ -279,8 +279,8 @@ export function ComparisonModeSelector({
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="Compare Datasets">Compare Datasets</SelectItem>
         <SelectItem value="vs Previous Period">vs Previous Period</SelectItem>
+        <SelectItem value="Compare Datasets">Compare Datasets</SelectItem>
       </SelectContent>
     </Select>
   );
