@@ -119,6 +119,9 @@ const ChartCard = ({
   overlayActiveTable,
   overlayActiveMetric,
   overlayActiveGroupBy,
+  dateMode,
+  relativeDays,
+  selectedDateRange,
 }) => (
   <div className="flex flex-col gap-4 pb-8">
     <h2 className="text-md font-medium">Trend Card Example</h2>
@@ -156,6 +159,9 @@ const ChartCard = ({
         overlayMetric={overlayActiveMetric}
         overlayChartType={overlayActiveChartType}
         overlayGroupBy={overlayActiveGroupBy}
+        dateMode={dateMode}
+        relativeDays={relativeDays}
+        selectedDateRange={selectedDateRange}
       />
     </Card>
   </div>
@@ -176,6 +182,9 @@ const ListCard = ({
   overlayActiveMetric,
   overlayActiveTable,
   overlayActiveGroupBy,
+  dateMode,
+  relativeDays,
+  selectedDateRange,
 }) => (
   <div className="flex flex-col gap-4 pb-8">
     <h2 className="text-md font-medium">List Card Example</h2>
@@ -200,6 +209,9 @@ const ListCard = ({
         overlayMetric={overlayActiveMetric}
         overlayTable={overlayActiveTable}
         overlayGroupBy={overlayActiveGroupBy}
+        dateMode={dateMode}
+        relativeDays={relativeDays}
+        selectedDateRange={selectedDateRange}
       />
     </Card>
   </div>
@@ -876,6 +888,9 @@ function DashboardContent() {
                 overlayActiveTable={overlayActiveTable}
                 overlayActiveMetric={overlayActiveMetric}
                 overlayActiveGroupBy={overlayActiveGroupBy}
+                dateMode={dateMode}
+                relativeDays={relativeDays}
+                selectedDateRange={selectedDateRange}
               />
 
               {/* List Card */}
@@ -894,6 +909,9 @@ function DashboardContent() {
                 overlayActiveMetric={overlayActiveMetric}
                 overlayActiveTable={overlayActiveTable}
                 overlayActiveGroupBy={overlayActiveGroupBy}
+                dateMode={dateMode}
+                relativeDays={relativeDays}
+                selectedDateRange={selectedDateRange}
               />
             </div>
           </TabsContent>
@@ -937,6 +955,9 @@ function DashboardContent() {
               overlayActiveTable={overlayActiveTable}
               overlayActiveMetric={overlayActiveMetric}
               overlayActiveGroupBy={overlayActiveGroupBy}
+              dateMode={dateMode}
+              relativeDays={relativeDays}
+              selectedDateRange={selectedDateRange}
             />
           </TabsContent>
 
@@ -957,6 +978,9 @@ function DashboardContent() {
               overlayActiveMetric={overlayActiveMetric}
               overlayActiveTable={overlayActiveTable}
               overlayActiveGroupBy={overlayActiveGroupBy}
+              dateMode={dateMode}
+              relativeDays={relativeDays}
+              selectedDateRange={selectedDateRange}
             />
           </TabsContent>
         </Tabs>

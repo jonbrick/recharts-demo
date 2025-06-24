@@ -124,3 +124,51 @@ export function hasOnlyOneValueForKey(
 
   return true;
 }
+
+// Utility function to generate dynamic labels for charts and tables
+export function generateDynamicLabel({
+  selectedTable,
+  selectedMetric,
+  dateMode,
+  relativeDays,
+  selectedDateRange,
+  groupBy,
+  dataSourceConfig,
+}: {
+  selectedTable: string;
+  selectedMetric: string;
+  dateMode: string;
+  relativeDays: number;
+  selectedDateRange: { from: Date; to: Date };
+  groupBy: string;
+  dataSourceConfig: any;
+}): string {
+  // Get metric label from config
+  const config = dataSourceConfig[selectedTable];
+  const allMetrics = [...config.metrics];
+  if (config.overlayMetric) {
+    allMetrics.push(config.overlayMetric);
+  }
+  const metricConfig = allMetrics.find((m) => m.key === selectedMetric);
+  const metricLabel = metricConfig?.label || selectedMetric;
+
+  // Format date range
+  let range;
+  if (dateMode === "relative") {
+    range = `last ${relativeDays} days`;
+  } else {
+    const fromMonth = selectedDateRange.from.getMonth() + 1;
+    const fromDay = selectedDateRange.from.getDate();
+    const toMonth = selectedDateRange.to.getMonth() + 1;
+    const toDay = selectedDateRange.to.getDate();
+    range = `${fromMonth}/${fromDay} - ${toMonth}/${toDay}`;
+  }
+
+  // Add group suffix for non-org views
+  const suffix =
+    groupBy !== "org"
+      ? ` - By ${groupBy.charAt(0).toUpperCase() + groupBy.slice(1)}`
+      : "";
+
+  return `${metricLabel} over ${range}${suffix}`;
+}

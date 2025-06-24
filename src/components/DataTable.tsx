@@ -2,6 +2,7 @@
 
 import React from "react";
 import { dataSourceConfig, formatValue } from "../lib/chartConfig.js";
+import { generateDynamicLabel } from "../lib/chartUtils";
 
 // Helper function to get column label
 function getColumnLabel(
@@ -69,6 +70,9 @@ interface DataTableProps {
   overlayMetric?: string;
   overlayTable?: string;
   overlayGroupBy?: string;
+  dateMode?: string;
+  relativeDays?: number;
+  selectedDateRange?: { from: Date; to: Date };
 }
 
 export function DataTable({
@@ -84,7 +88,24 @@ export function DataTable({
   overlayMetric,
   overlayTable,
   overlayGroupBy,
+  dateMode,
+  relativeDays,
+  selectedDateRange,
 }: DataTableProps) {
+  // Generate dynamic label
+  const dynamicLabel = generateDynamicLabel({
+    selectedTable,
+    selectedMetric,
+    dateMode: dateMode || "relative",
+    relativeDays: relativeDays || 14,
+    selectedDateRange: selectedDateRange || {
+      from: new Date(),
+      to: new Date(),
+    },
+    groupBy,
+    dataSourceConfig,
+  });
+
   // Merge overlay data if active
   const mergedData = React.useMemo(() => {
     if (!overlayActive || !overlayData || !currentData) {
@@ -151,41 +172,64 @@ export function DataTable({
   // Check if we're in record view (moved to after all hooks)
   if (viewMode === "record" && rawData) {
     return (
-      <RecordTable
-        data={rawData}
-        selectedTable={selectedTable}
-        groupBy={groupBy}
-      />
+      <div className="relative">
+        <div className="text-sm text-gray-600 mb-2">{dynamicLabel}</div>
+        <RecordTable
+          data={rawData}
+          selectedTable={selectedTable}
+          groupBy={groupBy}
+        />
+      </div>
     );
   }
 
   // Default: return the day view table
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm">
-        <thead>
-          <tr className="bg-gray-50">
-            <th className="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">
-              {granularity === "monthly" ? "Date" : "Period"}
-            </th>
-            {groupBy === "org" && !overlayActive ? (
+    <div className="relative">
+      <div className="text-sm text-gray-600 mb-4">{dynamicLabel}</div>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm">
+          <thead>
+            <tr className="bg-gray-50">
               <th className="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">
-                Organization
+                {granularity === "monthly" ? "Date" : "Period"}
               </th>
-            ) : groupBy === "org" && overlayActive ? (
-              <>
+              {groupBy === "org" && !overlayActive ? (
                 <th className="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">
-                  {(() => {
-                    const config = dataSourceConfig[selectedTable];
-                    const metricLabel =
-                      config.metrics.find((m) => m.key === selectedMetric)
-                        ?.label ||
-                      config.overlayMetric?.label ||
-                      selectedMetric;
-                    return `${metricLabel} - Organization`;
-                  })()}
+                  Organization
                 </th>
-                {overlayColumnKeys.map((key) => (
+              ) : groupBy === "org" && overlayActive ? (
+                <>
+                  <th className="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">
+                    {(() => {
+                      const config = dataSourceConfig[selectedTable];
+                      const metricLabel =
+                        config.metrics.find((m) => m.key === selectedMetric)
+                          ?.label ||
+                        config.overlayMetric?.label ||
+                        selectedMetric;
+                      return `${metricLabel} - Organization`;
+                    })()}
+                  </th>
+                  {overlayColumnKeys.map((key) => (
+                    <th
+                      key={key}
+                      className="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700"
+                    >
+                      {getColumnLabel(
+                        key,
+                        groupBy,
+                        selectedTable,
+                        selectedMetric,
+                        overlayTable,
+                        overlayMetric,
+                        overlayGroupBy
+                      )}
+                    </th>
+                  ))}
+                </>
+              ) : (
+                columnKeys.map((key) => (
                   <th
                     key={key}
                     className="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700"
@@ -200,47 +244,20 @@ export function DataTable({
                       overlayGroupBy
                     )}
                   </th>
-                ))}
-              </>
-            ) : (
-              columnKeys.map((key) => (
-                <th
-                  key={key}
-                  className="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700"
-                >
-                  {getColumnLabel(
-                    key,
-                    groupBy,
-                    selectedTable,
-                    selectedMetric,
-                    overlayTable,
-                    overlayMetric,
-                    overlayGroupBy
-                  )}
-                </th>
-              ))
-            )}
-          </tr>
-        </thead>
-        <tbody>
-          {dataToDisplay.map((row, index) => (
-            <tr
-              key={row.name}
-              className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
-            >
-              <td className="border border-gray-200 px-4 py-3 font-medium text-gray-900">
-                {row.name}
-              </td>
-              {groupBy === "org" && !overlayActive ? (
-                <td className="border border-gray-200 px-4 py-3 text-gray-700">
-                  {row[`${selectedMetric}_display`] ||
-                    formatValue(
-                      row[selectedMetric],
-                      column ? column.format : "number"
-                    )}
+                ))
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {dataToDisplay.map((row, index) => (
+              <tr
+                key={row.name}
+                className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
+              >
+                <td className="border border-gray-200 px-4 py-3 font-medium text-gray-900">
+                  {row.name}
                 </td>
-              ) : groupBy === "org" && overlayActive ? (
-                <>
+                {groupBy === "org" && !overlayActive ? (
                   <td className="border border-gray-200 px-4 py-3 text-gray-700">
                     {row[`${selectedMetric}_display`] ||
                       formatValue(
@@ -248,29 +265,40 @@ export function DataTable({
                         column ? column.format : "number"
                       )}
                   </td>
-                  {overlayColumnKeys.map((key) => (
+                ) : groupBy === "org" && overlayActive ? (
+                  <>
+                    <td className="border border-gray-200 px-4 py-3 text-gray-700">
+                      {row[`${selectedMetric}_display`] ||
+                        formatValue(
+                          row[selectedMetric],
+                          column ? column.format : "number"
+                        )}
+                    </td>
+                    {overlayColumnKeys.map((key) => (
+                      <td
+                        key={key}
+                        className="border border-gray-200 px-4 py-3 text-gray-700"
+                      >
+                        {row[`${key}_display`] ||
+                          formatValue(row[key], "number")}
+                      </td>
+                    ))}
+                  </>
+                ) : (
+                  columnKeys.map((key) => (
                     <td
                       key={key}
                       className="border border-gray-200 px-4 py-3 text-gray-700"
                     >
                       {row[`${key}_display`] || formatValue(row[key], "number")}
                     </td>
-                  ))}
-                </>
-              ) : (
-                columnKeys.map((key) => (
-                  <td
-                    key={key}
-                    className="border border-gray-200 px-4 py-3 text-gray-700"
-                  >
-                    {row[`${key}_display`] || formatValue(row[key], "number")}
-                  </td>
-                ))
-              )}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                  ))
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

@@ -18,6 +18,7 @@ import {
   ComposedChart,
 } from "recharts";
 import { dataSourceConfig, isMathMetric } from "../lib/chartConfig.js";
+import { generateDynamicLabel } from "../lib/chartUtils";
 
 // Common chart colors
 const CHART_COLORS = [
@@ -48,6 +49,9 @@ interface ChartRendererProps {
   overlayMetric?: string;
   overlayChartType?: string;
   overlayGroupBy?: string;
+  dateMode?: string;
+  relativeDays?: number;
+  selectedDateRange?: { from: Date; to: Date };
 }
 
 interface CustomTooltipProps extends TooltipProps<any, any> {
@@ -870,7 +874,24 @@ export function ChartRenderer({
   overlayMetric = "",
   overlayChartType = "",
   overlayGroupBy,
+  dateMode,
+  relativeDays,
+  selectedDateRange,
 }: ChartRendererProps) {
+  // Generate dynamic label
+  const dynamicLabel = generateDynamicLabel({
+    selectedTable,
+    selectedMetric,
+    dateMode: dateMode || "relative",
+    relativeDays: relativeDays || 14,
+    selectedDateRange: selectedDateRange || {
+      from: new Date(),
+      to: new Date(),
+    },
+    groupBy,
+    dataSourceConfig,
+  });
+
   // Merge primary and overlay data for ComposedChart
   const mergedData = useMemo(() => {
     if (!overlayActive || !overlayData || !currentData) {
@@ -924,17 +945,24 @@ export function ChartRenderer({
     mergedData
   ) {
     return (
-      <ComposedChartComponent
-        mergedData={mergedData}
-        selectedMetric={selectedMetric}
-        overlayMetric={overlayMetric}
-        chartType={chartType}
-        overlayChartType={overlayChartType}
-        selectedTable={selectedTable}
-        overlayTable={overlayTable}
-        groupBy={groupBy}
-        overlayGroupBy={overlayGroupBy}
-      />
+      <div className="relative">
+        <div className="absolute top-0 left-0 z-10 text-sm text-gray-600 mb-4">
+          {dynamicLabel}
+        </div>
+        <div className="pt-6">
+          <ComposedChartComponent
+            mergedData={mergedData}
+            selectedMetric={selectedMetric}
+            overlayMetric={overlayMetric}
+            chartType={chartType}
+            overlayChartType={overlayChartType}
+            selectedTable={selectedTable}
+            overlayTable={overlayTable}
+            groupBy={groupBy}
+            overlayGroupBy={overlayGroupBy}
+          />
+        </div>
+      </div>
     );
   }
 
@@ -956,12 +984,19 @@ export function ChartRenderer({
   }
 
   return (
-    <Component
-      currentData={currentData}
-      selectedTable={selectedTable}
-      selectedMetric={selectedMetric}
-      granularity={granularity}
-      groupBy={groupBy}
-    />
+    <div className="relative">
+      <div className="absolute top-0 left-0 z-10 text-sm text-gray-600 mb-2">
+        {dynamicLabel}
+      </div>
+      <div className="pt-6">
+        <Component
+          currentData={currentData}
+          selectedTable={selectedTable}
+          selectedMetric={selectedMetric}
+          granularity={granularity}
+          groupBy={groupBy}
+        />
+      </div>
+    </div>
   );
 }
