@@ -19,6 +19,7 @@ import {
   DisplayLimitSelector,
   DisplaySortSelector,
   CardSizeSelector,
+  CompareDatasetsSelector,
 } from "../components/ChartControls";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/Tabs";
 import { MetricsSummary } from "../components/MetricsSummary";
@@ -44,6 +45,7 @@ import {
 import { Card } from "../components/Card";
 import { Button } from "../components/Button";
 import { DataTable } from "../components/DataTable";
+import { Switch } from "../components/Switch";
 
 // Reusable card components to reduce duplication
 const MetricsSummaryCard = ({
@@ -61,14 +63,55 @@ const MetricsSummaryCard = ({
   overlayActiveTable,
   overlayActiveMetric,
   overlayActiveGroupBy,
+  groupBy,
+  onGroupByChange,
+  onOverlayActiveChange,
+  onOverlayGroupByChange,
 }) => (
   <div className="flex flex-col gap-4 pb-8">
-    <h2 className="text-md font-medium">Summary Card Example</h2>
-    <div>
+    <div className="flex items-center gap-4">
+      <h2 className="text-md font-medium">Summary Card Example</h2>
+      {/* Overlay toggle */}
+      {overlayActiveTable && overlayActiveMetric && (
+        <div className="flex items-center gap-2">
+          <Switch
+            id="summary-overlay-toggle"
+            checked={overlayActive}
+            onCheckedChange={onOverlayActiveChange}
+          />
+          <label
+            htmlFor="summary-overlay-toggle"
+            className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+          >
+            Show comparison
+          </label>
+        </div>
+      )}
+    </div>
+    <div className="flex gap-4">
       <OperatorSelector
         operator={operator}
         onOperatorChange={onOperatorChange}
       />
+      <GroupBySelector
+        groupBy={groupBy}
+        onGroupByChange={onGroupByChange}
+        selectedTable={selectedTable}
+      />
+      {overlayActive && (
+        <>
+          <div className="border-l border-gray-200 h-full pl-4">
+            <div className="flex items-center gap-4 w-full">
+              <CompareDatasetsSelector />
+              <GroupBySelector
+                groupBy={overlayActiveGroupBy}
+                onGroupByChange={onOverlayGroupByChange}
+                selectedTable={overlayActiveTable}
+              />
+            </div>
+          </div>
+        </>
+      )}
     </div>
     <Card className="flex flex-col gap-4">
       <div className="flex items-start gap-4">
@@ -252,6 +295,11 @@ function DashboardContent() {
   const [overlayActiveGroupBy, setOverlayActiveGroupBy] = useState("org");
   const [overlayActiveChartType, setOverlayActiveChartType] = useState("line");
 
+  // Summary Card Independent State
+  const [summaryGroupBy, setSummaryGroupBy] = useState("org");
+  const [summaryOverlayActive, setSummaryOverlayActive] = useState(false);
+  const [summaryOverlayGroupBy, setSummaryOverlayGroupBy] = useState("org");
+
   // Initialize URL state management
   const { getStateFromUrl, updateUrl, getShareableUrl } = useUrlState();
   const searchParams = useSearchParams();
@@ -282,6 +330,11 @@ function DashboardContent() {
         setOverlayActiveGroupBy(state.overlayActiveGroupBy);
       if (state.overlayActiveChartType)
         setOverlayActiveChartType(state.overlayActiveChartType);
+
+      // Load summary card state
+      setSummaryGroupBy(state.summaryGroupBy);
+      setSummaryOverlayActive(state.summaryOverlayActive);
+      setSummaryOverlayGroupBy(state.summaryOverlayGroupBy);
     } else {
       // Set default state and update URL with ALL parameters
       updateUrl({
@@ -304,6 +357,10 @@ function DashboardContent() {
         overlayActiveMetric: "",
         overlayActiveGroupBy: "org",
         overlayActiveChartType: "line",
+        // Include all summary card parameters with defaults
+        summaryGroupBy: "org",
+        summaryOverlayActive: false,
+        summaryOverlayGroupBy: "org",
       });
     }
   }, [searchParams, getStateFromUrl, updateUrl]);
@@ -378,6 +435,29 @@ function DashboardContent() {
       }
     }
   }, [overlayActiveTable, overlayActiveMetric]);
+
+  // Ensure summary overlay groupBy is valid for the overlayActiveTable
+  useEffect(() => {
+    if (overlayActiveTable) {
+      const validGroupBys = (
+        dataSourceConfig[overlayActiveTable]?.groupByOptions || []
+      ).map((opt) => opt.value);
+      if (!validGroupBys.includes(summaryOverlayGroupBy)) {
+        setSummaryOverlayGroupBy("org");
+      }
+    } else {
+      // If no overlay table is selected, reset summary overlay group by
+      setSummaryOverlayGroupBy("org");
+    }
+  }, [overlayActiveTable, summaryOverlayGroupBy]);
+
+  // Reset summary overlay when overlay metric is removed
+  useEffect(() => {
+    if (!overlayActiveMetric && summaryOverlayActive) {
+      setSummaryOverlayActive(false);
+      setSummaryOverlayGroupBy("org");
+    }
+  }, [overlayActiveMetric, summaryOverlayActive]);
 
   // Replace your existing allTimeData calculation with this:
   const allTimeData = useMemo(() => {
@@ -468,6 +548,72 @@ function DashboardContent() {
     dataTables,
     selectedDateRange,
     granularity,
+    operator,
+  ]);
+
+  // Process data specifically for Summary card
+  const summaryChartData = useMemo(() => {
+    const data = dataTables[selectedTable];
+    const startDate = selectedDateRange.from?.toISOString().split("T")[0];
+    const endDate = selectedDateRange.to?.toISOString().split("T")[0];
+
+    // Summary card always uses all-time view
+    if (summaryGroupBy === "org") {
+      return operator === "average"
+        ? calculateAverageData(data, selectedTable)
+        : calculateSumData(data, selectedTable);
+    } else {
+      return groupEventsByType(
+        data,
+        selectedTable,
+        summaryGroupBy,
+        selectedMetric,
+        "all-time", // Summary always shows totals
+        startDate,
+        endDate
+      );
+    }
+  }, [
+    dataTables,
+    selectedTable,
+    summaryGroupBy,
+    selectedMetric,
+    selectedDateRange,
+    operator,
+  ]);
+
+  // Process overlay data for Summary card
+  const summaryOverlayData = useMemo(() => {
+    if (!summaryOverlayActive || !overlayActiveTable) {
+      return null;
+    }
+
+    const overlayDataSource = dataTables[overlayActiveTable];
+    const startDate = selectedDateRange.from?.toISOString().split("T")[0];
+    const endDate = selectedDateRange.to?.toISOString().split("T")[0];
+
+    if (summaryOverlayGroupBy === "org") {
+      return operator === "average"
+        ? calculateAverageData(overlayDataSource, overlayActiveTable)
+        : calculateSumData(overlayDataSource, overlayActiveTable);
+    } else {
+      return groupEventsByType(
+        overlayDataSource,
+        overlayActiveTable,
+        summaryOverlayGroupBy,
+        overlayActiveMetric,
+        "all-time", // Summary always shows totals
+        startDate,
+        endDate
+      );
+    }
+  }, [
+    summaryOverlayActive,
+    overlayActiveTable,
+    overlayActiveMetric,
+    summaryOverlayGroupBy,
+    dataTables,
+    selectedDateRange,
     operator,
   ]);
 
@@ -615,7 +761,7 @@ function DashboardContent() {
     setOverlayConfigMetric("");
   };
 
-  const handleRemoveOverlay = () => {
+  const handleRemoveComparison = () => {
     // Clear all overlay states
     setOverlayActive(false);
     setOverlayActiveTable("");
@@ -625,6 +771,21 @@ function DashboardContent() {
     // Also clear config states
     setOverlayConfigTable("");
     setOverlayConfigMetric("");
+
+    // Clear summary overlay states
+    setSummaryOverlayActive(false);
+    setSummaryOverlayGroupBy("org");
+
+    // Update URL with cleared overlay state
+    updateUrl({
+      overlayActive: false,
+      overlayActiveTable: "",
+      overlayActiveMetric: "",
+      overlayActiveGroupBy: "org",
+      overlayActiveChartType: "line",
+      summaryOverlayActive: false,
+      summaryOverlayGroupBy: "org",
+    });
   };
 
   const handleShare = () => {
@@ -644,6 +805,9 @@ function DashboardContent() {
       overlayActiveMetric,
       overlayActiveGroupBy,
       overlayActiveChartType,
+      summaryGroupBy,
+      summaryOverlayActive,
+      summaryOverlayGroupBy,
     };
 
     const shareUrl = getShareableUrl(currentState);
@@ -692,6 +856,21 @@ function DashboardContent() {
       console.error("Fallback copy failed:", err);
       alert("Failed to copy URL. Please copy manually: " + text);
     }
+  };
+
+  const handleSummaryGroupByChange = (newGroupBy: string) => {
+    setSummaryGroupBy(newGroupBy);
+    updateUrl({ summaryGroupBy: newGroupBy });
+  };
+
+  const handleSummaryOverlayActiveChange = (newActive: boolean) => {
+    setSummaryOverlayActive(newActive);
+    updateUrl({ summaryOverlayActive: newActive });
+  };
+
+  const handleSummaryOverlayGroupByChange = (newGroupBy: string) => {
+    setSummaryOverlayGroupBy(newGroupBy);
+    updateUrl({ summaryOverlayGroupBy: newGroupBy });
   };
 
   return (
@@ -815,14 +994,9 @@ function DashboardContent() {
               selectedMetric={overlayActiveMetric}
               onMetricChange={setOverlayActiveMetric}
             />
-            <GroupBySelector
-              groupBy={overlayActiveGroupBy}
-              onGroupByChange={setOverlayActiveGroupBy}
-              selectedTable={overlayActiveTable}
-            />
             <div className="flex items-center gap-2 ml-auto">
-              <Button variant="ghost" onClick={handleRemoveOverlay}>
-                Remove Overlay
+              <Button variant="ghost" onClick={handleRemoveComparison}>
+                Remove Comparison
               </Button>
             </div>
           </div>
@@ -859,15 +1033,19 @@ function DashboardContent() {
                 selectedTable={selectedTable}
                 selectedMetric={selectedMetric}
                 granularity={granularity}
-                chartData={chartData}
+                chartData={summaryChartData}
                 dateMode={dateMode}
                 relativeDays={relativeDays}
                 selectedDateRange={selectedDateRange}
-                overlayActive={overlayActive}
-                overlayData={overlayData}
+                overlayActive={summaryOverlayActive}
+                overlayData={summaryOverlayData}
                 overlayActiveTable={overlayActiveTable}
                 overlayActiveMetric={overlayActiveMetric}
-                overlayActiveGroupBy={overlayActiveGroupBy}
+                overlayActiveGroupBy={summaryOverlayGroupBy}
+                groupBy={summaryGroupBy}
+                onGroupByChange={handleSummaryGroupByChange}
+                onOverlayActiveChange={handleSummaryOverlayActiveChange}
+                onOverlayGroupByChange={handleSummaryOverlayGroupByChange}
               />
 
               {/* Chart Card */}
@@ -924,15 +1102,19 @@ function DashboardContent() {
               selectedTable={selectedTable}
               selectedMetric={selectedMetric}
               granularity={granularity}
-              chartData={chartData}
+              chartData={summaryChartData}
               dateMode={dateMode}
               relativeDays={relativeDays}
               selectedDateRange={selectedDateRange}
-              overlayActive={overlayActive}
-              overlayData={overlayData}
+              overlayActive={summaryOverlayActive}
+              overlayData={summaryOverlayData}
               overlayActiveTable={overlayActiveTable}
               overlayActiveMetric={overlayActiveMetric}
-              overlayActiveGroupBy={overlayActiveGroupBy}
+              overlayActiveGroupBy={summaryOverlayGroupBy}
+              groupBy={summaryGroupBy}
+              onGroupByChange={handleSummaryGroupByChange}
+              onOverlayActiveChange={handleSummaryOverlayActiveChange}
+              onOverlayGroupByChange={handleSummaryOverlayGroupByChange}
             />
           </TabsContent>
 

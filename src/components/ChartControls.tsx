@@ -331,3 +331,22 @@ export function CardSizeSelector() {
     </Select>
   );
 }
+
+export function CompareDatasetsSelector() {
+  return (
+    <Select value="Compare Datasets" onValueChange={() => {}}>
+      <SelectTrigger className="cursor-pointer">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="Compare Datasets">Compare Datasets</SelectItem>
+        <SelectItem value="vs Previous Period">vs Previous Period</SelectItem>
+        <SelectItem value="vs Last Month">vs Last Month</SelectItem>
+        <SelectItem value="vs Organization Average">
+          vs Organization Average
+        </SelectItem>
+        <SelectItem value="vs Team Average">vs Team Average</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+}

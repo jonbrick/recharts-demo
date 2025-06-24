@@ -20,6 +20,10 @@ interface DashboardState {
   overlayActiveMetric: string;
   overlayActiveGroupBy: string;
   overlayActiveChartType: string;
+  // Summary card specific state
+  summaryGroupBy: string;
+  summaryOverlayActive: boolean;
+  summaryOverlayGroupBy: string;
 }
 
 // URL parameter keys - shortened for cleaner URLs
@@ -40,6 +44,10 @@ const URL_PARAMS = {
   overlayActiveMetric: "o_metric",
   overlayActiveGroupBy: "o_group",
   overlayActiveChartType: "o_chart",
+  // Summary card specific params
+  summaryGroupBy: "s_grp",
+  summaryOverlayActive: "s_overlay",
+  summaryOverlayGroupBy: "s_o_grp",
 } as const;
 
 export function useUrlState() {
@@ -152,6 +160,26 @@ export function useUrlState() {
       state.overlayActiveChartType = overlayChartType;
     }
 
+    // Read summary card specific params
+    const summaryGroupBy = searchParams.get(URL_PARAMS.summaryGroupBy);
+    if (summaryGroupBy) {
+      state.summaryGroupBy = summaryGroupBy;
+    }
+
+    const summaryOverlayActive = searchParams.get(
+      URL_PARAMS.summaryOverlayActive
+    );
+    if (summaryOverlayActive !== null) {
+      state.summaryOverlayActive = summaryOverlayActive === "true";
+    }
+
+    const summaryOverlayGroupBy = searchParams.get(
+      URL_PARAMS.summaryOverlayGroupBy
+    );
+    if (summaryOverlayGroupBy) {
+      state.summaryOverlayGroupBy = summaryOverlayGroupBy;
+    }
+
     return state;
   }, [searchParams]);
 
@@ -240,6 +268,23 @@ export function useUrlState() {
         );
       }
 
+      // Update summary card params if provided
+      if (updates.summaryGroupBy !== undefined) {
+        params.set(URL_PARAMS.summaryGroupBy, updates.summaryGroupBy);
+      }
+      if (updates.summaryOverlayActive !== undefined) {
+        params.set(
+          URL_PARAMS.summaryOverlayActive,
+          updates.summaryOverlayActive.toString()
+        );
+      }
+      if (updates.summaryOverlayGroupBy !== undefined) {
+        params.set(
+          URL_PARAMS.summaryOverlayGroupBy,
+          updates.summaryOverlayGroupBy
+        );
+      }
+
       // Update the URL without navigation
       const newUrl = `${pathname}?${params.toString()}`;
       router.push(newUrl, { scroll: false });
@@ -279,6 +324,14 @@ export function useUrlState() {
           state.overlayActiveChartType
         );
       }
+
+      // Add summary card params
+      params.set(URL_PARAMS.summaryGroupBy, state.summaryGroupBy);
+      params.set(
+        URL_PARAMS.summaryOverlayActive,
+        state.summaryOverlayActive.toString()
+      );
+      params.set(URL_PARAMS.summaryOverlayGroupBy, state.summaryOverlayGroupBy);
 
       // Return full URL
       const baseUrl =
