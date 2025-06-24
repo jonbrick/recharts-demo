@@ -187,35 +187,49 @@ const ChartCard = ({
         </div>
       )}
     </div>
-    <div className="flex gap-4">
-      <GranularitySelector
-        granularity={granularity}
-        onGranularityChange={onGranularityChange}
-      />
-      <DisplayLimitSelector />
-      <GroupBySelector
-        groupBy={chartGroupBy}
-        onGroupByChange={onChartGroupByChange}
-        selectedTable={selectedTable}
-      />
-      <ChartTypeSelector
-        chartType={chartType}
-        onChartTypeChange={onChartTypeChange}
-      />
+    <div className="flex gap-4 flex-wrap">
+      <div className="min-w-[120px]">
+        <GranularitySelector
+          granularity={granularity}
+          onGranularityChange={onGranularityChange}
+        />
+      </div>
+      <div className="min-w-[120px]">
+        <DisplayLimitSelector />
+      </div>
+      <div className="min-w-[120px]">
+        <GroupBySelector
+          groupBy={chartGroupBy}
+          onGroupByChange={onChartGroupByChange}
+          selectedTable={selectedTable}
+        />
+      </div>
+      <div className="min-w-[120px]">
+        <ChartTypeSelector
+          chartType={chartType}
+          onChartTypeChange={onChartTypeChange}
+        />
+      </div>
       {chartOverlayActive && overlayActiveTable && (
         <>
           <div className="border-l border-gray-200 h-full pl-4">
-            <div className="flex items-center gap-4 w-full">
-              <CompareDatasetsSelector />
-              <GroupBySelector
-                groupBy={chartOverlayGroupBy}
-                onGroupByChange={onChartOverlayGroupByChange}
-                selectedTable={overlayActiveTable}
-              />
-              <ChartTypeSelector
-                chartType={overlayActiveChartType}
-                onChartTypeChange={setOverlayActiveChartType}
-              />
+            <div className="flex items-center gap-4 w-full flex-wrap">
+              <div className="min-w-[120px]">
+                <CompareDatasetsSelector />
+              </div>
+              <div className="min-w-[120px]">
+                <GroupBySelector
+                  groupBy={chartOverlayGroupBy}
+                  onGroupByChange={onChartOverlayGroupByChange}
+                  selectedTable={overlayActiveTable}
+                />
+              </div>
+              <div className="min-w-[120px]">
+                <ChartTypeSelector
+                  chartType={overlayActiveChartType}
+                  onChartTypeChange={setOverlayActiveChartType}
+                />
+              </div>
             </div>
           </div>
         </>
@@ -261,17 +275,65 @@ const ListCard = ({
   dateMode,
   relativeDays,
   selectedDateRange,
+  onGroupByChange,
+  onOverlayActiveChange,
+  onOverlayGroupByChange,
 }) => (
   <div className="flex flex-col gap-4 pb-8">
-    <h2 className="text-md font-medium">List Card Example</h2>
-    <div className="flex gap-4">
-      <GranularitySelector
-        granularity={granularity}
-        onGranularityChange={onGranularityChange}
+    <div className="flex items-center gap-4">
+      <h2 className="text-md font-medium">List Card Example</h2>
+      {/* Overlay toggle */}
+      {overlayActiveTable && overlayActiveMetric && (
+        <div className="flex items-center gap-2">
+          <Switch
+            id="list-overlay-toggle"
+            checked={overlayActive}
+            onCheckedChange={onOverlayActiveChange}
+          />
+          <label
+            htmlFor="list-overlay-toggle"
+            className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+          >
+            Show comparison
+          </label>
+        </div>
+      )}
+    </div>
+    <div className="flex gap-4 flex-wrap">
+      <div className="min-w-[120px]">
+        <GranularitySelector
+          granularity={granularity}
+          onGranularityChange={onGranularityChange}
+        />
+      </div>
+      <div className="min-w-[120px]">
+        <DisplayLimitSelector />
+      </div>
+      <div className="min-w-[120px]">
+        <DisplaySortSelector />
+      </div>
+      <div className="min-w-[120px]">
+        <ViewSelector view={tableView} onViewChange={onTableViewChange} />
+      </div>
+      <GroupBySelector
+        groupBy={groupBy}
+        onGroupByChange={onGroupByChange}
+        selectedTable={selectedTable}
       />
-      <DisplayLimitSelector />
-      <DisplaySortSelector />
-      <ViewSelector view={tableView} onViewChange={onTableViewChange} />
+      {overlayActive && (
+        <>
+          <div className="border-l border-gray-200 h-full pl-4">
+            <div className="flex items-center gap-4 w-full">
+              <CompareDatasetsSelector />
+              <GroupBySelector
+                groupBy={overlayActiveGroupBy}
+                onGroupByChange={onOverlayGroupByChange}
+                selectedTable={overlayActiveTable}
+              />
+            </div>
+          </div>
+        </>
+      )}
     </div>
     <Card className="flex flex-col gap-4">
       <DataTable
@@ -340,6 +402,11 @@ function DashboardContent() {
   const [chartOverlayActive, setChartOverlayActive] = useState(false);
   const [chartOverlayGroupBy, setChartOverlayGroupBy] = useState("org");
 
+  // List card specific state
+  const [listGroupBy, setListGroupBy] = useState("org");
+  const [listOverlayActive, setListOverlayActive] = useState(false);
+  const [listOverlayGroupBy, setListOverlayGroupBy] = useState("org");
+
   // Initialize URL state management
   const { getStateFromUrl, updateUrl, getShareableUrl } = useUrlState();
   const searchParams = useSearchParams();
@@ -380,6 +447,11 @@ function DashboardContent() {
       setChartGroupBy(state.chartGroupBy || "org");
       setChartOverlayActive(state.chartOverlayActive || false);
       setChartOverlayGroupBy(state.chartOverlayGroupBy || "org");
+
+      // Initialize list-specific state from URL
+      setListGroupBy(state.listGroupBy || "org");
+      setListOverlayActive(state.listOverlayActive || false);
+      setListOverlayGroupBy(state.listOverlayGroupBy || "org");
     } else {
       // Set default state and update URL with ALL parameters
       updateUrl({
@@ -410,6 +482,10 @@ function DashboardContent() {
         chartGroupBy: "org",
         chartOverlayActive: false,
         chartOverlayGroupBy: "org",
+        // Include all list card parameters with defaults
+        listGroupBy: "org",
+        listOverlayActive: false,
+        listOverlayGroupBy: "org",
       });
     }
   }, [searchParams, getStateFromUrl, updateUrl]);
@@ -557,48 +633,48 @@ function DashboardContent() {
   ]);
 
   // Process overlay data when active
-  const overlayData = useMemo(() => {
-    if (!overlayActive || !overlayActiveTable) {
-      return null;
-    }
+  // const overlayData = useMemo(() => {
+  //   if (!overlayActive || !overlayActiveTable) {
+  //     return null;
+  //   }
 
-    const overlayDataSource = dataTables[overlayActiveTable];
-    const startDate = selectedDateRange.from?.toISOString().split("T")[0];
-    const endDate = selectedDateRange.to?.toISOString().split("T")[0];
+  //   const overlayDataSource = dataTables[overlayActiveTable];
+  //   const startDate = selectedDateRange.from?.toISOString().split("T")[0];
+  //   const endDate = selectedDateRange.to?.toISOString().split("T")[0];
 
-    if (overlayActiveGroupBy === "org") {
-      return granularity === "monthly"
-        ? groupEventsByDate(
-            overlayDataSource,
-            overlayActiveTable,
-            startDate,
-            endDate
-          )
-        : operator === "average"
-        ? calculateAverageData(overlayDataSource, overlayActiveTable)
-        : calculateSumData(overlayDataSource, overlayActiveTable);
-    } else {
-      // For non-org views, always use monthly granularity
-      return groupEventsByType(
-        overlayDataSource,
-        overlayActiveTable,
-        overlayActiveGroupBy,
-        overlayActiveMetric,
-        granularity,
-        startDate,
-        endDate
-      );
-    }
-  }, [
-    overlayActive,
-    overlayActiveTable,
-    overlayActiveMetric,
-    overlayActiveGroupBy,
-    dataTables,
-    selectedDateRange,
-    granularity,
-    operator,
-  ]);
+  //   if (overlayActiveGroupBy === "org") {
+  //     return granularity === "monthly"
+  //       ? groupEventsByDate(
+  //           overlayDataSource,
+  //           overlayActiveTable,
+  //           startDate,
+  //           endDate
+  //         )
+  //       : operator === "average"
+  //       ? calculateAverageData(overlayDataSource, overlayActiveTable)
+  //       : calculateSumData(overlayDataSource, overlayActiveTable);
+  //   } else {
+  //     // For non-org views, always use monthly granularity
+  //     return groupEventsByType(
+  //       overlayDataSource,
+  //       overlayActiveTable,
+  //       overlayActiveGroupBy,
+  //       overlayActiveMetric,
+  //       granularity,
+  //       startDate,
+  //       endDate
+  //     );
+  //   }
+  // }, [
+  //   overlayActive,
+  //   overlayActiveTable,
+  //   overlayActiveMetric,
+  //   overlayActiveGroupBy,
+  //   dataTables,
+  //   selectedDateRange,
+  //   granularity,
+  //   operator,
+  // ]);
 
   // Chart-specific overlay data processing
   const chartOverlayData = useMemo(() => {
@@ -710,6 +786,80 @@ function DashboardContent() {
     operator,
   ]);
 
+  // Process data specifically for List card
+  const listChartData = useMemo(() => {
+    const data = dataTables[selectedTable];
+    const startDate = selectedDateRange.from?.toISOString().split("T")[0];
+    const endDate = selectedDateRange.to?.toISOString().split("T")[0];
+
+    if (listGroupBy === "org") {
+      return granularity === "monthly"
+        ? groupEventsByDate(data, selectedTable, startDate, endDate)
+        : allTimeData;
+    } else {
+      return groupEventsByType(
+        data,
+        selectedTable,
+        listGroupBy,
+        selectedMetric,
+        granularity,
+        startDate,
+        endDate
+      );
+    }
+  }, [
+    dataTables,
+    selectedTable,
+    listGroupBy,
+    selectedMetric,
+    granularity,
+    allTimeData,
+    selectedDateRange,
+  ]);
+
+  // Process overlay data for List card
+  const listOverlayData = useMemo(() => {
+    if (!listOverlayActive || !overlayActiveTable) {
+      return null;
+    }
+
+    const overlayDataSource = dataTables[overlayActiveTable];
+    const startDate = selectedDateRange.from?.toISOString().split("T")[0];
+    const endDate = selectedDateRange.to?.toISOString().split("T")[0];
+
+    if (listOverlayGroupBy === "org") {
+      return granularity === "monthly"
+        ? groupEventsByDate(
+            overlayDataSource,
+            overlayActiveTable,
+            startDate,
+            endDate
+          )
+        : operator === "average"
+        ? calculateAverageData(overlayDataSource, overlayActiveTable)
+        : calculateSumData(overlayDataSource, overlayActiveTable);
+    } else {
+      return groupEventsByType(
+        overlayDataSource,
+        overlayActiveTable,
+        listOverlayGroupBy,
+        overlayActiveMetric,
+        granularity,
+        startDate,
+        endDate
+      );
+    }
+  }, [
+    listOverlayActive,
+    overlayActiveTable,
+    overlayActiveMetric,
+    listOverlayGroupBy,
+    dataTables,
+    selectedDateRange,
+    granularity,
+    operator,
+  ]);
+
   const handleTableChange = (newTable: string) => {
     setSelectedTable(newTable);
     // Reset to first metric of new data source
@@ -722,11 +872,6 @@ function DashboardContent() {
       selectedTable: newTable,
       selectedMetric: newMetric,
     });
-  };
-
-  const handleGroupByChange = (newGroupBy: string) => {
-    setGroupBy(newGroupBy);
-    updateUrl({ groupBy: newGroupBy });
   };
 
   const handleDateRangeChange = (dateRange: DateRange | undefined) => {
@@ -904,6 +1049,9 @@ function DashboardContent() {
       chartGroupBy,
       chartOverlayActive,
       chartOverlayGroupBy,
+      listGroupBy,
+      listOverlayActive,
+      listOverlayGroupBy,
     };
 
     const shareUrl = getShareableUrl(currentState);
@@ -985,6 +1133,22 @@ function DashboardContent() {
     updateUrl({ chartOverlayGroupBy: newGroupBy });
   };
 
+  // List card handlers
+  const handleListGroupByChange = (newGroupBy: string) => {
+    setListGroupBy(newGroupBy);
+    updateUrl({ listGroupBy: newGroupBy });
+  };
+
+  const handleListOverlayActiveChange = (active: boolean) => {
+    setListOverlayActive(active);
+    updateUrl({ listOverlayActive: active });
+  };
+
+  const handleListOverlayGroupByChange = (newGroupBy: string) => {
+    setListOverlayGroupBy(newGroupBy);
+    updateUrl({ listOverlayGroupBy: newGroupBy });
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col gap-6">
@@ -1048,11 +1212,6 @@ function DashboardContent() {
               selectedMetric={selectedMetric}
               onMetricChange={handleMetricChange}
             />
-            <GroupBySelector
-              groupBy={groupBy}
-              onGroupByChange={handleGroupByChange}
-              selectedTable={selectedTable}
-            />
 
             <div className="flex items-center gap-2 ml-auto">
               {!overlayActive && (
@@ -1076,11 +1235,6 @@ function DashboardContent() {
               selectedTable={overlayConfigTable}
               selectedMetric={overlayConfigMetric}
               onMetricChange={setOverlayConfigMetric}
-            />
-            <GroupBySelector
-              groupBy={overlayConfigGroupBy}
-              onGroupByChange={setOverlayConfigGroupBy}
-              selectedTable={overlayConfigTable}
             />
             <div className="flex items-center gap-2 ml-auto">
               <Button variant="secondary" onClick={handleCancelOverlay}>
@@ -1179,19 +1333,22 @@ function DashboardContent() {
                 onGranularityChange={handleGranularityChange}
                 tableView={tableView}
                 onTableViewChange={handleTableViewChange}
-                chartData={chartData}
+                chartData={listChartData}
                 selectedMetric={selectedMetric}
                 selectedTable={selectedTable}
-                groupBy={groupBy}
+                groupBy={listGroupBy}
                 dataTables={dataTables}
-                overlayActive={overlayActive}
-                overlayData={overlayData}
+                overlayActive={listOverlayActive}
+                overlayData={listOverlayData}
                 overlayActiveMetric={overlayActiveMetric}
                 overlayActiveTable={overlayActiveTable}
-                overlayActiveGroupBy={overlayActiveGroupBy}
+                overlayActiveGroupBy={listOverlayGroupBy}
                 dateMode={dateMode}
                 relativeDays={relativeDays}
                 selectedDateRange={selectedDateRange}
+                onGroupByChange={handleListGroupByChange}
+                onOverlayActiveChange={handleListOverlayActiveChange}
+                onOverlayGroupByChange={handleListOverlayGroupByChange}
               />
             </div>
           </TabsContent>
@@ -1254,19 +1411,22 @@ function DashboardContent() {
               onGranularityChange={handleGranularityChange}
               tableView={tableView}
               onTableViewChange={handleTableViewChange}
-              chartData={chartData}
+              chartData={listChartData}
               selectedMetric={selectedMetric}
               selectedTable={selectedTable}
-              groupBy={groupBy}
+              groupBy={listGroupBy}
               dataTables={dataTables}
-              overlayActive={overlayActive}
-              overlayData={overlayData}
+              overlayActive={listOverlayActive}
+              overlayData={listOverlayData}
               overlayActiveMetric={overlayActiveMetric}
               overlayActiveTable={overlayActiveTable}
-              overlayActiveGroupBy={overlayActiveGroupBy}
+              overlayActiveGroupBy={listOverlayGroupBy}
               dateMode={dateMode}
               relativeDays={relativeDays}
               selectedDateRange={selectedDateRange}
+              onGroupByChange={handleListGroupByChange}
+              onOverlayActiveChange={handleListOverlayActiveChange}
+              onOverlayGroupByChange={handleListOverlayGroupByChange}
             />
           </TabsContent>
         </Tabs>

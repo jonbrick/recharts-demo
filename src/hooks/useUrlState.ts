@@ -28,6 +28,10 @@ interface DashboardState {
   chartGroupBy: string;
   chartOverlayActive: boolean;
   chartOverlayGroupBy: string;
+  // List card specific state
+  listGroupBy: string;
+  listOverlayActive: boolean;
+  listOverlayGroupBy: string;
 }
 
 // URL parameter keys - shortened for cleaner URLs
@@ -56,6 +60,10 @@ const URL_PARAMS = {
   chartGroupBy: "c_grp",
   chartOverlayActive: "c_overlay",
   chartOverlayGroupBy: "c_o_grp",
+  // List card specific params
+  listGroupBy: "l_grp",
+  listOverlayActive: "l_overlay",
+  listOverlayGroupBy: "l_o_grp",
 } as const;
 
 export function useUrlState() {
@@ -206,6 +214,22 @@ export function useUrlState() {
       state.chartOverlayGroupBy = chartOverlayGroupBy;
     }
 
+    // Read list card specific params
+    const listGroupBy = searchParams.get(URL_PARAMS.listGroupBy);
+    if (listGroupBy) {
+      state.listGroupBy = listGroupBy;
+    }
+
+    const listOverlayActive = searchParams.get(URL_PARAMS.listOverlayActive);
+    if (listOverlayActive !== null) {
+      state.listOverlayActive = listOverlayActive === "true";
+    }
+
+    const listOverlayGroupBy = searchParams.get(URL_PARAMS.listOverlayGroupBy);
+    if (listOverlayGroupBy) {
+      state.listOverlayGroupBy = listOverlayGroupBy;
+    }
+
     return state;
   }, [searchParams]);
 
@@ -325,6 +349,20 @@ export function useUrlState() {
         params.set(URL_PARAMS.chartOverlayGroupBy, updates.chartOverlayGroupBy);
       }
 
+      // Update list card params if provided
+      if (updates.listGroupBy !== undefined) {
+        params.set(URL_PARAMS.listGroupBy, updates.listGroupBy);
+      }
+      if (updates.listOverlayActive !== undefined) {
+        params.set(
+          URL_PARAMS.listOverlayActive,
+          updates.listOverlayActive.toString()
+        );
+      }
+      if (updates.listOverlayGroupBy !== undefined) {
+        params.set(URL_PARAMS.listOverlayGroupBy, updates.listOverlayGroupBy);
+      }
+
       // Update the URL without navigation
       const newUrl = `${pathname}?${params.toString()}`;
       router.push(newUrl, { scroll: false });
@@ -385,6 +423,20 @@ export function useUrlState() {
       }
       if (state.chartOverlayGroupBy) {
         params.set(URL_PARAMS.chartOverlayGroupBy, state.chartOverlayGroupBy);
+      }
+
+      // Add list card params
+      if (state.listGroupBy) {
+        params.set(URL_PARAMS.listGroupBy, state.listGroupBy);
+      }
+      if (state.listOverlayActive) {
+        params.set(
+          URL_PARAMS.listOverlayActive,
+          state.listOverlayActive.toString()
+        );
+      }
+      if (state.listOverlayGroupBy) {
+        params.set(URL_PARAMS.listOverlayGroupBy, state.listOverlayGroupBy);
       }
 
       // Return full URL

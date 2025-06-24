@@ -144,9 +144,9 @@ export function DataTable({
     dataToDisplay.length > 0
       ? Object.keys(dataToDisplay[0])
           .filter((key) => {
-            // For org view, we'll handle this differently
             if (groupBy === "org") {
-              return false; // No dynamic columns for org view
+              // Only show the selected metric for org view
+              return key === `${selectedMetric}_display`;
             }
             // For other views, only show '_display' keys
             return key.endsWith("_display") && !key.endsWith("_overlay");
@@ -158,8 +158,12 @@ export function DataTable({
   const overlayColumnKeys =
     overlayActive && dataToDisplay.length > 0
       ? Object.keys(dataToDisplay[0]).filter((key) => {
-          // Always show overlay columns, regardless of groupBy
-          return key.endsWith("_overlay") && !key.endsWith("_hasData");
+          // Only show overlay columns that are not _display_overlay or _hasData
+          return (
+            key.endsWith("_overlay") &&
+            !key.endsWith("_display_overlay") &&
+            !key.endsWith("_hasData")
+          );
         })
       : [];
 
@@ -196,7 +200,15 @@ export function DataTable({
               </th>
               {groupBy === "org" && !overlayActive ? (
                 <th className="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">
-                  Organization
+                  {(() => {
+                    const config = dataSourceConfig[selectedTable];
+                    const metricLabel =
+                      config.metrics.find((m) => m.key === selectedMetric)
+                        ?.label ||
+                      config.overlayMetric?.label ||
+                      selectedMetric;
+                    return metricLabel;
+                  })()}
                 </th>
               ) : groupBy === "org" && overlayActive ? (
                 <>
@@ -279,8 +291,9 @@ export function DataTable({
                         key={key}
                         className="border border-gray-200 px-4 py-3 text-gray-700"
                       >
-                        {row[`${key}_display`] ||
-                          formatValue(row[key], "number")}
+                        {row[key] !== undefined
+                          ? formatValue(row[key], "number")
+                          : ""}
                       </td>
                     ))}
                   </>
