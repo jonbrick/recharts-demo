@@ -17,6 +17,18 @@ export const getRelativeDateRange = (days) => {
   return { from, to };
 };
 
+/**
+ * Calculates the previous period date range with the same duration as the current range.
+ * @param {Object} currentRange - Object with from/to Date objects
+ * @returns {Object} Previous period range with from/to Date objects
+ */
+export function getPreviousPeriodRange(currentRange) {
+  const duration = currentRange.to.getTime() - currentRange.from.getTime();
+  const previousTo = new Date(currentRange.from.getTime());
+  const previousFrom = new Date(previousTo.getTime() - duration);
+  return { from: previousFrom, to: previousTo };
+}
+
 // Default dates for the date picker
 export const DEFAULT_PICKER_DATES = {
   defaultStart: POC_START_DATE,

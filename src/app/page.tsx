@@ -40,6 +40,7 @@ import {
   POC_END_DATE_UTC,
   TODAY,
   getRelativeDateRange,
+  getPreviousPeriodRange,
 } from "../lib/dashboardUtils";
 import { Card } from "../components/Card";
 import { Button } from "../components/Button";
@@ -66,26 +67,26 @@ const MetricsSummaryCard = ({
   onGroupByChange,
   onOverlayActiveChange,
   onOverlayGroupByChange,
+  summaryComparisonMode,
+  setSummaryComparisonMode,
 }) => (
   <div className="flex flex-col gap-4 pb-8">
     <div className="flex items-center gap-4">
       <h2 className="text-md font-medium">Summary Card Example</h2>
       {/* Overlay toggle */}
-      {overlayActiveTable && overlayActiveMetric && (
-        <div className="flex items-center gap-2">
-          <Switch
-            id="summary-overlay-toggle"
-            checked={overlayActive}
-            onCheckedChange={onOverlayActiveChange}
-          />
-          <label
-            htmlFor="summary-overlay-toggle"
-            className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
-          >
-            Show comparison
-          </label>
-        </div>
-      )}
+      <div className="flex items-center gap-2">
+        <Switch
+          id="summary-overlay-toggle"
+          checked={overlayActive}
+          onCheckedChange={onOverlayActiveChange}
+        />
+        <label
+          htmlFor="summary-overlay-toggle"
+          className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+        >
+          Show comparison
+        </label>
+      </div>
     </div>
     <div className="flex gap-2">
       <GroupBySelector
@@ -97,11 +98,16 @@ const MetricsSummaryCard = ({
         operator={operator}
         onOperatorChange={onOperatorChange}
       />
-      {overlayActive && (
+      {overlayActive && overlayActiveTable && (
         <>
           <div className="border-l border-gray-200 h-full pl-2">
             <div className="flex items-center gap-2 w-full">
-              <CompareDatasetsSelector />
+              <ComparisonModeSelector
+                comparisonMode={summaryComparisonMode}
+                onComparisonModeChange={(mode) =>
+                  setSummaryComparisonMode(mode)
+                }
+              />
               <GroupBySelector
                 groupBy={overlayActiveGroupBy}
                 onGroupByChange={onOverlayGroupByChange}
@@ -128,9 +134,21 @@ const MetricsSummaryCard = ({
         {overlayActive && overlayData && (
           <MetricsSummary
             className="border-l border-gray-200 dark:border-gray-700 pl-8"
-            key={`overlay-${operator}-${overlayActiveMetric}-${overlayActiveGroupBy}-${granularity}`}
-            selectedTable={overlayActiveTable}
-            selectedMetric={overlayActiveMetric}
+            key={`overlay-${operator}-${
+              summaryComparisonMode === "vs Previous Period"
+                ? selectedMetric
+                : overlayActiveMetric
+            }-${overlayActiveGroupBy}-${granularity}`}
+            selectedTable={
+              summaryComparisonMode === "vs Previous Period"
+                ? selectedTable
+                : overlayActiveTable
+            }
+            selectedMetric={
+              summaryComparisonMode === "vs Previous Period"
+                ? selectedMetric
+                : overlayActiveMetric
+            }
             operator={operator}
             granularity={granularity}
             data={overlayData}
@@ -171,21 +189,19 @@ const ChartCard = ({
     <div className="flex items-center gap-4">
       <h2 className="text-md font-medium">Trend Card Example</h2>
       {/* Chart-specific overlay toggle */}
-      {overlayActiveTable && overlayActiveMetric && (
-        <div className="flex items-center gap-2">
-          <Switch
-            id="chart-overlay-toggle"
-            checked={chartOverlayActive}
-            onCheckedChange={onChartOverlayActiveChange}
-          />
-          <label
-            htmlFor="chart-overlay-toggle"
-            className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
-          >
-            Show comparison
-          </label>
-        </div>
-      )}
+      <div className="flex items-center gap-2">
+        <Switch
+          id="chart-overlay-toggle"
+          checked={chartOverlayActive}
+          onCheckedChange={onChartOverlayActiveChange}
+        />
+        <label
+          htmlFor="chart-overlay-toggle"
+          className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+        >
+          Show comparison
+        </label>
+      </div>
     </div>
     <div className="flex gap-2 flex-wrap">
       <GroupBySelector
@@ -272,21 +288,19 @@ const ListCard = ({
     <div className="flex items-center gap-4">
       <h2 className="text-md font-medium">List Card Example</h2>
       {/* Overlay toggle */}
-      {overlayActiveTable && overlayActiveMetric && (
-        <div className="flex items-center gap-2">
-          <Switch
-            id="list-overlay-toggle"
-            checked={overlayActive}
-            onCheckedChange={onOverlayActiveChange}
-          />
-          <label
-            htmlFor="list-overlay-toggle"
-            className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
-          >
-            Show comparison
-          </label>
-        </div>
-      )}
+      <div className="flex items-center gap-2">
+        <Switch
+          id="list-overlay-toggle"
+          checked={overlayActive}
+          onCheckedChange={onOverlayActiveChange}
+        />
+        <label
+          htmlFor="list-overlay-toggle"
+          className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+        >
+          Show comparison
+        </label>
+      </div>
     </div>
     <div className="flex gap-2 flex-wrap">
       <GroupBySelector
@@ -301,7 +315,7 @@ const ListCard = ({
       <DisplayLimitSelector />
       <DisplaySortSelector />
       <ViewSelector view={tableView} onViewChange={onTableViewChange} />
-      {overlayActive && (
+      {overlayActive && overlayActiveTable && (
         <>
           <div className="border-l border-gray-200 h-full pl-2">
             <div className="flex items-center gap-4 w-full">
@@ -391,9 +405,9 @@ function DashboardContent() {
   // Card-specific comparison mode states
   const [summaryComparisonMode, setSummaryComparisonMode] =
     useState("Compare Datasets");
-  const [chartComparisonMode, setChartComparisonMode] =
+  const [chartComparisonMode, _setChartComparisonMode] =
     useState("Compare Datasets");
-  const [listComparisonMode, setListComparisonMode] =
+  const [listComparisonMode, _setListComparisonMode] =
     useState("Compare Datasets");
 
   // Initialize URL state management
@@ -742,7 +756,43 @@ function DashboardContent() {
 
   // Process overlay data for Summary card
   const summaryOverlayData = useMemo(() => {
-    if (!summaryOverlayActive || !overlayActiveTable) {
+    if (!summaryOverlayActive) {
+      return null;
+    }
+
+    // vs Previous Period mode
+    if (summaryComparisonMode === "vs Previous Period") {
+      const previousRange = getPreviousPeriodRange(selectedDateRange);
+      const prevStartDate = previousRange.from.toISOString().split("T")[0];
+      const prevEndDate = previousRange.to.toISOString().split("T")[0];
+
+      // Filter data for previous period using same table as primary
+      const previousPeriodData = filterEventsByDate(
+        dataTables[selectedTable],
+        prevStartDate,
+        prevEndDate,
+        selectedTable === "githubActions" ? "deployed_at" : "created_at"
+      );
+
+      if (summaryGroupBy === "org") {
+        return operator === "average"
+          ? calculateAverageData(previousPeriodData, selectedTable)
+          : calculateSumData(previousPeriodData, selectedTable);
+      } else {
+        return groupEventsByType(
+          previousPeriodData,
+          selectedTable,
+          summaryGroupBy,
+          selectedMetric,
+          "all-time",
+          prevStartDate,
+          prevEndDate
+        );
+      }
+    }
+
+    // Compare Datasets mode (existing logic)
+    if (!overlayActiveTable) {
       return null;
     }
 
@@ -767,9 +817,13 @@ function DashboardContent() {
     }
   }, [
     summaryOverlayActive,
+    summaryComparisonMode,
     overlayActiveTable,
     overlayActiveMetric,
     summaryOverlayGroupBy,
+    summaryGroupBy,
+    selectedTable,
+    selectedMetric,
     dataTables,
     selectedDateRange,
     operator,
@@ -1109,6 +1163,11 @@ function DashboardContent() {
     updateUrl({ summaryOverlayGroupBy: newGroupBy });
   };
 
+  const handleSummaryComparisonModeChange = (mode: string) => {
+    setSummaryComparisonMode(mode);
+    updateUrl({ summaryComparisonMode: mode });
+  };
+
   // Chart card specific handlers
   const handleChartGroupByChange = (newGroupBy: string) => {
     setChartGroupBy(newGroupBy);
@@ -1218,7 +1277,6 @@ function DashboardContent() {
         {/* Overlay Configuration Controls */}
         {overlayConfiguring && (
           <div className="flex items-center gap-4 bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-            <ComparisonModeSelector />
             <DataSourceSelector
               selectedTable={overlayConfigTable}
               onTableChange={setOverlayConfigTable}
@@ -1242,7 +1300,6 @@ function DashboardContent() {
         {/* Active Overlay Controls */}
         {overlayActive && !overlayConfiguring && (
           <div className="flex items-center gap-4 bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-            <ComparisonModeSelector />
             <DataSourceSelector
               selectedTable={overlayActiveTable}
               onTableChange={setOverlayActiveTable}
@@ -1292,6 +1349,8 @@ function DashboardContent() {
                 onGroupByChange={handleSummaryGroupByChange}
                 onOverlayActiveChange={handleSummaryOverlayActiveChange}
                 onOverlayGroupByChange={handleSummaryOverlayGroupByChange}
+                summaryComparisonMode={summaryComparisonMode}
+                setSummaryComparisonMode={handleSummaryComparisonModeChange}
               />
 
               {/* Chart Card */}
@@ -1366,6 +1425,8 @@ function DashboardContent() {
               onGroupByChange={handleSummaryGroupByChange}
               onOverlayActiveChange={handleSummaryOverlayActiveChange}
               onOverlayGroupByChange={handleSummaryOverlayGroupByChange}
+              summaryComparisonMode={summaryComparisonMode}
+              setSummaryComparisonMode={handleSummaryComparisonModeChange}
             />
           </TabsContent>
 
