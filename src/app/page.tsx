@@ -63,7 +63,7 @@ const MetricsSummaryCard = ({
   overlayActiveGroupBy,
 }) => (
   <div className="flex flex-col gap-4 pb-8">
-    <h2 className="text-md font-medium">Summary Card</h2>
+    <h2 className="text-md font-medium">Summary Card Example</h2>
     <div>
       <OperatorSelector
         operator={operator}
@@ -121,7 +121,7 @@ const ChartCard = ({
   overlayActiveGroupBy,
 }) => (
   <div className="flex flex-col gap-4 pb-8">
-    <h2 className="text-md font-medium">Trend Card</h2>
+    <h2 className="text-md font-medium">Trend Card Example</h2>
     <div className="flex gap-4">
       <GranularitySelector
         granularity={granularity}
@@ -178,7 +178,7 @@ const ListCard = ({
   overlayActiveGroupBy,
 }) => (
   <div className="flex flex-col gap-4 pb-8">
-    <h2 className="text-md font-medium">List Card</h2>
+    <h2 className="text-md font-medium">List Card Example</h2>
     <div className="flex gap-4">
       <GranularitySelector
         granularity={granularity}
@@ -832,9 +832,9 @@ function DashboardContent() {
         <Tabs defaultValue="Demo" className="pt-2 w-full">
           <TabsList className="mb-6" variant="line">
             <TabsTrigger value="Demo">Demo</TabsTrigger>
-            <TabsTrigger value="Summary">Summary Card</TabsTrigger>
-            <TabsTrigger value="Chart">Chart Card</TabsTrigger>
-            <TabsTrigger value="List">List Card</TabsTrigger>
+            <TabsTrigger value="Summary">Summary Card Example</TabsTrigger>
+            <TabsTrigger value="Chart">Chart Card Example</TabsTrigger>
+            <TabsTrigger value="List">List Card Example</TabsTrigger>
           </TabsList>
 
           {/* Demo Tab - Shows all cards */}
