@@ -20,7 +20,6 @@ import {
   DisplaySortSelector,
   CompareDatasetsSelector,
 } from "../components/ChartControls";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/Tabs";
 import { MetricsSummary } from "../components/MetricsSummary";
 import { ChartRenderer } from "../components/ChartRenderer";
 import { DateRangePicker, type DateRange } from "../components/DatePicker";
@@ -76,7 +75,7 @@ const MetricsSummaryCard = ({
   return (
     <div className="flex flex-col gap-4 pb-8">
       <div className="flex items-center gap-4">
-        <h2 className="text-md font-medium">Summary Card Example</h2>
+        <h2 className="text-md font-medium">Metric Summary Controls</h2>
         {/* Overlay toggle */}
         <div className="flex items-center gap-2">
           <Switch
@@ -210,7 +209,7 @@ const ChartCard = ({
 }) => (
   <div className="flex flex-col gap-4 pb-8">
     <div className="flex items-center gap-4">
-      <h2 className="text-md font-medium">Trend Card Example</h2>
+      <h2 className="text-md font-medium">Metric Trend Controls</h2>
       {/* Chart-specific overlay toggle */}
       <div className="flex items-center gap-2">
         <Switch
@@ -309,7 +308,7 @@ const ListCard = ({
 }) => (
   <div className="flex flex-col gap-4 pb-8">
     <div className="flex items-center gap-4">
-      <h2 className="text-md font-medium">List Card Example</h2>
+      <h2 className="text-md font-medium">Metric List Controls</h2>
       {/* Overlay toggle */}
       <div className="flex items-center gap-2">
         <Switch
@@ -1289,177 +1288,83 @@ function DashboardContent() {
         )}
 
         {/* Display Controls - Tab Navigation */}
-        <Tabs defaultValue="Demo" className="pt-2 w-full">
-          <TabsList className="mb-6" variant="line">
-            <TabsTrigger value="Demo">Demo</TabsTrigger>
-            <TabsTrigger value="Summary">Summary Card Example</TabsTrigger>
-            <TabsTrigger value="Chart">Chart Card Example</TabsTrigger>
-            <TabsTrigger value="List">List Card Example</TabsTrigger>
-          </TabsList>
+        <div className="flex flex-col gap-8">
+          {/* Metrics Summary Card */}
+          <MetricsSummaryCard
+            operator={operator}
+            onOperatorChange={handleOperatorChange}
+            selectedTable={selectedTable}
+            selectedMetric={selectedMetric}
+            granularity={granularity}
+            chartData={summaryChartData}
+            dateMode={dateMode}
+            relativeDays={relativeDays}
+            selectedDateRange={selectedDateRange}
+            overlayActive={summaryOverlayActive}
+            overlayActiveTable={overlayActiveTable}
+            overlayActiveMetric={overlayActiveMetric}
+            overlayActiveGroupBy={summaryOverlayGroupBy}
+            groupBy={summaryGroupBy}
+            onGroupByChange={handleSummaryGroupByChange}
+            onOverlayActiveChange={handleSummaryOverlayActiveChange}
+            onOverlayGroupByChange={handleSummaryOverlayGroupByChange}
+            summaryPreviousPeriod={summaryPreviousPeriod}
+            setSummaryPreviousPeriod={setSummaryPreviousPeriod}
+            summaryCompareDatasets={summaryCompareDatasets}
+            setSummaryCompareDatasets={setSummaryCompareDatasets}
+            summaryPreviousPeriodData={summaryPreviousPeriodData}
+            summaryOverlayCurrentData={summaryOverlayCurrentData}
+          />
 
-          {/* Demo Tab - Shows all cards */}
-          <TabsContent value="Demo">
-            <div className="flex flex-col gap-8">
-              {/* Metrics Summary Card */}
-              <MetricsSummaryCard
-                operator={operator}
-                onOperatorChange={handleOperatorChange}
-                selectedTable={selectedTable}
-                selectedMetric={selectedMetric}
-                granularity={granularity}
-                chartData={summaryChartData}
-                dateMode={dateMode}
-                relativeDays={relativeDays}
-                selectedDateRange={selectedDateRange}
-                overlayActive={summaryOverlayActive}
-                overlayActiveTable={overlayActiveTable}
-                overlayActiveMetric={overlayActiveMetric}
-                overlayActiveGroupBy={summaryOverlayGroupBy}
-                groupBy={summaryGroupBy}
-                onGroupByChange={handleSummaryGroupByChange}
-                onOverlayActiveChange={handleSummaryOverlayActiveChange}
-                onOverlayGroupByChange={handleSummaryOverlayGroupByChange}
-                summaryPreviousPeriod={summaryPreviousPeriod}
-                setSummaryPreviousPeriod={setSummaryPreviousPeriod}
-                summaryCompareDatasets={summaryCompareDatasets}
-                setSummaryCompareDatasets={setSummaryCompareDatasets}
-                summaryPreviousPeriodData={summaryPreviousPeriodData}
-                summaryOverlayCurrentData={summaryOverlayCurrentData}
-              />
+          {/* Chart Card */}
+          <ChartCard
+            granularity={granularity}
+            onGranularityChange={handleGranularityChange}
+            chartType={chartType}
+            onChartTypeChange={handleChartTypeChange}
+            overlayActiveChartType={overlayActiveChartType}
+            setOverlayActiveChartType={setOverlayActiveChartType}
+            chartData={chartData}
+            selectedTable={selectedTable}
+            selectedMetric={selectedMetric}
+            chartGroupBy={chartGroupBy}
+            overlayData={chartOverlayData}
+            overlayActiveTable={overlayActiveTable}
+            overlayActiveMetric={overlayActiveMetric}
+            chartOverlayGroupBy={chartOverlayGroupBy}
+            chartOverlayActive={chartOverlayActive}
+            onChartGroupByChange={handleChartGroupByChange}
+            onChartOverlayActiveChange={handleChartOverlayActiveChange}
+            onChartOverlayGroupByChange={handleChartOverlayGroupByChange}
+            dateMode={dateMode}
+            relativeDays={relativeDays}
+            selectedDateRange={selectedDateRange}
+          />
 
-              {/* Chart Card */}
-              <ChartCard
-                granularity={granularity}
-                onGranularityChange={handleGranularityChange}
-                chartType={chartType}
-                onChartTypeChange={handleChartTypeChange}
-                overlayActiveChartType={overlayActiveChartType}
-                setOverlayActiveChartType={setOverlayActiveChartType}
-                chartData={chartData}
-                selectedTable={selectedTable}
-                selectedMetric={selectedMetric}
-                chartGroupBy={chartGroupBy}
-                overlayData={chartOverlayData}
-                overlayActiveTable={overlayActiveTable}
-                overlayActiveMetric={overlayActiveMetric}
-                chartOverlayGroupBy={chartOverlayGroupBy}
-                chartOverlayActive={chartOverlayActive}
-                onChartGroupByChange={handleChartGroupByChange}
-                onChartOverlayActiveChange={handleChartOverlayActiveChange}
-                onChartOverlayGroupByChange={handleChartOverlayGroupByChange}
-                dateMode={dateMode}
-                relativeDays={relativeDays}
-                selectedDateRange={selectedDateRange}
-              />
-
-              {/* List Card */}
-              <ListCard
-                granularity={granularity}
-                onGranularityChange={handleGranularityChange}
-                tableView={tableView}
-                onTableViewChange={handleTableViewChange}
-                chartData={listChartData}
-                selectedMetric={selectedMetric}
-                selectedTable={selectedTable}
-                groupBy={listGroupBy}
-                dataTables={dataTables}
-                overlayActive={listOverlayActive}
-                overlayData={listOverlayData}
-                overlayActiveMetric={overlayActiveMetric}
-                overlayActiveTable={overlayActiveTable}
-                overlayActiveGroupBy={listOverlayGroupBy}
-                dateMode={dateMode}
-                relativeDays={relativeDays}
-                selectedDateRange={selectedDateRange}
-                onGroupByChange={handleListGroupByChange}
-                onOverlayActiveChange={handleListOverlayActiveChange}
-                onOverlayGroupByChange={handleListOverlayGroupByChange}
-              />
-            </div>
-          </TabsContent>
-
-          {/* Summary Tab - Shows only metrics summary */}
-          <TabsContent value="Summary">
-            <MetricsSummaryCard
-              operator={operator}
-              onOperatorChange={handleOperatorChange}
-              selectedTable={selectedTable}
-              selectedMetric={selectedMetric}
-              granularity={granularity}
-              chartData={summaryChartData}
-              dateMode={dateMode}
-              relativeDays={relativeDays}
-              selectedDateRange={selectedDateRange}
-              overlayActive={summaryOverlayActive}
-              overlayActiveTable={overlayActiveTable}
-              overlayActiveMetric={overlayActiveMetric}
-              overlayActiveGroupBy={summaryOverlayGroupBy}
-              groupBy={summaryGroupBy}
-              onGroupByChange={handleSummaryGroupByChange}
-              onOverlayActiveChange={handleSummaryOverlayActiveChange}
-              onOverlayGroupByChange={handleSummaryOverlayGroupByChange}
-              summaryPreviousPeriod={summaryPreviousPeriod}
-              setSummaryPreviousPeriod={setSummaryPreviousPeriod}
-              summaryCompareDatasets={summaryCompareDatasets}
-              setSummaryCompareDatasets={setSummaryCompareDatasets}
-              summaryPreviousPeriodData={summaryPreviousPeriodData}
-              summaryOverlayCurrentData={summaryOverlayCurrentData}
-            />
-          </TabsContent>
-
-          {/* Chart Tab - Shows only chart */}
-          <TabsContent value="Chart">
-            <ChartCard
-              granularity={granularity}
-              onGranularityChange={handleGranularityChange}
-              chartType={chartType}
-              onChartTypeChange={handleChartTypeChange}
-              overlayActiveChartType={overlayActiveChartType}
-              setOverlayActiveChartType={setOverlayActiveChartType}
-              chartData={chartData}
-              selectedTable={selectedTable}
-              selectedMetric={selectedMetric}
-              chartGroupBy={chartGroupBy}
-              overlayData={chartOverlayData}
-              overlayActiveTable={overlayActiveTable}
-              overlayActiveMetric={overlayActiveMetric}
-              chartOverlayGroupBy={chartOverlayGroupBy}
-              chartOverlayActive={chartOverlayActive}
-              onChartGroupByChange={handleChartGroupByChange}
-              onChartOverlayActiveChange={handleChartOverlayActiveChange}
-              onChartOverlayGroupByChange={handleChartOverlayGroupByChange}
-              dateMode={dateMode}
-              relativeDays={relativeDays}
-              selectedDateRange={selectedDateRange}
-            />
-          </TabsContent>
-
-          {/* List Tab - Shows only list */}
-          <TabsContent value="List">
-            <ListCard
-              granularity={granularity}
-              onGranularityChange={handleGranularityChange}
-              tableView={tableView}
-              onTableViewChange={handleTableViewChange}
-              chartData={listChartData}
-              selectedMetric={selectedMetric}
-              selectedTable={selectedTable}
-              groupBy={listGroupBy}
-              dataTables={dataTables}
-              overlayActive={listOverlayActive}
-              overlayData={listOverlayData}
-              overlayActiveMetric={overlayActiveMetric}
-              overlayActiveTable={overlayActiveTable}
-              overlayActiveGroupBy={listOverlayGroupBy}
-              dateMode={dateMode}
-              relativeDays={relativeDays}
-              selectedDateRange={selectedDateRange}
-              onGroupByChange={handleListGroupByChange}
-              onOverlayActiveChange={handleListOverlayActiveChange}
-              onOverlayGroupByChange={handleListOverlayGroupByChange}
-            />
-          </TabsContent>
-        </Tabs>
+          {/* List Card */}
+          <ListCard
+            granularity={granularity}
+            onGranularityChange={handleGranularityChange}
+            tableView={tableView}
+            onTableViewChange={handleTableViewChange}
+            chartData={listChartData}
+            selectedMetric={selectedMetric}
+            selectedTable={selectedTable}
+            groupBy={listGroupBy}
+            dataTables={dataTables}
+            overlayActive={listOverlayActive}
+            overlayData={listOverlayData}
+            overlayActiveMetric={overlayActiveMetric}
+            overlayActiveTable={overlayActiveTable}
+            overlayActiveGroupBy={listOverlayGroupBy}
+            dateMode={dateMode}
+            relativeDays={relativeDays}
+            selectedDateRange={selectedDateRange}
+            onGroupByChange={handleListGroupByChange}
+            onOverlayActiveChange={handleListOverlayActiveChange}
+            onOverlayGroupByChange={handleListOverlayGroupByChange}
+          />
+        </div>
       </div>
     </div>
   );
