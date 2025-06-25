@@ -690,7 +690,7 @@ function ComposedChartComponent({
   const overlayConfig = dataSourceConfig[overlayTable];
 
   const overlayColor =
-    overlayConfig.metrics.find((m) => m.key === overlayMetric)?.color ||
+    overlayConfig?.metrics?.find((m) => m.key === overlayMetric)?.color ||
     "#82ca9d";
 
   // Create a color palette for multi-series overlays
@@ -841,10 +841,10 @@ function ComposedChartComponent({
             : `overlay_${overlayMetric}`;
           const overlayName = isOverlayMultiSeries
             ? `${key} (${
-                overlayConfig.metrics.find((m) => m.key === overlayMetric)
+                overlayConfig?.metrics?.find((m) => m.key === overlayMetric)
                   ?.label || overlayMetric
               })`
-            : overlayConfig.metrics.find((m) => m.key === overlayMetric)
+            : overlayConfig?.metrics?.find((m) => m.key === overlayMetric)
                 ?.label || overlayMetric;
 
           return renderChartComponent(
@@ -903,7 +903,11 @@ export function ChartRenderer({
 
     // Add primary data
     currentData.forEach((point) => {
-      dataMap.set(point.name, { ...point });
+      // Filter out _hasData properties to prevent React DOM warnings
+      const cleanPoint = Object.fromEntries(
+        Object.entries(point).filter(([key]) => !key.endsWith("_hasData"))
+      );
+      dataMap.set(point.name, cleanPoint);
     });
 
     // Merge overlay data

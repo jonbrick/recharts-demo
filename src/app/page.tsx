@@ -47,332 +47,176 @@ import { DataTable } from "../components/DataTable";
 import { Switch } from "../components/Switch";
 
 // Reusable card components to reduce duplication
-const MetricsSummaryCard = ({
+const UnifiedCard = ({
+  // Summary props
   operator,
-  onOperatorChange,
+  onOperatorChange, // eslint-disable-line @typescript-eslint/no-unused-vars
   selectedTable,
   selectedMetric,
   granularity,
-  chartData,
+  summaryChartData,
   dateMode,
   relativeDays,
   selectedDateRange,
-  overlayActive,
+  summaryOverlayActive, // eslint-disable-line @typescript-eslint/no-unused-vars
   overlayActiveTable,
   overlayActiveMetric,
-  overlayActiveGroupBy,
-  groupBy,
-  onGroupByChange,
-  onOverlayActiveChange,
-  onOverlayGroupByChange,
+  summaryOverlayGroupBy, // eslint-disable-line @typescript-eslint/no-unused-vars
+  summaryGroupBy, // eslint-disable-line @typescript-eslint/no-unused-vars
+  onSummaryGroupByChange, // eslint-disable-line @typescript-eslint/no-unused-vars
+  onSummaryOverlayActiveChange, // eslint-disable-line @typescript-eslint/no-unused-vars
+  onSummaryOverlayGroupByChange, // eslint-disable-line @typescript-eslint/no-unused-vars
   summaryPreviousPeriod,
-  setSummaryPreviousPeriod,
+  setSummaryPreviousPeriod, // eslint-disable-line @typescript-eslint/no-unused-vars
   summaryCompareDatasets,
-  setSummaryCompareDatasets,
+  setSummaryCompareDatasets, // eslint-disable-line @typescript-eslint/no-unused-vars
   summaryPreviousPeriodData,
   summaryOverlayCurrentData,
+  // Chart props
+  onGranularityChange, // eslint-disable-line @typescript-eslint/no-unused-vars
+  chartType,
+  onChartTypeChange, // eslint-disable-line @typescript-eslint/no-unused-vars
+  overlayActiveChartType,
+  setOverlayActiveChartType, // eslint-disable-line @typescript-eslint/no-unused-vars
+  chartData,
+  chartGroupBy,
+  chartOverlayData,
+  chartOverlayGroupBy,
+  chartOverlayActive,
+  onChartGroupByChange, // eslint-disable-line @typescript-eslint/no-unused-vars
+  onChartOverlayActiveChange, // eslint-disable-line @typescript-eslint/no-unused-vars
+  onChartOverlayGroupByChange, // eslint-disable-line @typescript-eslint/no-unused-vars
+  // List props
+  tableView,
+  onTableViewChange, // eslint-disable-line @typescript-eslint/no-unused-vars
+  listChartData,
+  listGroupBy,
+  dataTables,
+  listOverlayActive,
+  listOverlayData,
+  listOverlayGroupBy,
+  onListGroupByChange, // eslint-disable-line @typescript-eslint/no-unused-vars
+  onListOverlayActiveChange, // eslint-disable-line @typescript-eslint/no-unused-vars
+  onListOverlayGroupByChange, // eslint-disable-line @typescript-eslint/no-unused-vars
+  // Visibility props
+  showSummary,
+  showChart,
+  showTable,
 }) => {
-  return (
-    <div className="flex flex-col gap-4 pb-8">
-      <div className="flex items-center gap-4">
-        <h2 className="text-md font-medium">Metric Summary Controls</h2>
-        {/* Overlay toggle */}
-        <div className="flex items-center gap-2">
-          <Switch
-            id="summary-overlay-toggle"
-            checked={overlayActive}
-            onCheckedChange={onOverlayActiveChange}
-          />
-          <label
-            htmlFor="summary-overlay-toggle"
-            className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
-          >
-            Show comparison
-          </label>
-        </div>
-      </div>
-      <div className="flex gap-2">
-        <GroupBySelector
-          groupBy={groupBy}
-          onGroupByChange={onGroupByChange}
-          selectedTable={selectedTable}
-        />
-        <OperatorSelector
-          operator={operator}
-          onOperatorChange={onOperatorChange}
-        />
-        {overlayActive && overlayActiveTable && (
-          <>
-            <div className="border-l border-gray-200 h-full pl-2">
-              <div className="flex items-center gap-2 w-full">
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="prev-period-toggle"
-                    checked={summaryPreviousPeriod}
-                    onCheckedChange={setSummaryPreviousPeriod}
-                  />
-                  <label
-                    htmlFor="prev-period-toggle"
-                    className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
-                  >
-                    vs Previous Period
-                  </label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="compare-datasets-toggle"
-                    checked={summaryCompareDatasets}
-                    onCheckedChange={setSummaryCompareDatasets}
-                  />
-                  <label
-                    htmlFor="compare-datasets-toggle"
-                    className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
-                  >
-                    Compare Datasets
-                  </label>
-                </div>
-                <GroupBySelector
-                  groupBy={overlayActiveGroupBy}
-                  onGroupByChange={onOverlayGroupByChange}
-                  selectedTable={overlayActiveTable}
-                />
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-      <Card className="flex flex-col gap-4">
-        <div className={summaryCompareDatasets ? "flex gap-4" : ""}>
-          <MetricsSummary
-            key={`${operator}-${selectedMetric}-${selectedTable}-${granularity}`}
-            selectedTable={selectedTable}
-            selectedMetric={selectedMetric}
-            operator={operator}
-            granularity={granularity}
-            data={chartData}
-            dateMode={dateMode}
-            relativeDays={relativeDays}
-            selectedDateRange={selectedDateRange}
-            comparisonData={summaryPreviousPeriodData}
-            comparisonMode={summaryPreviousPeriod ? "vs Previous Period" : null}
-            comparisonMetric={selectedMetric}
-          />
+  // Safety check for selectedTable
+  if (!selectedTable || !dataSourceConfig[selectedTable]) {
+    return (
+      <Card className="flex flex-col gap-6 p-6">
+        <div className="text-gray-500">Loading...</div>
+      </Card>
+    );
+  }
 
-          {summaryCompareDatasets && (
+  // Check if any component is visible
+  const hasVisibleComponents = showSummary || showChart || showTable;
+  if (!hasVisibleComponents) {
+    return (
+      <Card className="flex flex-col gap-6 p-6">
+        <div className="text-gray-500">No components selected</div>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="flex flex-col gap-6 p-6">
+      {/* Metrics Summary Section */}
+      {showSummary && (
+        <div className="flex flex-col gap-4">
+          <div className={summaryCompareDatasets ? "flex gap-4" : ""}>
             <MetricsSummary
-              key={`overlay-${operator}-${overlayActiveMetric}-${overlayActiveTable}-${granularity}`}
-              selectedTable={overlayActiveTable}
-              selectedMetric={overlayActiveMetric}
+              key={`${operator}-${selectedMetric}-${selectedTable}-${granularity}`}
+              selectedTable={selectedTable}
+              selectedMetric={selectedMetric}
               operator={operator}
               granularity={granularity}
-              data={summaryOverlayCurrentData}
+              data={summaryChartData}
               dateMode={dateMode}
               relativeDays={relativeDays}
               selectedDateRange={selectedDateRange}
-              comparisonData={
-                summaryPreviousPeriod ? summaryOverlayCurrentData : null
-              } // TODO: This should be overlay's previous period
+              comparisonData={summaryPreviousPeriodData}
               comparisonMode={
                 summaryPreviousPeriod ? "vs Previous Period" : null
               }
-              comparisonMetric={overlayActiveMetric}
+              comparisonMetric={selectedMetric}
             />
-          )}
+
+            {summaryCompareDatasets && (
+              <MetricsSummary
+                key={`overlay-${operator}-${overlayActiveMetric}-${overlayActiveTable}-${granularity}`}
+                selectedTable={overlayActiveTable}
+                selectedMetric={overlayActiveMetric}
+                operator={operator}
+                granularity={granularity}
+                data={summaryOverlayCurrentData}
+                dateMode={dateMode}
+                relativeDays={relativeDays}
+                selectedDateRange={selectedDateRange}
+                comparisonData={
+                  summaryPreviousPeriod ? summaryOverlayCurrentData : null
+                } // TODO: This should be overlay's previous period
+                comparisonMode={
+                  summaryPreviousPeriod ? "vs Previous Period" : null
+                }
+                comparisonMetric={overlayActiveMetric}
+              />
+            )}
+          </div>
         </div>
-      </Card>
-    </div>
+      )}
+
+      {/* Chart Section */}
+      {showChart && (
+        <div className="flex flex-col gap-4">
+          <ChartRenderer
+            chartType={chartType}
+            currentData={chartData}
+            selectedTable={selectedTable}
+            selectedMetric={selectedMetric}
+            granularity={granularity}
+            groupBy={chartGroupBy}
+            overlayActive={chartOverlayActive}
+            overlayData={chartOverlayData}
+            overlayTable={overlayActiveTable}
+            overlayMetric={overlayActiveMetric}
+            overlayChartType={overlayActiveChartType}
+            overlayGroupBy={chartOverlayGroupBy}
+            dateMode={dateMode}
+            relativeDays={relativeDays}
+            selectedDateRange={selectedDateRange}
+          />
+        </div>
+      )}
+
+      {/* Data Table Section */}
+      {showTable && (
+        <div className="flex flex-col gap-4">
+          <DataTable
+            currentData={listChartData}
+            selectedMetric={selectedMetric}
+            selectedTable={selectedTable}
+            granularity={granularity}
+            groupBy={listGroupBy}
+            viewMode={tableView}
+            rawData={dataTables[selectedTable]}
+            overlayActive={listOverlayActive}
+            overlayData={listOverlayData}
+            overlayMetric={overlayActiveMetric}
+            overlayTable={overlayActiveTable}
+            overlayGroupBy={listOverlayGroupBy}
+            dateMode={dateMode}
+            relativeDays={relativeDays}
+            selectedDateRange={selectedDateRange}
+          />
+        </div>
+      )}
+    </Card>
   );
 };
-
-const ChartCard = ({
-  granularity,
-  onGranularityChange,
-  chartType,
-  onChartTypeChange,
-  overlayActiveChartType,
-  setOverlayActiveChartType,
-  chartData,
-  selectedTable,
-  selectedMetric,
-  chartGroupBy,
-  overlayData,
-  overlayActiveTable,
-  overlayActiveMetric,
-  chartOverlayGroupBy,
-  chartOverlayActive,
-  onChartGroupByChange,
-  onChartOverlayActiveChange,
-  onChartOverlayGroupByChange,
-  dateMode,
-  relativeDays,
-  selectedDateRange,
-}) => (
-  <div className="flex flex-col gap-4 pb-8">
-    <div className="flex items-center gap-4">
-      <h2 className="text-md font-medium">Metric Trend Controls</h2>
-      {/* Chart-specific overlay toggle */}
-      <div className="flex items-center gap-2">
-        <Switch
-          id="chart-overlay-toggle"
-          checked={chartOverlayActive}
-          onCheckedChange={onChartOverlayActiveChange}
-        />
-        <label
-          htmlFor="chart-overlay-toggle"
-          className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
-        >
-          Show comparison
-        </label>
-      </div>
-    </div>
-    <div className="flex gap-2 flex-wrap">
-      <GroupBySelector
-        groupBy={chartGroupBy}
-        onGroupByChange={onChartGroupByChange}
-        selectedTable={selectedTable}
-      />
-      <GranularitySelector
-        granularity={granularity}
-        onGranularityChange={onGranularityChange}
-      />
-      <DisplayLimitSelector />
-
-      <div className="min-w-[120px]">
-        <ChartTypeSelector
-          chartType={chartType}
-          onChartTypeChange={onChartTypeChange}
-        />
-      </div>
-      {chartOverlayActive && overlayActiveTable && (
-        <>
-          <div className="border-l border-gray-200 h-full pl-2">
-            <div className="flex items-center gap-2 w-full flex-wrap">
-              <CompareDatasetsSelector />
-              <GroupBySelector
-                groupBy={chartOverlayGroupBy}
-                onGroupByChange={onChartOverlayGroupByChange}
-                selectedTable={overlayActiveTable}
-              />
-              <ChartTypeSelector
-                chartType={overlayActiveChartType}
-                onChartTypeChange={setOverlayActiveChartType}
-              />
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-    <Card className="flex flex-col gap-4">
-      <ChartRenderer
-        chartType={chartType}
-        currentData={chartData}
-        selectedTable={selectedTable}
-        selectedMetric={selectedMetric}
-        granularity={granularity}
-        groupBy={chartGroupBy}
-        overlayActive={chartOverlayActive}
-        overlayData={overlayData}
-        overlayTable={overlayActiveTable}
-        overlayMetric={overlayActiveMetric}
-        overlayChartType={overlayActiveChartType}
-        overlayGroupBy={chartOverlayGroupBy}
-        dateMode={dateMode}
-        relativeDays={relativeDays}
-        selectedDateRange={selectedDateRange}
-      />
-    </Card>
-  </div>
-);
-
-const ListCard = ({
-  granularity,
-  onGranularityChange,
-  tableView,
-  onTableViewChange,
-  chartData,
-  selectedMetric,
-  selectedTable,
-  groupBy,
-  dataTables,
-  overlayActive,
-  overlayData,
-  overlayActiveMetric,
-  overlayActiveTable,
-  overlayActiveGroupBy,
-  dateMode,
-  relativeDays,
-  selectedDateRange,
-  onGroupByChange,
-  onOverlayActiveChange,
-  onOverlayGroupByChange,
-}) => (
-  <div className="flex flex-col gap-4 pb-8">
-    <div className="flex items-center gap-4">
-      <h2 className="text-md font-medium">Metric List Controls</h2>
-      {/* Overlay toggle */}
-      <div className="flex items-center gap-2">
-        <Switch
-          id="list-overlay-toggle"
-          checked={overlayActive}
-          onCheckedChange={onOverlayActiveChange}
-        />
-        <label
-          htmlFor="list-overlay-toggle"
-          className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
-        >
-          Show comparison
-        </label>
-      </div>
-    </div>
-    <div className="flex gap-2 flex-wrap">
-      <GroupBySelector
-        groupBy={groupBy}
-        onGroupByChange={onGroupByChange}
-        selectedTable={selectedTable}
-      />
-      <GranularitySelector
-        granularity={granularity}
-        onGranularityChange={onGranularityChange}
-      />
-      <DisplayLimitSelector />
-      <DisplaySortSelector />
-      <ViewSelector view={tableView} onViewChange={onTableViewChange} />
-      {overlayActive && overlayActiveTable && (
-        <>
-          <div className="border-l border-gray-200 h-full pl-2">
-            <div className="flex items-center gap-4 w-full">
-              <CompareDatasetsSelector />
-              <GroupBySelector
-                groupBy={overlayActiveGroupBy}
-                onGroupByChange={onOverlayGroupByChange}
-                selectedTable={overlayActiveTable}
-              />
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-    <Card className="flex flex-col gap-4">
-      <DataTable
-        currentData={chartData}
-        selectedMetric={selectedMetric}
-        selectedTable={selectedTable}
-        granularity={granularity}
-        groupBy={groupBy}
-        viewMode={tableView}
-        rawData={dataTables[selectedTable]}
-        overlayActive={overlayActive}
-        overlayData={overlayData}
-        overlayMetric={overlayActiveMetric}
-        overlayTable={overlayActiveTable}
-        overlayGroupBy={overlayActiveGroupBy}
-        dateMode={dateMode}
-        relativeDays={relativeDays}
-        selectedDateRange={selectedDateRange}
-      />
-    </Card>
-  </div>
-);
 
 function DashboardContent() {
   const [chartType, setChartType] = useState("line");
@@ -431,6 +275,11 @@ function DashboardContent() {
     useState("Compare Datasets");
   const [listComparisonMode, _setListComparisonMode] =
     useState("Compare Datasets");
+
+  // Component visibility states
+  const [showSummary, setShowSummary] = useState(true);
+  const [showChart, setShowChart] = useState(true);
+  const [showTable, setShowTable] = useState(true);
 
   // Initialize URL state management
   const { getStateFromUrl, updateUrl, getShareableUrl } = useUrlState();
@@ -1287,82 +1136,290 @@ function DashboardContent() {
           </div>
         )}
 
+        {/* Component Visibility Controls */}
+        <div className="flex items-center gap-6 border-b border-gray-200 pb-6">
+          <div className="flex items-center gap-2">
+            <Switch
+              id="show-summary-toggle"
+              checked={showSummary}
+              onCheckedChange={setShowSummary}
+            />
+            <label
+              htmlFor="show-summary-toggle"
+              className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+            >
+              Show Summary
+            </label>
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch
+              id="show-chart-toggle"
+              checked={showChart}
+              onCheckedChange={setShowChart}
+            />
+            <label
+              htmlFor="show-chart-toggle"
+              className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+            >
+              Show Chart
+            </label>
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch
+              id="show-table-toggle"
+              checked={showTable}
+              onCheckedChange={setShowTable}
+            />
+            <label
+              htmlFor="show-table-toggle"
+              className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+            >
+              Show Table
+            </label>
+          </div>
+        </div>
+
         {/* Display Controls - Tab Navigation */}
         <div className="flex flex-col gap-8">
-          {/* Metrics Summary Card */}
-          <MetricsSummaryCard
+          {/* Summary Controls */}
+          {showSummary && (
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-4">
+                <h2 className="text-md font-medium">Summary Controls</h2>
+                {/* Overlay toggle */}
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="summary-overlay-toggle"
+                    checked={summaryOverlayActive}
+                    onCheckedChange={handleSummaryOverlayActiveChange}
+                  />
+                  <label
+                    htmlFor="summary-overlay-toggle"
+                    className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+                  >
+                    Show comparison
+                  </label>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <GroupBySelector
+                  groupBy={summaryGroupBy}
+                  onGroupByChange={handleSummaryGroupByChange}
+                  selectedTable={selectedTable}
+                />
+                <OperatorSelector
+                  operator={operator}
+                  onOperatorChange={handleOperatorChange}
+                />
+                {summaryOverlayActive && overlayActiveTable && (
+                  <>
+                    <div className="border-l border-gray-200 h-full pl-2">
+                      <div className="flex items-center gap-2 w-full">
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            id="prev-period-toggle"
+                            checked={summaryPreviousPeriod}
+                            onCheckedChange={setSummaryPreviousPeriod}
+                          />
+                          <label
+                            htmlFor="prev-period-toggle"
+                            className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+                          >
+                            vs Previous Period
+                          </label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            id="compare-datasets-toggle"
+                            checked={summaryCompareDatasets}
+                            onCheckedChange={setSummaryCompareDatasets}
+                          />
+                          <label
+                            htmlFor="compare-datasets-toggle"
+                            className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+                          >
+                            Compare Datasets
+                          </label>
+                        </div>
+                        <GroupBySelector
+                          groupBy={summaryOverlayGroupBy}
+                          onGroupByChange={handleSummaryOverlayGroupByChange}
+                          selectedTable={overlayActiveTable}
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Chart Controls */}
+          {showChart && (
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-4">
+                <h2 className="text-md font-medium">Trend Controls</h2>
+                {/* Chart-specific overlay toggle */}
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="chart-overlay-toggle"
+                    checked={chartOverlayActive}
+                    onCheckedChange={handleChartOverlayActiveChange}
+                  />
+                  <label
+                    htmlFor="chart-overlay-toggle"
+                    className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+                  >
+                    Show comparison
+                  </label>
+                </div>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                <GroupBySelector
+                  groupBy={chartGroupBy}
+                  onGroupByChange={handleChartGroupByChange}
+                  selectedTable={selectedTable}
+                />
+                <GranularitySelector
+                  granularity={granularity}
+                  onGranularityChange={handleGranularityChange}
+                />
+                <DisplayLimitSelector />
+
+                <div className="min-w-[120px]">
+                  <ChartTypeSelector
+                    chartType={chartType}
+                    onChartTypeChange={handleChartTypeChange}
+                  />
+                </div>
+                {chartOverlayActive && overlayActiveTable && (
+                  <>
+                    <div className="border-l border-gray-200 h-full pl-2">
+                      <div className="flex items-center gap-2 w-full flex-wrap">
+                        <CompareDatasetsSelector />
+                        <GroupBySelector
+                          groupBy={chartOverlayGroupBy}
+                          onGroupByChange={handleChartOverlayGroupByChange}
+                          selectedTable={overlayActiveTable}
+                        />
+                        <ChartTypeSelector
+                          chartType={overlayActiveChartType}
+                          onChartTypeChange={setOverlayActiveChartType}
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* List Controls */}
+          {showTable && (
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-4">
+                <h2 className="text-md font-medium">List Controls</h2>
+                {/* Overlay toggle */}
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="list-overlay-toggle"
+                    checked={listOverlayActive}
+                    onCheckedChange={handleListOverlayActiveChange}
+                  />
+                  <label
+                    htmlFor="list-overlay-toggle"
+                    className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+                  >
+                    Show comparison
+                  </label>
+                </div>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                <GroupBySelector
+                  groupBy={listGroupBy}
+                  onGroupByChange={handleListGroupByChange}
+                  selectedTable={selectedTable}
+                />
+                <GranularitySelector
+                  granularity={granularity}
+                  onGranularityChange={handleGranularityChange}
+                />
+                <DisplayLimitSelector />
+                <DisplaySortSelector />
+                <ViewSelector
+                  view={tableView}
+                  onViewChange={handleTableViewChange}
+                />
+                {listOverlayActive && overlayActiveTable && (
+                  <>
+                    <div className="border-l border-gray-200 h-full pl-2">
+                      <div className="flex items-center gap-4 w-full">
+                        <CompareDatasetsSelector />
+                        <GroupBySelector
+                          groupBy={listOverlayGroupBy}
+                          onGroupByChange={handleListOverlayGroupByChange}
+                          selectedTable={overlayActiveTable}
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Unified Card */}
+          <UnifiedCard
             operator={operator}
             onOperatorChange={handleOperatorChange}
             selectedTable={selectedTable}
             selectedMetric={selectedMetric}
             granularity={granularity}
-            chartData={summaryChartData}
+            summaryChartData={summaryChartData}
             dateMode={dateMode}
             relativeDays={relativeDays}
             selectedDateRange={selectedDateRange}
-            overlayActive={summaryOverlayActive}
+            summaryOverlayActive={summaryOverlayActive}
             overlayActiveTable={overlayActiveTable}
             overlayActiveMetric={overlayActiveMetric}
-            overlayActiveGroupBy={summaryOverlayGroupBy}
-            groupBy={summaryGroupBy}
-            onGroupByChange={handleSummaryGroupByChange}
-            onOverlayActiveChange={handleSummaryOverlayActiveChange}
-            onOverlayGroupByChange={handleSummaryOverlayGroupByChange}
+            summaryOverlayGroupBy={summaryOverlayGroupBy}
+            summaryGroupBy={summaryGroupBy}
+            onSummaryGroupByChange={handleSummaryGroupByChange}
+            onSummaryOverlayActiveChange={handleSummaryOverlayActiveChange}
+            onSummaryOverlayGroupByChange={handleSummaryOverlayGroupByChange}
             summaryPreviousPeriod={summaryPreviousPeriod}
             setSummaryPreviousPeriod={setSummaryPreviousPeriod}
             summaryCompareDatasets={summaryCompareDatasets}
             setSummaryCompareDatasets={setSummaryCompareDatasets}
             summaryPreviousPeriodData={summaryPreviousPeriodData}
             summaryOverlayCurrentData={summaryOverlayCurrentData}
-          />
-
-          {/* Chart Card */}
-          <ChartCard
-            granularity={granularity}
             onGranularityChange={handleGranularityChange}
             chartType={chartType}
             onChartTypeChange={handleChartTypeChange}
             overlayActiveChartType={overlayActiveChartType}
             setOverlayActiveChartType={setOverlayActiveChartType}
             chartData={chartData}
-            selectedTable={selectedTable}
-            selectedMetric={selectedMetric}
             chartGroupBy={chartGroupBy}
-            overlayData={chartOverlayData}
-            overlayActiveTable={overlayActiveTable}
-            overlayActiveMetric={overlayActiveMetric}
+            chartOverlayData={chartOverlayData}
             chartOverlayGroupBy={chartOverlayGroupBy}
             chartOverlayActive={chartOverlayActive}
             onChartGroupByChange={handleChartGroupByChange}
             onChartOverlayActiveChange={handleChartOverlayActiveChange}
             onChartOverlayGroupByChange={handleChartOverlayGroupByChange}
-            dateMode={dateMode}
-            relativeDays={relativeDays}
-            selectedDateRange={selectedDateRange}
-          />
-
-          {/* List Card */}
-          <ListCard
-            granularity={granularity}
-            onGranularityChange={handleGranularityChange}
             tableView={tableView}
             onTableViewChange={handleTableViewChange}
-            chartData={listChartData}
-            selectedMetric={selectedMetric}
-            selectedTable={selectedTable}
-            groupBy={listGroupBy}
+            listChartData={listChartData}
+            listGroupBy={listGroupBy}
             dataTables={dataTables}
-            overlayActive={listOverlayActive}
-            overlayData={listOverlayData}
-            overlayActiveMetric={overlayActiveMetric}
-            overlayActiveTable={overlayActiveTable}
-            overlayActiveGroupBy={listOverlayGroupBy}
-            dateMode={dateMode}
-            relativeDays={relativeDays}
-            selectedDateRange={selectedDateRange}
-            onGroupByChange={handleListGroupByChange}
-            onOverlayActiveChange={handleListOverlayActiveChange}
-            onOverlayGroupByChange={handleListOverlayGroupByChange}
+            listOverlayActive={listOverlayActive}
+            listOverlayData={listOverlayData}
+            listOverlayGroupBy={listOverlayGroupBy}
+            onListGroupByChange={handleListGroupByChange}
+            onListOverlayActiveChange={handleListOverlayActiveChange}
+            onListOverlayGroupByChange={handleListOverlayGroupByChange}
+            showSummary={showSummary}
+            showChart={showChart}
+            showTable={showTable}
           />
         </div>
       </div>

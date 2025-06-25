@@ -31,6 +31,10 @@ export function MetricsSummary({
 
   // Get metric label from config
   const config = dataSourceConfig[selectedTable];
+  if (!config) {
+    console.warn(`No config found for table: ${selectedTable}`);
+    return <div className="text-gray-500">No data available</div>;
+  }
   const allMetrics = [...config.metrics];
   if (config.overlayMetric) {
     allMetrics.push(config.overlayMetric);

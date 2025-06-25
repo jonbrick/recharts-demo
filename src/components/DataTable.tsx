@@ -3,6 +3,12 @@
 import React from "react";
 import { dataSourceConfig, formatValue } from "../lib/chartConfig.js";
 import { generateDynamicLabel } from "../lib/chartUtils";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "./Accordion";
 
 // Helper function to get column label
 function getColumnLabel(
@@ -21,6 +27,9 @@ function getColumnLabel(
     // Get overlay metric label
     if (overlayTable && overlayMetric) {
       const overlayConfig = dataSourceConfig[overlayTable];
+      if (!overlayConfig) {
+        return `${overlayMetric} - ${baseKey}`;
+      }
       const metricConfig = [
         ...overlayConfig.metrics,
         overlayConfig.overlayMetric,
@@ -117,7 +126,11 @@ export function DataTable({
       const overlayRow = overlayData[index];
       if (!overlayRow) return row;
 
-      const merged = { ...row };
+      // Filter out _hasData properties to prevent React DOM warnings
+      const cleanRow = Object.fromEntries(
+        Object.entries(row).filter(([key]) => !key.endsWith("_hasData"))
+      );
+      const merged = { ...cleanRow };
 
       // Add overlay columns based on overlay groupBy
       if (overlayGroupBy === "org") {
@@ -385,6 +398,10 @@ function RecordTable({ data, selectedTable, groupBy }: RecordTableProps) {
         groupKey = record.team || record.assigned_team || "Unknown";
       } else if (groupBy === "person") {
         groupKey = record.author || record.assigned_to || "Unknown";
+      } else if (groupBy === "service") {
+        groupKey = record.service || "Unknown";
+      } else if (groupBy === "repo") {
+        groupKey = record.repo || "Unknown";
       }
 
       if (!groups[groupKey]) {
@@ -409,49 +426,55 @@ function RecordTable({ data, selectedTable, groupBy }: RecordTableProps) {
   const sortedGroupNames = Object.keys(groupedData).sort();
 
   return (
-    <div className="space-y-6">
+    <Accordion
+      type="multiple"
+      className="space-y-2"
+      defaultValue={sortedGroupNames}
+    >
       {sortedGroupNames.map((groupName) => (
-        <div key={groupName}>
-          <div className="bg-gray-100 px-4 py-2 font-semibold text-gray-700">
+        <AccordionItem key={groupName} value={groupName}>
+          <AccordionTrigger className="bg-gray-100 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-200">
             {groupName} ({groupedData[groupName].length} records)
-          </div>
-          <table className="w-full border-collapse bg-white">
-            <thead>
-              <tr className="bg-gray-50">
-                {columns.map((col) => (
-                  <th
-                    key={col.key}
-                    className="border border-gray-200 px-4 py-2 text-left text-sm font-semibold text-gray-700"
-                  >
-                    {col.label}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {groupedData[groupName].map((record, index) => (
-                <tr
-                  key={`${groupName}-${record.id}-${index}`}
-                  className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
-                >
+          </AccordionTrigger>
+          <AccordionContent>
+            <table className="w-full border-collapse bg-white">
+              <thead>
+                <tr className="bg-gray-50">
                   {columns.map((col) => (
-                    <td
+                    <th
                       key={col.key}
-                      className="border border-gray-200 px-4 py-2 text-sm"
+                      className="border border-gray-200 px-4 py-2 text-left text-sm font-semibold text-gray-700"
                     >
-                      {col.format === "date" && record[col.key]
-                        ? new Date(record[col.key]).toLocaleDateString()
-                        : col.format === "number" || col.format === "decimal"
-                        ? formatValue(record[col.key], col.format)
-                        : record[col.key] || "N/A"}
-                    </td>
+                      {col.label}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {groupedData[groupName].map((record, index) => (
+                  <tr
+                    key={`${groupName}-${record.id}-${index}`}
+                    className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                  >
+                    {columns.map((col) => (
+                      <td
+                        key={col.key}
+                        className="border border-gray-200 px-4 py-2 text-sm"
+                      >
+                        {col.format === "date" && record[col.key]
+                          ? new Date(record[col.key]).toLocaleDateString()
+                          : col.format === "number" || col.format === "decimal"
+                          ? formatValue(record[col.key], col.format)
+                          : record[col.key] || "N/A"}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </AccordionContent>
+        </AccordionItem>
       ))}
-    </div>
+    </Accordion>
   );
 }

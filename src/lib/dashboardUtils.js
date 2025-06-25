@@ -216,8 +216,15 @@ function getAllPossibleGroups(dataSource, groupBy) {
       return ["platform-services", "product-api", "web-app", "mobile-app"];
 
     case "service":
-      // For PagerDuty
-      return ["api", "web", "database", "auth"];
+      // For PagerDuty - updated to match actual services in data
+      return [
+        "frontend-app",
+        "mobile-app",
+        "data-pipeline",
+        "user-auth",
+        "api-service",
+        "payment-service",
+      ];
 
     default:
       return [];
