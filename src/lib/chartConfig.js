@@ -150,6 +150,14 @@ export const chartTypeConfig = {
     label: "📊 Stacked Horizontal Bar Chart",
     icon: "📊",
   },
+  "percent-bar": {
+    label: "📊 Percent Bar Chart",
+    icon: "📊",
+  },
+  donut: {
+    label: "🍩 Donut Chart",
+    icon: "🍩",
+  },
 };
 
 // Helper functions

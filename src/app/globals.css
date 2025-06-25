@@ -164,3 +164,8 @@ body {
 .dark body {
   background-color: #020617; /* slate-950 */
 }
+
+/* Alternative: target the background specifically */
+.dark .recharts-rectangle[fill="#ccc"] {
+  fill: rgba(255, 255, 255, 0.2) !important;
+}

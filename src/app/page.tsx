@@ -755,7 +755,14 @@ function DashboardContent() {
 
   const handleChartTypeChange = (newType: string) => {
     setChartType(newType);
-    updateUrl({ chartType: newType });
+
+    // If donut chart is selected, automatically set granularity to "all-time"
+    if (newType === "donut" && granularity !== "all-time") {
+      setGranularity("all-time");
+      updateUrl({ chartType: newType, granularity: "all-time" });
+    } else {
+      updateUrl({ chartType: newType });
+    }
   };
 
   const handleMetricChange = (newMetric: string) => {
@@ -1184,7 +1191,7 @@ function DashboardContent() {
               htmlFor="show-chart-toggle"
               className="text-sm text-gray-600 dark:text-slate-300 cursor-pointer"
             >
-              Show Chart
+              Show Trend
             </label>
           </div>
           <div className="flex items-center gap-2">
@@ -1197,7 +1204,7 @@ function DashboardContent() {
               htmlFor="show-table-toggle"
               className="text-sm text-gray-600 dark:text-slate-300 cursor-pointer"
             >
-              Show Table
+              Show List
             </label>
           </div>
         </div>
@@ -1329,6 +1336,7 @@ function DashboardContent() {
                 <GranularitySelector
                   granularity={granularity}
                   onGranularityChange={handleGranularityChange}
+                  disabled={chartType === "donut"}
                 />
                 <DisplayLimitSelector />
 
@@ -1405,6 +1413,7 @@ function DashboardContent() {
                 <GranularitySelector
                   granularity={granularity}
                   onGranularityChange={handleGranularityChange}
+                  disabled={chartType === "donut"}
                 />
                 <DisplayLimitSelector />
                 <DisplaySortSelector />

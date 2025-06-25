@@ -36,9 +36,9 @@ const AccordionTrigger = React.forwardRef<
           // base
           "size-5 shrink-0 transition-transform duration-150 ease-[cubic-bezier(0.87,_0,_0.13,_1)] group-data-[state=open]:-rotate-45",
           // text color
-          "text-gray-400 dark:text-gray-600",
+          "text-gray-400 dark:text-slate-300",
           // disabled
-          "group-data-disabled:text-gray-300 dark:group-data-disabled:text-gray-700"
+          "group-data-disabled:text-gray-300 dark:group-data-disabled:text-slate-500"
         )}
         aria-hidden="true"
         focusable="false"

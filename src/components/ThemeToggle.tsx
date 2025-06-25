@@ -3,9 +3,11 @@
 import { useTheme } from "next-themes";
 import { Button } from "./Button";
 import { RiSunFill, RiMoonFill, RiComputerFill } from "@remixicon/react";
+import { useHasMounted } from "../hooks/useHasMounted";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const hasMounted = useHasMounted();
 
   const toggleTheme = () => {
     if (theme === "light") {
@@ -18,6 +20,10 @@ export function ThemeToggle() {
   };
 
   const getIcon = () => {
+    if (!hasMounted) {
+      return <RiComputerFill className="h-4 w-4" />;
+    }
+
     switch (theme) {
       case "light":
         return <RiSunFill className="h-4 w-4" />;
@@ -29,6 +35,10 @@ export function ThemeToggle() {
   };
 
   const getLabel = () => {
+    if (!hasMounted) {
+      return "System";
+    }
+
     switch (theme) {
       case "light":
         return "Light";

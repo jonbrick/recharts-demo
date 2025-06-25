@@ -95,9 +95,17 @@ export function MetricSelector({
   );
 }
 
-export function GranularitySelector({ granularity, onGranularityChange }) {
+export function GranularitySelector({
+  granularity,
+  onGranularityChange,
+  disabled = false,
+}) {
   return (
-    <Select value={granularity} onValueChange={onGranularityChange}>
+    <Select
+      value={granularity}
+      onValueChange={onGranularityChange}
+      disabled={disabled}
+    >
       <SelectTrigger className="cursor-pointer">
         <SelectValue />
       </SelectTrigger>

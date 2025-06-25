@@ -16,6 +16,8 @@ import {
   ResponsiveContainer,
   TooltipProps,
   ComposedChart,
+  PieChart,
+  Pie,
 } from "recharts";
 import { dataSourceConfig, isMathMetric } from "../lib/chartConfig.js";
 import { generateDynamicLabel } from "../lib/chartUtils";
@@ -332,6 +334,191 @@ export function PercentAreaChartComponent({
           />
         ))}
       </AreaChart>
+    </ResponsiveContainer>
+  );
+}
+
+export function PercentBarChartComponent({
+  currentData,
+  selectedMetric,
+  groupBy,
+}: ChartComponentProps) {
+  // Check if this is multi-series data
+  const isMultiSeries = groupBy !== "org" && currentData.length > 0;
+  const seriesKeys = isMultiSeries
+    ? Object.keys(currentData[0])
+        .filter((key) => key.endsWith("_display"))
+        .map((key) => key.replace("_display", ""))
+    : [selectedMetric];
+
+  // Format Y-axis tick for percentages
+  const formatYTick = (value) => {
+    return `${value}%`;
+  };
+
+  // Convert data to percentages
+  const percentData = currentData.map((point) => {
+    if (!isMultiSeries) {
+      return point; // Single series, no percentage conversion needed
+    }
+
+    // Calculate total for this data point
+    const total = seriesKeys.reduce((sum, key) => {
+      const value = point[`${key}_display`] || 0;
+      return sum + value;
+    }, 0);
+
+    if (total === 0) {
+      // If total is 0, set all percentages to 0
+      const result = { name: point.name };
+      seriesKeys.forEach((key) => {
+        result[key] = 0;
+        result[`${key}_hasData`] = point[`${key}_hasData`];
+      });
+      return result;
+    }
+
+    // Convert each value to percentage
+    const result = { name: point.name };
+    seriesKeys.forEach((key) => {
+      const value = point[`${key}_display`] || 0;
+      result[key] = (value / total) * 100;
+      result[`${key}_hasData`] = point[`${key}_hasData`];
+    });
+    return result;
+  });
+
+  return (
+    <ResponsiveContainer width="100%" height={400}>
+      <BarChart
+        data={percentData}
+        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+      >
+        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+        <XAxis
+          dataKey="name"
+          tick={{ fill: "#666" }}
+          axisLine={{ stroke: "#ccc" }}
+        />
+        <YAxis
+          tick={{ fill: "#666" }}
+          axisLine={{ stroke: "#ccc" }}
+          tickFormatter={formatYTick}
+          domain={[0, 100]}
+        />
+        <Tooltip
+          content={
+            <CustomTooltip
+              selectedMetric={selectedMetric}
+              isMultiSeries={isMultiSeries}
+            />
+          }
+        />
+        <Legend />
+
+        {seriesKeys.map((key, index) => (
+          <Bar
+            key={key}
+            dataKey={isMultiSeries ? key : `${selectedMetric}_display`}
+            stackId="team"
+            fill={CHART_COLORS[index % CHART_COLORS.length]}
+            name={isMultiSeries ? key : "Organization"}
+          />
+        ))}
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+export function DonutChartComponent({
+  currentData,
+  selectedMetric,
+  groupBy,
+}: ChartComponentProps) {
+  // Check if this is multi-series data
+  const isMultiSeries = groupBy !== "org" && currentData.length > 0;
+  const seriesKeys = isMultiSeries
+    ? Object.keys(currentData[0])
+        .filter((key) => key.endsWith("_display"))
+        .map((key) => key.replace("_display", ""))
+    : [selectedMetric];
+
+  // For donut chart, we need to aggregate the data across all time periods
+  const aggregatedData = useMemo(() => {
+    if (!isMultiSeries) {
+      // Single series - sum all values
+      const total = currentData.reduce((sum, point) => {
+        return sum + (point[`${selectedMetric}_display`] || 0);
+      }, 0);
+      return [{ name: "Total", value: total, fill: CHART_COLORS[0] }];
+    }
+
+    // Multi-series - aggregate each series
+    const seriesTotals: { [key: string]: number } = {};
+
+    // Initialize totals for each series
+    seriesKeys.forEach((key) => {
+      seriesTotals[key] = 0;
+    });
+
+    // Sum up all values for each series
+    currentData.forEach((point) => {
+      seriesKeys.forEach((key) => {
+        seriesTotals[key] += point[`${key}_display`] || 0;
+      });
+    });
+
+    // Convert to array format for PieChart
+    return seriesKeys.map((key, index) => ({
+      name: key,
+      value: seriesTotals[key],
+      fill: CHART_COLORS[index % CHART_COLORS.length],
+    }));
+  }, [currentData, selectedMetric, seriesKeys, isMultiSeries]);
+
+  // Custom tooltip for pie chart
+  const CustomPieTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0];
+      const total = aggregatedData.reduce(
+        (sum, item) => sum + (item.value as number),
+        0
+      );
+      const percentage =
+        total > 0 ? (((data.value as number) / total) * 100).toFixed(1) : 0;
+
+      return (
+        <div className="bg-white dark:bg-slate-800 p-2 border border-gray-200 dark:border-slate-600 rounded shadow-sm">
+          <p className="text-sm font-medium text-gray-700 dark:text-slate-200">
+            {data.name}
+          </p>
+          <p
+            className="text-sm dark:text-slate-300"
+            style={{ color: data.fill }}
+          >
+            {(data.value as number).toLocaleString()} ({percentage}%)
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  return (
+    <ResponsiveContainer width="100%" height={400}>
+      <PieChart>
+        <Pie
+          data={aggregatedData}
+          cx="50%"
+          cy="50%"
+          innerRadius={60}
+          outerRadius={120}
+          paddingAngle={2}
+          dataKey="value"
+        />
+        <Tooltip content={<CustomPieTooltip />} />
+        <Legend />
+      </PieChart>
     </ResponsiveContainer>
   );
 }
@@ -769,6 +956,19 @@ function ComposedChartComponent({
             stackId={type === "stacked-vertical-bar" ? stackId : undefined}
           />
         );
+      case "percent-bar":
+        return (
+          <Bar
+            key={dataKey}
+            {...baseProps}
+            fill={color}
+            opacity={yAxisId === "right" ? 0.7 : 1}
+            stackId="team"
+          />
+        );
+      case "donut":
+        // Donut charts don't work well with overlays, so return null
+        return null;
       case "line":
         return (
           <Line
@@ -992,6 +1192,8 @@ export function ChartRenderer({
     "horizontal-bar": HorizontalBarChartComponent,
     "stacked-area": StackedAreaChartComponent,
     "percent-area": PercentAreaChartComponent,
+    "percent-bar": PercentBarChartComponent,
+    donut: DonutChartComponent,
     "stacked-vertical-bar": StackedVerticalBarChartComponent,
     "stacked-horizontal-bar": StackedHorizontalBarChartComponent,
   };
