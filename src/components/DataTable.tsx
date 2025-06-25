@@ -186,7 +186,7 @@ export function DataTable({
   // Check if we're in record view (moved to after all hooks)
   if (viewMode === "record" && rawData) {
     return (
-      <div className="relative">
+      <div className="flex flex-col">
         {showLabel && (
           <div className="text-sm text-gray-600 dark:text-slate-300 mb-2">
             {dynamicLabel}
@@ -203,7 +203,7 @@ export function DataTable({
 
   // Default table view
   return (
-    <div className="relative">
+    <div className="flex flex-col">
       {showLabel && (
         <div className="text-sm text-gray-600 dark:text-slate-300 mb-2">
           {dynamicLabel}

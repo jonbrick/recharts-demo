@@ -961,13 +961,13 @@ export function ChartRenderer({
     mergedData
   ) {
     return (
-      <div className="relative">
+      <div className="flex flex-col">
         {showLabel && (
-          <div className="absolute top-0 left-0 z-10 text-sm text-gray-600 dark:text-slate-300 mb-2">
+          <div className="text-sm text-gray-600 dark:text-slate-300 mb-2">
             {dynamicLabel}
           </div>
         )}
-        <div className="pt-6">
+        <div>
           <ComposedChartComponent
             mergedData={mergedData}
             selectedMetric={selectedMetric}
@@ -1002,13 +1002,13 @@ export function ChartRenderer({
   }
 
   return (
-    <div className="relative">
+    <div className="flex flex-col">
       {showLabel && (
-        <div className="absolute top-0 left-0 z-10 text-sm text-gray-600 dark:text-slate-300 mb-2">
+        <div className="text-sm text-gray-600 dark:text-slate-300 mb-2">
           {dynamicLabel}
         </div>
       )}
-      <div className="pt-6">
+      <div>
         <Component
           currentData={currentData}
           selectedTable={selectedTable}

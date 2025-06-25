@@ -46,6 +46,7 @@ import { Button } from "../components/Button";
 import { DataTable } from "../components/DataTable";
 import { Switch } from "../components/Switch";
 import { ThemeToggle } from "../components/ThemeToggle";
+import { useHasMounted } from "../hooks/useHasMounted";
 
 // Reusable card components to reduce duplication
 const UnifiedCard = ({
@@ -278,6 +279,7 @@ function DashboardContent() {
   // Initialize URL state management
   const { getStateFromUrl, updateUrl, getShareableUrl } = useUrlState();
   const searchParams = useSearchParams();
+  const hasMounted = useHasMounted();
 
   // Load state from URL on mount
   useEffect(() => {
@@ -1251,11 +1253,13 @@ function DashboardContent() {
                 />
                 {/* Vs Previous Period toggle - always visible */}
                 <div className="flex items-center gap-2">
-                  <Switch
-                    id="prev-period-toggle"
-                    checked={summaryPreviousPeriod}
-                    onCheckedChange={setSummaryPreviousPeriod}
-                  />
+                  {hasMounted && (
+                    <Switch
+                      id="prev-period-toggle"
+                      checked={summaryPreviousPeriod}
+                      onCheckedChange={setSummaryPreviousPeriod}
+                    />
+                  )}
                   <label
                     htmlFor="prev-period-toggle"
                     className="text-sm text-gray-600 dark:text-slate-300 cursor-pointer"
