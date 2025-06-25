@@ -45,6 +45,7 @@ import { Card } from "../components/Card";
 import { Button } from "../components/Button";
 import { DataTable } from "../components/DataTable";
 import { Switch } from "../components/Switch";
+import { ThemeToggle } from "../components/ThemeToggle";
 
 // Reusable card components to reduce duplication
 const UnifiedCard = ({
@@ -83,12 +84,15 @@ const UnifiedCard = ({
   showSummary,
   showChart,
   showTable,
+  showSummaryLabel,
+  showChartLabel,
+  showTableLabel,
 }) => {
   // Safety check for selectedTable
   if (!selectedTable || !dataSourceConfig[selectedTable]) {
     return (
       <Card className="flex flex-col gap-6 p-6">
-        <div className="text-gray-500">Loading...</div>
+        <div className="text-gray-500 dark:text-slate-400">Loading...</div>
       </Card>
     );
   }
@@ -98,7 +102,9 @@ const UnifiedCard = ({
   if (!hasVisibleComponents) {
     return (
       <Card className="flex flex-col gap-6 p-6">
-        <div className="text-gray-500">No components selected</div>
+        <div className="text-gray-500 dark:text-slate-400">
+          No components selected
+        </div>
       </Card>
     );
   }
@@ -124,6 +130,7 @@ const UnifiedCard = ({
                 summaryPreviousPeriod ? "vs Previous Period" : null
               }
               comparisonMetric={selectedMetric}
+              showLabel={showSummaryLabel}
             />
 
             {summaryOverlayActive && (
@@ -144,6 +151,7 @@ const UnifiedCard = ({
                   summaryPreviousPeriod ? "vs Previous Period" : null
                 }
                 comparisonMetric={overlayActiveMetric}
+                showLabel={showSummaryLabel}
               />
             )}
           </div>
@@ -169,6 +177,7 @@ const UnifiedCard = ({
             dateMode={dateMode}
             relativeDays={relativeDays}
             selectedDateRange={selectedDateRange}
+            showLabel={showChartLabel}
           />
         </div>
       )}
@@ -180,7 +189,6 @@ const UnifiedCard = ({
             currentData={listChartData}
             selectedMetric={selectedMetric}
             selectedTable={selectedTable}
-            granularity={granularity}
             groupBy={listGroupBy}
             viewMode={tableView}
             rawData={dataTables[selectedTable]}
@@ -192,6 +200,7 @@ const UnifiedCard = ({
             dateMode={dateMode}
             relativeDays={relativeDays}
             selectedDateRange={selectedDateRange}
+            showLabel={showTableLabel}
           />
         </div>
       )}
@@ -260,6 +269,11 @@ function DashboardContent() {
   const [showSummary, setShowSummary] = useState(true);
   const [showChart, setShowChart] = useState(true);
   const [showTable, setShowTable] = useState(true);
+
+  // Label visibility states
+  const [showSummaryLabel, setShowSummaryLabel] = useState(true);
+  const [showChartLabel, setShowChartLabel] = useState(true);
+  const [showTableLabel, setShowTableLabel] = useState(true);
 
   // Initialize URL state management
   const { getStateFromUrl, updateUrl, getShareableUrl } = useUrlState();
@@ -828,6 +842,11 @@ function DashboardContent() {
     // Exit config mode
     setOverlayConfiguring(false);
 
+    // Automatically turn ON all comparison switches
+    setSummaryOverlayActive(true);
+    setChartOverlayActive(true);
+    setListOverlayActive(true);
+
     // Update URL with overlay state
     updateUrl({
       overlayActive: true,
@@ -835,6 +854,9 @@ function DashboardContent() {
       overlayActiveMetric: overlayConfigMetric,
       overlayActiveGroupBy: overlayConfigGroupBy,
       overlayActiveChartType: overlayConfigChartType,
+      summaryOverlayActive: true,
+      chartOverlayActive: true,
+      listOverlayActive: true,
     });
   };
 
@@ -1016,10 +1038,11 @@ function DashboardContent() {
       <div className="flex flex-col gap-6">
         {/* Header row with title and date picker */}
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
             Module Building UX POC
           </h1>
           <div className="flex gap-2">
+            <ThemeToggle />
             {(dateMode !== "relative" || relativeDays !== 7) && (
               <Button
                 variant="ghost"
@@ -1060,7 +1083,7 @@ function DashboardContent() {
         </div>
 
         {/* Divider */}
-        <div className="border-b border-gray-200" />
+        <div className="border-b border-gray-200 dark:border-slate-700" />
 
         <div className="flex flex-col gap-4">
           {/* Data controls row */}
@@ -1087,7 +1110,7 @@ function DashboardContent() {
 
         {/* Overlay Configuration Controls */}
         {overlayConfiguring && (
-          <div className="flex items-center gap-4 bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+          <div className="flex items-center gap-4 bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
             <DataSourceSelector
               selectedTable={overlayConfigTable}
               onTableChange={setOverlayConfigTable}
@@ -1110,7 +1133,7 @@ function DashboardContent() {
 
         {/* Active Overlay Controls */}
         {overlayActive && !overlayConfiguring && (
-          <div className="flex items-center gap-4 bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+          <div className="flex items-center gap-4 bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
             <DataSourceSelector
               selectedTable={overlayActiveTable}
               onTableChange={setOverlayActiveTable}
@@ -1129,7 +1152,7 @@ function DashboardContent() {
         )}
 
         {/* Component Visibility Controls */}
-        <div className="flex items-center gap-6 border-b border-gray-200 pb-6">
+        <div className="flex items-center gap-6 border-b border-gray-200 dark:border-slate-700 pb-6">
           <div className="flex items-center gap-2">
             <Switch
               id="show-summary-toggle"
@@ -1138,7 +1161,7 @@ function DashboardContent() {
             />
             <label
               htmlFor="show-summary-toggle"
-              className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+              className="text-sm text-gray-600 dark:text-slate-300 cursor-pointer"
             >
               Show Summary
             </label>
@@ -1151,7 +1174,7 @@ function DashboardContent() {
             />
             <label
               htmlFor="show-chart-toggle"
-              className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+              className="text-sm text-gray-600 dark:text-slate-300 cursor-pointer"
             >
               Show Chart
             </label>
@@ -1164,7 +1187,7 @@ function DashboardContent() {
             />
             <label
               htmlFor="show-table-toggle"
-              className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+              className="text-sm text-gray-600 dark:text-slate-300 cursor-pointer"
             >
               Show Table
             </label>
@@ -1178,23 +1201,38 @@ function DashboardContent() {
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-4">
                 <h2 className="text-md font-medium">Summary Controls</h2>
-                {/* Overlay toggle - only show when there's a comparison available */}
-                {overlayActiveTable && (
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      id="summary-overlay-toggle"
-                      checked={summaryOverlayActive}
-                      onCheckedChange={handleSummaryOverlayActiveChange}
-                    />
-                    <label
-                      htmlFor="summary-overlay-toggle"
-                      className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
-                    >
-                      Show comparison
-                    </label>
-                  </div>
-                )}
+
+                {/* Show label toggle */}
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="summary-label-toggle"
+                    checked={showSummaryLabel}
+                    onCheckedChange={setShowSummaryLabel}
+                  />
+                  <label
+                    htmlFor="summary-label-toggle"
+                    className="text-sm text-gray-600 dark:text-slate-300 cursor-pointer"
+                  >
+                    Show label
+                  </label>
+                </div>
               </div>
+              {/* Overlay toggle - only show when there's a comparison available */}
+              {overlayActiveTable && (
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="summary-overlay-toggle"
+                    checked={summaryOverlayActive}
+                    onCheckedChange={handleSummaryOverlayActiveChange}
+                  />
+                  <label
+                    htmlFor="summary-overlay-toggle"
+                    className="text-sm text-gray-600 dark:text-slate-300 cursor-pointer"
+                  >
+                    Show comparison
+                  </label>
+                </div>
+              )}
               <div className="flex gap-2">
                 <GroupBySelector
                   groupBy={summaryGroupBy}
@@ -1214,14 +1252,14 @@ function DashboardContent() {
                   />
                   <label
                     htmlFor="prev-period-toggle"
-                    className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+                    className="text-sm text-gray-600 dark:text-slate-300 cursor-pointer"
                   >
                     vs Previous Period
                   </label>
                 </div>
                 {summaryOverlayActive && overlayActiveTable && (
                   <>
-                    <div className="border-l border-gray-200 h-full pl-3 ml-1">
+                    <div className="border-l border-gray-200 dark:border-slate-700 h-full pl-3 ml-1">
                       <div className="flex items-center gap-2 w-full">
                         <GroupBySelector
                           groupBy={summaryOverlayGroupBy}
@@ -1251,12 +1289,26 @@ function DashboardContent() {
                     />
                     <label
                       htmlFor="chart-overlay-toggle"
-                      className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+                      className="text-sm text-gray-600 dark:text-slate-300 cursor-pointer"
                     >
                       Show comparison
                     </label>
                   </div>
                 )}
+                {/* Show label toggle */}
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="chart-label-toggle"
+                    checked={showChartLabel}
+                    onCheckedChange={setShowChartLabel}
+                  />
+                  <label
+                    htmlFor="chart-label-toggle"
+                    className="text-sm text-gray-600 dark:text-slate-300 cursor-pointer"
+                  >
+                    Show label
+                  </label>
+                </div>
               </div>
               <div className="flex gap-2 flex-wrap">
                 <GroupBySelector
@@ -1278,7 +1330,7 @@ function DashboardContent() {
                 </div>
                 {chartOverlayActive && overlayActiveTable && (
                   <>
-                    <div className="border-l border-gray-200 h-full pl-3 ml-1">
+                    <div className="border-l border-gray-200 dark:border-slate-700 h-full pl-3 ml-1">
                       <div className="flex items-center gap-2 w-full flex-wrap">
                         <CompareDatasetsSelector />
                         <GroupBySelector
@@ -1313,12 +1365,26 @@ function DashboardContent() {
                     />
                     <label
                       htmlFor="list-overlay-toggle"
-                      className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+                      className="text-sm text-gray-600 dark:text-slate-300 cursor-pointer"
                     >
                       Show comparison
                     </label>
                   </div>
                 )}
+                {/* Show label toggle */}
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="list-label-toggle"
+                    checked={showTableLabel}
+                    onCheckedChange={setShowTableLabel}
+                  />
+                  <label
+                    htmlFor="list-label-toggle"
+                    className="text-sm text-gray-600 dark:text-slate-300 cursor-pointer"
+                  >
+                    Show label
+                  </label>
+                </div>
               </div>
               <div className="flex gap-2 flex-wrap">
                 <GroupBySelector
@@ -1338,7 +1404,7 @@ function DashboardContent() {
                 />
                 {listOverlayActive && overlayActiveTable && (
                   <>
-                    <div className="border-l border-gray-200 h-full pl-3 ml-1">
+                    <div className="border-l border-gray-200 dark:border-slate-700 h-full pl-3 ml-1">
                       <div className="flex items-center gap-4 w-full">
                         <CompareDatasetsSelector />
                         <GroupBySelector
@@ -1387,6 +1453,9 @@ function DashboardContent() {
             showSummary={showSummary}
             showChart={showChart}
             showTable={showTable}
+            showSummaryLabel={showSummaryLabel}
+            showChartLabel={showChartLabel}
+            showTableLabel={showTableLabel}
           />
         </div>
       </div>

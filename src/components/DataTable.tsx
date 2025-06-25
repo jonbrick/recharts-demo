@@ -70,7 +70,6 @@ interface DataTableProps {
   currentData: any[];
   selectedMetric: string;
   selectedTable: string;
-  granularity: string;
   groupBy: string;
   viewMode?: string;
   rawData?: any[];
@@ -82,13 +81,13 @@ interface DataTableProps {
   dateMode?: string;
   relativeDays?: number;
   selectedDateRange?: { from: Date; to: Date };
+  showLabel?: boolean;
 }
 
 export function DataTable({
   currentData,
   selectedMetric,
   selectedTable,
-  granularity,
   groupBy,
   viewMode = "day",
   rawData,
@@ -100,6 +99,7 @@ export function DataTable({
   dateMode,
   relativeDays,
   selectedDateRange,
+  showLabel = true,
 }: DataTableProps) {
   // Generate dynamic label
   const dynamicLabel = generateDynamicLabel({
@@ -183,14 +183,15 @@ export function DataTable({
   // Combine all columns
   const columnKeys = [...primaryColumnKeys, ...overlayColumnKeys];
 
-  const config = dataSourceConfig[selectedTable];
-  const column = config.tableColumns.find((c) => c.key === selectedMetric);
-
   // Check if we're in record view (moved to after all hooks)
   if (viewMode === "record" && rawData) {
     return (
       <div className="relative">
-        <div className="text-sm text-gray-600 mb-2">{dynamicLabel}</div>
+        {showLabel && (
+          <div className="text-sm text-gray-600 dark:text-slate-300 mb-2">
+            {dynamicLabel}
+          </div>
+        )}
         <RecordTable
           data={rawData}
           selectedTable={selectedTable}
@@ -200,126 +201,53 @@ export function DataTable({
     );
   }
 
-  // Default: return the day view table
+  // Default table view
   return (
     <div className="relative">
-      <div className="text-sm text-gray-600 mb-4">{dynamicLabel}</div>
+      {showLabel && (
+        <div className="text-sm text-gray-600 dark:text-slate-300 mb-2">
+          {dynamicLabel}
+        </div>
+      )}
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm">
+        <table className="w-full border-collapse border border-gray-200 dark:border-slate-700">
           <thead>
-            <tr className="bg-gray-50">
-              <th className="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">
-                {granularity === "monthly" ? "Date" : "Period"}
+            <tr>
+              <th className="border border-gray-200 dark:border-slate-700 px-4 py-3 text-left font-semibold text-gray-700 dark:text-slate-200">
+                {groupBy === "org" ? "Organization" : "Name"}
               </th>
-              {groupBy === "org" && !overlayActive ? (
-                <th className="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">
-                  {(() => {
-                    const config = dataSourceConfig[selectedTable];
-                    const metricLabel =
-                      config.metrics.find((m) => m.key === selectedMetric)
-                        ?.label ||
-                      config.overlayMetric?.label ||
-                      selectedMetric;
-                    return metricLabel;
-                  })()}
+              {columnKeys.map((key) => (
+                <th
+                  key={key}
+                  className="border border-gray-200 dark:border-slate-700 px-4 py-3 text-left font-semibold text-gray-700 dark:text-slate-200"
+                >
+                  {getColumnLabel(
+                    key,
+                    groupBy,
+                    selectedTable,
+                    selectedMetric,
+                    overlayTable,
+                    overlayMetric,
+                    overlayGroupBy
+                  )}
                 </th>
-              ) : groupBy === "org" && overlayActive ? (
-                <>
-                  <th className="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">
-                    {(() => {
-                      const config = dataSourceConfig[selectedTable];
-                      const metricLabel =
-                        config.metrics.find((m) => m.key === selectedMetric)
-                          ?.label ||
-                        config.overlayMetric?.label ||
-                        selectedMetric;
-                      return `${metricLabel} - Organization`;
-                    })()}
-                  </th>
-                  {overlayColumnKeys.map((key) => (
-                    <th
-                      key={key}
-                      className="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700"
-                    >
-                      {getColumnLabel(
-                        key,
-                        groupBy,
-                        selectedTable,
-                        selectedMetric,
-                        overlayTable,
-                        overlayMetric,
-                        overlayGroupBy
-                      )}
-                    </th>
-                  ))}
-                </>
-              ) : (
-                columnKeys.map((key) => (
-                  <th
-                    key={key}
-                    className="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700"
-                  >
-                    {getColumnLabel(
-                      key,
-                      groupBy,
-                      selectedTable,
-                      selectedMetric,
-                      overlayTable,
-                      overlayMetric,
-                      overlayGroupBy
-                    )}
-                  </th>
-                ))
-              )}
+              ))}
             </tr>
           </thead>
           <tbody>
             {dataToDisplay.map((row, index) => (
-              <tr
-                key={row.name}
-                className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
-              >
-                <td className="border border-gray-200 px-4 py-3 font-medium text-gray-900">
+              <tr key={index}>
+                <td className="border border-gray-200 dark:border-slate-700 px-4 py-3 font-medium text-gray-900 dark:text-slate-100">
                   {row.name}
                 </td>
-                {groupBy === "org" && !overlayActive ? (
-                  <td className="border border-gray-200 px-4 py-3 text-gray-700">
-                    {row[`${selectedMetric}_display`] ||
-                      formatValue(
-                        row[selectedMetric],
-                        column ? column.format : "number"
-                      )}
+                {columnKeys.map((key) => (
+                  <td
+                    key={key}
+                    className="border border-gray-200 dark:border-slate-700 px-4 py-3 text-gray-700 dark:text-slate-300"
+                  >
+                    {row[key]}
                   </td>
-                ) : groupBy === "org" && overlayActive ? (
-                  <>
-                    <td className="border border-gray-200 px-4 py-3 text-gray-700">
-                      {row[`${selectedMetric}_display`] ||
-                        formatValue(
-                          row[selectedMetric],
-                          column ? column.format : "number"
-                        )}
-                    </td>
-                    {overlayColumnKeys.map((key) => (
-                      <td
-                        key={key}
-                        className="border border-gray-200 px-4 py-3 text-gray-700"
-                      >
-                        {row[key] !== undefined
-                          ? formatValue(row[key], "number")
-                          : ""}
-                      </td>
-                    ))}
-                  </>
-                ) : (
-                  columnKeys.map((key) => (
-                    <td
-                      key={key}
-                      className="border border-gray-200 px-4 py-3 text-gray-700"
-                    >
-                      {row[`${key}_display`] || formatValue(row[key], "number")}
-                    </td>
-                  ))
-                )}
+                ))}
               </tr>
             ))}
           </tbody>
@@ -445,17 +373,17 @@ function RecordTable({ data, selectedTable, groupBy }: RecordTableProps) {
     >
       {sortedGroupNames.map((groupName) => (
         <AccordionItem key={groupName} value={groupName}>
-          <AccordionTrigger className="bg-gray-100 px-4 py-2 font-semibold text-gray-700 hover:bg-gray-200">
+          <AccordionTrigger className="bg-gray-100 dark:bg-slate-800 px-4 py-2 font-semibold text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-700">
             {groupName} ({groupedData[groupName].length} records)
           </AccordionTrigger>
           <AccordionContent>
-            <table className="w-full border-collapse bg-white">
+            <table className="w-full border-collapse bg-white dark:bg-slate-900">
               <thead>
-                <tr className="bg-gray-50">
+                <tr className="bg-gray-50 dark:bg-slate-800">
                   {columns.map((col) => (
                     <th
                       key={col.key}
-                      className="border border-gray-200 px-4 py-2 text-left text-sm font-semibold text-gray-700"
+                      className="border border-gray-200 dark:border-slate-700 px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-slate-200"
                     >
                       {col.label}
                     </th>
@@ -466,12 +394,16 @@ function RecordTable({ data, selectedTable, groupBy }: RecordTableProps) {
                 {groupedData[groupName].map((record, index) => (
                   <tr
                     key={`${groupName}-${record.id}-${index}`}
-                    className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                    className={
+                      index % 2 === 0
+                        ? "bg-white dark:bg-slate-900"
+                        : "bg-gray-50 dark:bg-slate-800"
+                    }
                   >
                     {columns.map((col) => (
                       <td
                         key={col.key}
-                        className="border border-gray-200 px-4 py-2 text-sm"
+                        className="border border-gray-200 dark:border-slate-700 px-4 py-2 text-sm text-gray-900 dark:text-slate-100"
                       >
                         {col.format === "date" && record[col.key]
                           ? new Date(record[col.key]).toLocaleDateString()

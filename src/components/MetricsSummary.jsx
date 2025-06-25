@@ -18,6 +18,7 @@ export function MetricsSummary({
   comparisonData = null,
   comparisonMode = null,
   comparisonMetric = null,
+  showLabel = true,
 }) {
   // Extract group keys (only use '_display' fields)
   const groupKeys = data?.[0]
@@ -33,7 +34,9 @@ export function MetricsSummary({
   const config = dataSourceConfig[selectedTable];
   if (!config) {
     console.warn(`No config found for table: ${selectedTable}`);
-    return <div className="text-gray-500">No data available</div>;
+    return (
+      <div className="text-gray-500 dark:text-slate-400">No data available</div>
+    );
   }
   const allMetrics = [...config.metrics];
   if (config.overlayMetric) {
@@ -123,7 +126,9 @@ export function MetricsSummary({
       value === null || value === undefined ? "N/A" : Number(value).toFixed(1);
     return (
       <div>
-        <div className="text-3xl font-bold text-gray-800">{displayValue}</div>
+        <div className="text-3xl font-bold text-gray-800 dark:text-slate-100">
+          {displayValue}
+        </div>
         {comparisonValues && (
           <div className="flex items-center gap-2 mt-1">
             <span
@@ -134,7 +139,7 @@ export function MetricsSummary({
               {comparisonValues.isPositive ? "+" : ""}
               {comparisonValues.percentChange.toFixed(1)}%
             </span>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-500 dark:text-slate-400">
               {comparisonValues.displayValue}{" "}
               {comparisonMode === "vs Previous Period"
                 ? "prev period"
@@ -167,7 +172,7 @@ export function MetricsSummary({
     const suffix = isGrouped ? ` - ${label}` : "";
 
     return (
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-gray-600 dark:text-slate-300">
         {operation} {metricLabel.toLowerCase()} over {range}
         {suffix}
       </div>
@@ -185,7 +190,7 @@ export function MetricsSummary({
 
     return (
       <div className={clsx("metrics-summary", className)}>
-        {renderMetricLabel("Organization")}
+        {showLabel && renderMetricLabel("Organization")}
         {renderMetricValue(value)}
       </div>
     );
@@ -210,9 +215,9 @@ export function MetricsSummary({
 
         return (
           <div key={groupName}>
-            {renderMetricLabel(groupName)}
+            {showLabel && renderMetricLabel(groupName)}
             <div>
-              <div className="text-3xl font-bold text-gray-800">
+              <div className="text-3xl font-bold text-gray-800 dark:text-slate-100">
                 {finalValue === null || finalValue === undefined
                   ? "N/A"
                   : Number(finalValue).toFixed(1)}
@@ -229,7 +234,7 @@ export function MetricsSummary({
                     {groupComparisonValues.isPositive ? "+" : ""}
                     {groupComparisonValues.percentChange.toFixed(1)}%
                   </span>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-500 dark:text-slate-400">
                     {groupComparisonValues.displayValue}{" "}
                     {comparisonMode === "vs Previous Period"
                       ? "prev period"

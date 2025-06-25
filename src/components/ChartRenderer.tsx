@@ -52,6 +52,7 @@ interface ChartRendererProps {
   dateMode?: string;
   relativeDays?: number;
   selectedDateRange?: { from: Date; to: Date };
+  showLabel?: boolean;
 }
 
 interface CustomTooltipProps extends TooltipProps<any, any> {
@@ -77,10 +78,16 @@ const CustomTooltip = ({
 }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white p-2 border border-gray-200 rounded shadow-sm">
-        <p className="text-sm font-medium text-gray-700">{label}</p>
+      <div className="bg-white dark:bg-slate-800 p-2 border border-gray-200 dark:border-slate-600 rounded shadow-sm">
+        <p className="text-sm font-medium text-gray-700 dark:text-slate-200">
+          {label}
+        </p>
         {payload.map((entry: any, index: number) => (
-          <p key={index} className="text-sm" style={{ color: entry.color }}>
+          <p
+            key={index}
+            className="text-sm dark:text-slate-300"
+            style={{ color: entry.color }}
+          >
             {isMultiSeries ? entry.name : selectedMetric}: {entry.value}
           </p>
         ))}
@@ -102,7 +109,11 @@ export function AreaChartComponent({
         data={currentData}
         margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
       >
-        <CartesianGrid strokeDasharray="3 3" />
+        <CartesianGrid
+          strokeDasharray="3 3"
+          stroke="#e5e7eb"
+          className="dark:stroke-slate-700"
+        />
         <XAxis dataKey="name" />
         <YAxis />
         <Tooltip
@@ -877,6 +888,7 @@ export function ChartRenderer({
   dateMode,
   relativeDays,
   selectedDateRange,
+  showLabel = true,
 }: ChartRendererProps) {
   // Generate dynamic label
   const dynamicLabel = generateDynamicLabel({
@@ -950,9 +962,11 @@ export function ChartRenderer({
   ) {
     return (
       <div className="relative">
-        <div className="absolute top-0 left-0 z-10 text-sm text-gray-600 mb-4">
-          {dynamicLabel}
-        </div>
+        {showLabel && (
+          <div className="absolute top-0 left-0 z-10 text-sm text-gray-600 dark:text-slate-300 mb-2">
+            {dynamicLabel}
+          </div>
+        )}
         <div className="pt-6">
           <ComposedChartComponent
             mergedData={mergedData}
@@ -989,9 +1003,11 @@ export function ChartRenderer({
 
   return (
     <div className="relative">
-      <div className="absolute top-0 left-0 z-10 text-sm text-gray-600 mb-2">
-        {dynamicLabel}
-      </div>
+      {showLabel && (
+        <div className="absolute top-0 left-0 z-10 text-sm text-gray-600 dark:text-slate-300 mb-2">
+          {dynamicLabel}
+        </div>
+      )}
       <div className="pt-6">
         <Component
           currentData={currentData}
