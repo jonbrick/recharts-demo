@@ -60,7 +60,7 @@ const UnifiedCard = ({
   overlayActiveTable,
   overlayActiveMetric,
   summaryPreviousPeriod,
-  summaryCompareDatasets,
+  summaryOverlayActive,
   summaryPreviousPeriodData,
   summaryOverlayCurrentData,
   // Chart props
@@ -108,7 +108,7 @@ const UnifiedCard = ({
       {/* Metrics Summary Section */}
       {showSummary && (
         <div className="flex flex-col gap-4">
-          <div className={summaryCompareDatasets ? "flex gap-4" : ""}>
+          <div className={summaryOverlayActive ? "flex gap-4" : ""}>
             <MetricsSummary
               key={`${operator}-${selectedMetric}-${selectedTable}-${granularity}`}
               selectedTable={selectedTable}
@@ -126,7 +126,7 @@ const UnifiedCard = ({
               comparisonMetric={selectedMetric}
             />
 
-            {summaryCompareDatasets && (
+            {summaryOverlayActive && (
               <MetricsSummary
                 key={`overlay-${operator}-${overlayActiveMetric}-${overlayActiveTable}-${granularity}`}
                 selectedTable={overlayActiveTable}
@@ -251,7 +251,6 @@ function DashboardContent() {
 
   // Card-specific comparison mode states
   const [summaryPreviousPeriod, setSummaryPreviousPeriod] = useState(false);
-  const [summaryCompareDatasets, setSummaryCompareDatasets] = useState(false);
   const [chartComparisonMode, _setChartComparisonMode] =
     useState("Compare Datasets");
   const [listComparisonMode, _setListComparisonMode] =
@@ -600,7 +599,7 @@ function DashboardContent() {
 
   // Current overlay data for second card
   const summaryOverlayCurrentData = useMemo(() => {
-    if (!summaryCompareDatasets || !overlayActiveTable) {
+    if (!summaryOverlayActive || !overlayActiveTable) {
       return null;
     }
 
@@ -624,7 +623,7 @@ function DashboardContent() {
       );
     }
   }, [
-    summaryCompareDatasets,
+    summaryOverlayActive,
     overlayActiveTable,
     dataTables,
     summaryOverlayGroupBy,
@@ -861,6 +860,14 @@ function DashboardContent() {
     setSummaryOverlayActive(false);
     setSummaryOverlayGroupBy("org");
 
+    // Clear chart overlay states
+    setChartOverlayActive(false);
+    setChartOverlayGroupBy("org");
+
+    // Clear list overlay states
+    setListOverlayActive(false);
+    setListOverlayGroupBy("org");
+
     // Update URL with cleared overlay state
     updateUrl({
       overlayActive: false,
@@ -870,6 +877,10 @@ function DashboardContent() {
       overlayActiveChartType: "line",
       summaryOverlayActive: false,
       summaryOverlayGroupBy: "org",
+      chartOverlayActive: false,
+      chartOverlayGroupBy: "org",
+      listOverlayActive: false,
+      listOverlayGroupBy: "org",
     });
   };
 
@@ -886,7 +897,7 @@ function DashboardContent() {
       dateMode,
       relativeDays,
       summaryPreviousPeriod,
-      summaryCompareDatasets,
+      summaryCompareDatasets: summaryOverlayActive,
       chartComparisonMode,
       listComparisonMode,
       overlayActive,
@@ -1167,20 +1178,22 @@ function DashboardContent() {
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-4">
                 <h2 className="text-md font-medium">Summary Controls</h2>
-                {/* Overlay toggle */}
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="summary-overlay-toggle"
-                    checked={summaryOverlayActive}
-                    onCheckedChange={handleSummaryOverlayActiveChange}
-                  />
-                  <label
-                    htmlFor="summary-overlay-toggle"
-                    className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
-                  >
-                    Show comparison
-                  </label>
-                </div>
+                {/* Overlay toggle - only show when there's a comparison available */}
+                {overlayActiveTable && (
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id="summary-overlay-toggle"
+                      checked={summaryOverlayActive}
+                      onCheckedChange={handleSummaryOverlayActiveChange}
+                    />
+                    <label
+                      htmlFor="summary-overlay-toggle"
+                      className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+                    >
+                      Show comparison
+                    </label>
+                  </div>
+                )}
               </div>
               <div className="flex gap-2">
                 <GroupBySelector
@@ -1192,36 +1205,24 @@ function DashboardContent() {
                   operator={operator}
                   onOperatorChange={handleOperatorChange}
                 />
+                {/* Vs Previous Period toggle - always visible */}
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="prev-period-toggle"
+                    checked={summaryPreviousPeriod}
+                    onCheckedChange={setSummaryPreviousPeriod}
+                  />
+                  <label
+                    htmlFor="prev-period-toggle"
+                    className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+                  >
+                    vs Previous Period
+                  </label>
+                </div>
                 {summaryOverlayActive && overlayActiveTable && (
                   <>
-                    <div className="border-l border-gray-200 h-full pl-2">
+                    <div className="border-l border-gray-200 h-full pl-3 ml-1">
                       <div className="flex items-center gap-2 w-full">
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            id="prev-period-toggle"
-                            checked={summaryPreviousPeriod}
-                            onCheckedChange={setSummaryPreviousPeriod}
-                          />
-                          <label
-                            htmlFor="prev-period-toggle"
-                            className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
-                          >
-                            vs Previous Period
-                          </label>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            id="compare-datasets-toggle"
-                            checked={summaryCompareDatasets}
-                            onCheckedChange={setSummaryCompareDatasets}
-                          />
-                          <label
-                            htmlFor="compare-datasets-toggle"
-                            className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
-                          >
-                            Compare Datasets
-                          </label>
-                        </div>
                         <GroupBySelector
                           groupBy={summaryOverlayGroupBy}
                           onGroupByChange={handleSummaryOverlayGroupByChange}
@@ -1240,20 +1241,22 @@ function DashboardContent() {
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-4">
                 <h2 className="text-md font-medium">Trend Controls</h2>
-                {/* Chart-specific overlay toggle */}
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="chart-overlay-toggle"
-                    checked={chartOverlayActive}
-                    onCheckedChange={handleChartOverlayActiveChange}
-                  />
-                  <label
-                    htmlFor="chart-overlay-toggle"
-                    className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
-                  >
-                    Show comparison
-                  </label>
-                </div>
+                {/* Chart-specific overlay toggle - only show when there's a comparison available */}
+                {overlayActiveTable && (
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id="chart-overlay-toggle"
+                      checked={chartOverlayActive}
+                      onCheckedChange={handleChartOverlayActiveChange}
+                    />
+                    <label
+                      htmlFor="chart-overlay-toggle"
+                      className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+                    >
+                      Show comparison
+                    </label>
+                  </div>
+                )}
               </div>
               <div className="flex gap-2 flex-wrap">
                 <GroupBySelector
@@ -1275,7 +1278,7 @@ function DashboardContent() {
                 </div>
                 {chartOverlayActive && overlayActiveTable && (
                   <>
-                    <div className="border-l border-gray-200 h-full pl-2">
+                    <div className="border-l border-gray-200 h-full pl-3 ml-1">
                       <div className="flex items-center gap-2 w-full flex-wrap">
                         <CompareDatasetsSelector />
                         <GroupBySelector
@@ -1300,20 +1303,22 @@ function DashboardContent() {
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-4">
                 <h2 className="text-md font-medium">List Controls</h2>
-                {/* Overlay toggle */}
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="list-overlay-toggle"
-                    checked={listOverlayActive}
-                    onCheckedChange={handleListOverlayActiveChange}
-                  />
-                  <label
-                    htmlFor="list-overlay-toggle"
-                    className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
-                  >
-                    Show comparison
-                  </label>
-                </div>
+                {/* Overlay toggle - only show when there's a comparison available */}
+                {overlayActiveTable && (
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id="list-overlay-toggle"
+                      checked={listOverlayActive}
+                      onCheckedChange={handleListOverlayActiveChange}
+                    />
+                    <label
+                      htmlFor="list-overlay-toggle"
+                      className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+                    >
+                      Show comparison
+                    </label>
+                  </div>
+                )}
               </div>
               <div className="flex gap-2 flex-wrap">
                 <GroupBySelector
@@ -1333,7 +1338,7 @@ function DashboardContent() {
                 />
                 {listOverlayActive && overlayActiveTable && (
                   <>
-                    <div className="border-l border-gray-200 h-full pl-2">
+                    <div className="border-l border-gray-200 h-full pl-3 ml-1">
                       <div className="flex items-center gap-4 w-full">
                         <CompareDatasetsSelector />
                         <GroupBySelector
@@ -1362,7 +1367,7 @@ function DashboardContent() {
             overlayActiveTable={overlayActiveTable}
             overlayActiveMetric={overlayActiveMetric}
             summaryPreviousPeriod={summaryPreviousPeriod}
-            summaryCompareDatasets={summaryCompareDatasets}
+            summaryOverlayActive={summaryOverlayActive}
             summaryPreviousPeriodData={summaryPreviousPeriodData}
             summaryOverlayCurrentData={summaryOverlayCurrentData}
             chartType={chartType}
