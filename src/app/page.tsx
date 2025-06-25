@@ -1246,8 +1246,51 @@ function DashboardContent() {
               variant="ghost"
               disabled={isDefaultState}
               onClick={() => {
-                window.location.href =
-                  "http://localhost:3000/?source=githubPR&metric=pullRequests&group=org&chart=line&op=sum&table=day&from=2025-05-15&to=2025-05-30&dateMode=relative&days=7&s_prev=true&overlay=false&o_source=&o_metric=&o_group=org&o_chart=line&s_grp=org&s_overlay=false&s_o_grp=org&c_grp=org&c_overlay=false&c_o_grp=org&c_gran=monthly&l_grp=org&l_overlay=false&l_o_grp=org&l_gran=monthly&show_sum=true&show_chart=true&show_list=true&show_sum_label=true&show_chart_label=true&show_list_label=true";
+                const defaultState = {
+                  chartType: "line",
+                  selectedTable: "githubPR",
+                  selectedMetric: "pullRequests",
+                  operator: "sum",
+                  groupBy: "org",
+                  tableView: "day",
+                  selectedDateRange: {
+                    from: new Date(
+                      DEFAULT_PICKER_DATES.defaultStart + "T00:00:00"
+                    ),
+                    to: new Date(DEFAULT_PICKER_DATES.defaultEnd + "T00:00:00"),
+                  },
+                  dateMode: "relative",
+                  relativeDays: 7,
+                  summaryPreviousPeriod: true,
+                  summaryCompareDatasets: false,
+                  chartComparisonMode: "Compare Datasets",
+                  listComparisonMode: "Compare Datasets",
+                  overlayActive: false,
+                  overlayActiveTable: "",
+                  overlayActiveMetric: "",
+                  overlayActiveGroupBy: "org",
+                  overlayActiveChartType: "line",
+                  summaryGroupBy: "org",
+                  summaryOverlayActive: false,
+                  summaryOverlayGroupBy: "org",
+                  chartGroupBy: "org",
+                  chartOverlayActive: false,
+                  chartOverlayGroupBy: "org",
+                  chartGranularity: "monthly",
+                  listGroupBy: "org",
+                  listOverlayActive: false,
+                  listOverlayGroupBy: "org",
+                  listGranularity: "monthly",
+                  showSummary: true,
+                  showChart: true,
+                  showTable: true,
+                  showSummaryLabel: true,
+                  showChartLabel: true,
+                  showTableLabel: true,
+                };
+
+                const resetUrl = getShareableUrl(defaultState);
+                window.location.href = resetUrl;
               }}
               className="cursor-pointer"
             >
