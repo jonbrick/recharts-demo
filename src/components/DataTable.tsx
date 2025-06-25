@@ -423,13 +423,25 @@ function RecordTable({ data, selectedTable, groupBy }: RecordTableProps) {
   }, [data, groupBy]);
 
   // Sort group names alphabetically
-  const sortedGroupNames = Object.keys(groupedData).sort();
+  const sortedGroupNames = React.useMemo(
+    () => Object.keys(groupedData).sort(),
+    [groupedData]
+  );
+
+  // State to manage which accordions are open (all open by default)
+  const [openGroups, setOpenGroups] = React.useState<string[]>([]);
+
+  // Update open groups when group names change
+  React.useEffect(() => {
+    setOpenGroups(sortedGroupNames);
+  }, [sortedGroupNames]);
 
   return (
     <Accordion
       type="multiple"
       className="space-y-2"
-      defaultValue={sortedGroupNames}
+      value={openGroups}
+      onValueChange={setOpenGroups}
     >
       {sortedGroupNames.map((groupName) => (
         <AccordionItem key={groupName} value={groupName}>
