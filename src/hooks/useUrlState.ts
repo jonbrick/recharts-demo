@@ -6,7 +6,6 @@ import { DateRange } from "../components/DatePicker";
 
 interface DashboardState {
   chartType: string;
-  granularity: string;
   selectedTable: string;
   selectedMetric: string;
   operator: string;
@@ -32,10 +31,12 @@ interface DashboardState {
   chartGroupBy: string;
   chartOverlayActive: boolean;
   chartOverlayGroupBy: string;
+  chartGranularity: string;
   // List card specific state
   listGroupBy: string;
   listOverlayActive: boolean;
   listOverlayGroupBy: string;
+  listGranularity: string;
 }
 
 // URL parameter keys - shortened for cleaner URLs
@@ -48,7 +49,6 @@ const URL_PARAMS = {
   relativeDays: "days",
   groupBy: "group",
   chartType: "chart",
-  granularity: "gran",
   operator: "op",
   tableView: "table",
   summaryPreviousPeriod: "s_prev",
@@ -68,10 +68,12 @@ const URL_PARAMS = {
   chartGroupBy: "c_grp",
   chartOverlayActive: "c_overlay",
   chartOverlayGroupBy: "c_o_grp",
+  chartGranularity: "c_gran",
   // List card specific params
   listGroupBy: "l_grp",
   listOverlayActive: "l_overlay",
   listOverlayGroupBy: "l_o_grp",
+  listGranularity: "l_gran",
 } as const;
 
 export function useUrlState() {
@@ -120,11 +122,6 @@ export function useUrlState() {
     const chartType = searchParams.get(URL_PARAMS.chartType);
     if (chartType) {
       state.chartType = chartType;
-    }
-
-    const granularity = searchParams.get(URL_PARAMS.granularity);
-    if (granularity) {
-      state.granularity = granularity;
     }
 
     const operator = searchParams.get(URL_PARAMS.operator);
@@ -249,6 +246,11 @@ export function useUrlState() {
       state.chartOverlayGroupBy = chartOverlayGroupBy;
     }
 
+    const chartGranularity = searchParams.get(URL_PARAMS.chartGranularity);
+    if (chartGranularity) {
+      state.chartGranularity = chartGranularity;
+    }
+
     // Read list card specific params
     const listGroupBy = searchParams.get(URL_PARAMS.listGroupBy);
     if (listGroupBy) {
@@ -263,6 +265,11 @@ export function useUrlState() {
     const listOverlayGroupBy = searchParams.get(URL_PARAMS.listOverlayGroupBy);
     if (listOverlayGroupBy) {
       state.listOverlayGroupBy = listOverlayGroupBy;
+    }
+
+    const listGranularity = searchParams.get(URL_PARAMS.listGranularity);
+    if (listGranularity) {
+      state.listGranularity = listGranularity;
     }
 
     return state;
@@ -285,9 +292,6 @@ export function useUrlState() {
       }
       if (updates.chartType !== undefined) {
         params.set(URL_PARAMS.chartType, updates.chartType);
-      }
-      if (updates.granularity !== undefined) {
-        params.set(URL_PARAMS.granularity, updates.granularity);
       }
       if (updates.operator !== undefined) {
         params.set(URL_PARAMS.operator, updates.operator);
@@ -403,6 +407,9 @@ export function useUrlState() {
       if (updates.chartOverlayGroupBy !== undefined) {
         params.set(URL_PARAMS.chartOverlayGroupBy, updates.chartOverlayGroupBy);
       }
+      if (updates.chartGranularity !== undefined) {
+        params.set(URL_PARAMS.chartGranularity, updates.chartGranularity);
+      }
 
       // Update list card params if provided
       if (updates.listGroupBy !== undefined) {
@@ -416,6 +423,9 @@ export function useUrlState() {
       }
       if (updates.listOverlayGroupBy !== undefined) {
         params.set(URL_PARAMS.listOverlayGroupBy, updates.listOverlayGroupBy);
+      }
+      if (updates.listGranularity !== undefined) {
+        params.set(URL_PARAMS.listGranularity, updates.listGranularity);
       }
 
       // Update the URL without navigation
@@ -439,7 +449,6 @@ export function useUrlState() {
       params.set(URL_PARAMS.relativeDays, state.relativeDays.toString());
       params.set(URL_PARAMS.groupBy, state.groupBy);
       params.set(URL_PARAMS.chartType, state.chartType);
-      params.set(URL_PARAMS.granularity, state.granularity);
       params.set(URL_PARAMS.operator, state.operator);
       params.set(URL_PARAMS.tableView, state.tableView);
       params.set(
@@ -489,6 +498,9 @@ export function useUrlState() {
       if (state.chartOverlayGroupBy) {
         params.set(URL_PARAMS.chartOverlayGroupBy, state.chartOverlayGroupBy);
       }
+      if (state.chartGranularity) {
+        params.set(URL_PARAMS.chartGranularity, state.chartGranularity);
+      }
 
       // Add list card params
       if (state.listGroupBy) {
@@ -502,6 +514,9 @@ export function useUrlState() {
       }
       if (state.listOverlayGroupBy) {
         params.set(URL_PARAMS.listOverlayGroupBy, state.listOverlayGroupBy);
+      }
+      if (state.listGranularity) {
+        params.set(URL_PARAMS.listGranularity, state.listGranularity);
       }
 
       // Return full URL

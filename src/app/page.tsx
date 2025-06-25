@@ -54,7 +54,6 @@ const UnifiedCard = ({
   operator,
   selectedTable,
   selectedMetric,
-  granularity,
   summaryChartData,
   dateMode,
   relativeDays,
@@ -67,6 +66,7 @@ const UnifiedCard = ({
   summaryOverlayCurrentData,
   // Chart props
   chartType,
+  chartGranularity,
   overlayActiveChartType,
   chartData,
   chartGroupBy,
@@ -117,11 +117,11 @@ const UnifiedCard = ({
         <div className="flex flex-col gap-4">
           <div className={summaryOverlayActive ? "flex gap-4" : ""}>
             <MetricsSummary
-              key={`${operator}-${selectedMetric}-${selectedTable}-${granularity}`}
+              key={`${operator}-${selectedMetric}-${selectedTable}-${relativeDays}`}
               selectedTable={selectedTable}
               selectedMetric={selectedMetric}
               operator={operator}
-              granularity={granularity}
+              granularity="all-time"
               data={summaryChartData}
               dateMode={dateMode}
               relativeDays={relativeDays}
@@ -136,11 +136,11 @@ const UnifiedCard = ({
 
             {summaryOverlayActive && (
               <MetricsSummary
-                key={`overlay-${operator}-${overlayActiveMetric}-${overlayActiveTable}-${granularity}`}
+                key={`overlay-${operator}-${overlayActiveMetric}-${overlayActiveTable}-${relativeDays}`}
                 selectedTable={overlayActiveTable}
                 selectedMetric={overlayActiveMetric}
                 operator={operator}
-                granularity={granularity}
+                granularity="all-time"
                 data={summaryOverlayCurrentData}
                 dateMode={dateMode}
                 relativeDays={relativeDays}
@@ -167,7 +167,7 @@ const UnifiedCard = ({
             currentData={chartData}
             selectedTable={selectedTable}
             selectedMetric={selectedMetric}
-            granularity={granularity}
+            granularity={chartGranularity}
             groupBy={chartGroupBy}
             overlayActive={chartOverlayActive}
             overlayData={chartOverlayData}
@@ -211,7 +211,6 @@ const UnifiedCard = ({
 
 function DashboardContent() {
   const [chartType, setChartType] = useState("line");
-  const [granularity, setGranularity] = useState("monthly");
   const [selectedTable, setSelectedTable] = useState("githubPR");
   const [selectedMetric, setSelectedMetric] = useState("pullRequests");
   const [operator, setOperator] = useState("sum");
@@ -254,11 +253,13 @@ function DashboardContent() {
   const [chartGroupBy, setChartGroupBy] = useState("org");
   const [chartOverlayActive, setChartOverlayActive] = useState(false);
   const [chartOverlayGroupBy, setChartOverlayGroupBy] = useState("org");
+  const [chartGranularity, setChartGranularity] = useState("monthly");
 
   // List card specific state
   const [listGroupBy, setListGroupBy] = useState("org");
   const [listOverlayActive, setListOverlayActive] = useState(false);
   const [listOverlayGroupBy, setListOverlayGroupBy] = useState("org");
+  const [listGranularity, setListGranularity] = useState("monthly");
 
   // Card-specific comparison mode states
   const [chartComparisonMode, _setChartComparisonMode] =
@@ -290,7 +291,6 @@ function DashboardContent() {
       setSelectedMetric(state.selectedMetric || "pullRequests");
       setGroupBy(state.groupBy || "org");
       setChartType(state.chartType || "line");
-      setGranularity(state.granularity || "monthly");
       setOperator(state.operator || "sum");
       setTableView(state.tableView || "day");
       setDateMode(state.dateMode || "relative");
@@ -322,11 +322,13 @@ function DashboardContent() {
       setChartGroupBy(state.chartGroupBy || "org");
       setChartOverlayActive(state.chartOverlayActive || false);
       setChartOverlayGroupBy(state.chartOverlayGroupBy || "org");
+      setChartGranularity(state.chartGranularity || "monthly");
 
       // Initialize list-specific state from URL
       setListGroupBy(state.listGroupBy || "org");
       setListOverlayActive(state.listOverlayActive || false);
       setListOverlayGroupBy(state.listOverlayGroupBy || "org");
+      setListGranularity(state.listGranularity || "monthly");
     } else {
       // Set default state and update URL with ALL parameters
       updateUrl({
@@ -338,7 +340,6 @@ function DashboardContent() {
         },
         groupBy: "org",
         chartType: "line",
-        granularity: "monthly",
         operator: "sum",
         tableView: "day",
         dateMode: "relative",
@@ -358,10 +359,12 @@ function DashboardContent() {
         chartGroupBy: "org",
         chartOverlayActive: false,
         chartOverlayGroupBy: "org",
+        chartGranularity: "monthly",
         // Include all list card parameters with defaults
         listGroupBy: "org",
         listOverlayActive: false,
         listOverlayGroupBy: "org",
+        listGranularity: "monthly",
       });
     }
   }, [searchParams, getStateFromUrl, updateUrl]);
@@ -475,7 +478,7 @@ function DashboardContent() {
     let result;
     if (chartGroupBy === "org") {
       result =
-        granularity === "monthly"
+        chartGranularity === "monthly"
           ? groupEventsByDate(data, selectedTable, startDate, endDate)
           : allTimeData;
     } else {
@@ -484,7 +487,7 @@ function DashboardContent() {
         selectedTable,
         chartGroupBy,
         selectedMetric,
-        granularity,
+        chartGranularity,
         startDate,
         endDate
       );
@@ -496,7 +499,7 @@ function DashboardContent() {
     selectedTable,
     chartGroupBy,
     selectedMetric,
-    granularity,
+    chartGranularity,
     allTimeData,
     selectedDateRange,
   ]);
@@ -512,7 +515,7 @@ function DashboardContent() {
     const endDate = selectedDateRange.to?.toISOString().split("T")[0];
 
     if (chartOverlayGroupBy === "org") {
-      return granularity === "monthly"
+      return chartGranularity === "monthly"
         ? groupEventsByDate(
             overlayDataSource,
             overlayActiveTable,
@@ -529,7 +532,7 @@ function DashboardContent() {
         overlayActiveTable,
         chartOverlayGroupBy,
         overlayActiveMetric,
-        granularity,
+        chartGranularity,
         startDate,
         endDate
       );
@@ -541,7 +544,7 @@ function DashboardContent() {
     overlayActiveMetric,
     dataTables,
     selectedDateRange,
-    granularity,
+    chartGranularity,
     operator,
   ]);
 
@@ -661,7 +664,7 @@ function DashboardContent() {
     const endDate = selectedDateRange.to?.toISOString().split("T")[0];
 
     if (listGroupBy === "org") {
-      return granularity === "monthly"
+      return listGranularity === "monthly"
         ? groupEventsByDate(data, selectedTable, startDate, endDate)
         : allTimeData;
     } else {
@@ -670,7 +673,7 @@ function DashboardContent() {
         selectedTable,
         listGroupBy,
         selectedMetric,
-        granularity,
+        listGranularity,
         startDate,
         endDate
       );
@@ -680,7 +683,7 @@ function DashboardContent() {
     selectedTable,
     listGroupBy,
     selectedMetric,
-    granularity,
+    listGranularity,
     allTimeData,
     selectedDateRange,
   ]);
@@ -696,7 +699,7 @@ function DashboardContent() {
     const endDate = selectedDateRange.to?.toISOString().split("T")[0];
 
     if (listOverlayGroupBy === "org") {
-      return granularity === "monthly"
+      return listGranularity === "monthly"
         ? groupEventsByDate(
             overlayDataSource,
             overlayActiveTable,
@@ -712,7 +715,7 @@ function DashboardContent() {
         overlayActiveTable,
         listOverlayGroupBy,
         overlayActiveMetric,
-        granularity,
+        listGranularity,
         startDate,
         endDate
       );
@@ -724,7 +727,7 @@ function DashboardContent() {
     listOverlayGroupBy,
     dataTables,
     selectedDateRange,
-    granularity,
+    listGranularity,
     operator,
   ]);
 
@@ -757,9 +760,9 @@ function DashboardContent() {
     setChartType(newType);
 
     // If donut chart is selected, automatically set granularity to "all-time"
-    if (newType === "donut" && granularity !== "all-time") {
-      setGranularity("all-time");
-      updateUrl({ chartType: newType, granularity: "all-time" });
+    if (newType === "donut" && chartGranularity !== "all-time") {
+      setChartGranularity("all-time");
+      updateUrl({ chartType: newType, chartGranularity: "all-time" });
     } else {
       updateUrl({ chartType: newType });
     }
@@ -768,11 +771,6 @@ function DashboardContent() {
   const handleMetricChange = (newMetric: string) => {
     setSelectedMetric(newMetric);
     updateUrl({ selectedMetric: newMetric });
-  };
-
-  const handleGranularityChange = (newGranularity: string) => {
-    setGranularity(newGranularity);
-    updateUrl({ granularity: newGranularity });
   };
 
   const handleOperatorChange = (newOperator: string) => {
@@ -924,7 +922,6 @@ function DashboardContent() {
   const handleShare = () => {
     const currentState = {
       chartType,
-      granularity,
       selectedTable,
       selectedMetric,
       operator,
@@ -948,9 +945,11 @@ function DashboardContent() {
       chartGroupBy,
       chartOverlayActive,
       chartOverlayGroupBy,
+      chartGranularity,
       listGroupBy,
       listOverlayActive,
       listOverlayGroupBy,
+      listGranularity,
     };
 
     const shareUrl = getShareableUrl(currentState);
@@ -1032,6 +1031,11 @@ function DashboardContent() {
     updateUrl({ chartOverlayGroupBy: newGroupBy });
   };
 
+  const handleChartGranularityChange = (newGranularity: string) => {
+    setChartGranularity(newGranularity);
+    updateUrl({ chartGranularity: newGranularity });
+  };
+
   // List card handlers
   const handleListGroupByChange = (newGroupBy: string) => {
     setListGroupBy(newGroupBy);
@@ -1046,6 +1050,11 @@ function DashboardContent() {
   const handleListOverlayGroupByChange = (newGroupBy: string) => {
     setListOverlayGroupBy(newGroupBy);
     updateUrl({ listOverlayGroupBy: newGroupBy });
+  };
+
+  const handleListGranularityChange = (newGranularity: string) => {
+    setListGranularity(newGranularity);
+    updateUrl({ listGranularity: newGranularity });
   };
 
   return (
@@ -1334,8 +1343,8 @@ function DashboardContent() {
                   selectedTable={selectedTable}
                 />
                 <GranularitySelector
-                  granularity={granularity}
-                  onGranularityChange={handleGranularityChange}
+                  granularity={chartGranularity}
+                  onGranularityChange={handleChartGranularityChange}
                   disabled={chartType === "donut"}
                 />
                 <DisplayLimitSelector />
@@ -1411,9 +1420,8 @@ function DashboardContent() {
                   selectedTable={selectedTable}
                 />
                 <GranularitySelector
-                  granularity={granularity}
-                  onGranularityChange={handleGranularityChange}
-                  disabled={chartType === "donut"}
+                  granularity={listGranularity}
+                  onGranularityChange={handleListGranularityChange}
                 />
                 <DisplayLimitSelector />
                 <DisplaySortSelector />
@@ -1444,7 +1452,6 @@ function DashboardContent() {
             operator={operator}
             selectedTable={selectedTable}
             selectedMetric={selectedMetric}
-            granularity={granularity}
             summaryChartData={summaryChartData}
             dateMode={dateMode}
             relativeDays={relativeDays}
@@ -1456,6 +1463,7 @@ function DashboardContent() {
             summaryPreviousPeriodData={summaryPreviousPeriodData}
             summaryOverlayCurrentData={summaryOverlayCurrentData}
             chartType={chartType}
+            chartGranularity={chartGranularity}
             overlayActiveChartType={overlayActiveChartType}
             chartData={chartData}
             chartGroupBy={chartGroupBy}
