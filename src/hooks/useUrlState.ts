@@ -37,6 +37,14 @@ interface DashboardState {
   listOverlayActive: boolean;
   listOverlayGroupBy: string;
   listGranularity: string;
+  // Component visibility state
+  showSummary: boolean;
+  showChart: boolean;
+  showTable: boolean;
+  // Component label visibility state
+  showSummaryLabel: boolean;
+  showChartLabel: boolean;
+  showTableLabel: boolean;
 }
 
 // URL parameter keys - shortened for cleaner URLs
@@ -74,6 +82,14 @@ const URL_PARAMS = {
   listOverlayActive: "l_overlay",
   listOverlayGroupBy: "l_o_grp",
   listGranularity: "l_gran",
+  // Component visibility params
+  showSummary: "show_sum",
+  showChart: "show_chart",
+  showTable: "show_list",
+  // Component label visibility params
+  showSummaryLabel: "show_sum_label",
+  showChartLabel: "show_chart_label",
+  showTableLabel: "show_list_label",
 } as const;
 
 export function useUrlState() {
@@ -272,6 +288,38 @@ export function useUrlState() {
       state.listGranularity = listGranularity;
     }
 
+    // Read component visibility params
+    const showSummary = searchParams.get(URL_PARAMS.showSummary);
+    if (showSummary !== null) {
+      state.showSummary = showSummary === "true";
+    }
+
+    const showChart = searchParams.get(URL_PARAMS.showChart);
+    if (showChart !== null) {
+      state.showChart = showChart === "true";
+    }
+
+    const showTable = searchParams.get(URL_PARAMS.showTable);
+    if (showTable !== null) {
+      state.showTable = showTable === "true";
+    }
+
+    // Read component label visibility params
+    const showSummaryLabel = searchParams.get(URL_PARAMS.showSummaryLabel);
+    if (showSummaryLabel !== null) {
+      state.showSummaryLabel = showSummaryLabel === "true";
+    }
+
+    const showChartLabel = searchParams.get(URL_PARAMS.showChartLabel);
+    if (showChartLabel !== null) {
+      state.showChartLabel = showChartLabel === "true";
+    }
+
+    const showTableLabel = searchParams.get(URL_PARAMS.showTableLabel);
+    if (showTableLabel !== null) {
+      state.showTableLabel = showTableLabel === "true";
+    }
+
     return state;
   }, [searchParams]);
 
@@ -428,6 +476,37 @@ export function useUrlState() {
         params.set(URL_PARAMS.listGranularity, updates.listGranularity);
       }
 
+      // Update component visibility params
+      if (updates.showSummary !== undefined) {
+        params.set(URL_PARAMS.showSummary, updates.showSummary.toString());
+      }
+      if (updates.showChart !== undefined) {
+        params.set(URL_PARAMS.showChart, updates.showChart.toString());
+      }
+      if (updates.showTable !== undefined) {
+        params.set(URL_PARAMS.showTable, updates.showTable.toString());
+      }
+
+      // Update component label visibility params
+      if (updates.showSummaryLabel !== undefined) {
+        params.set(
+          URL_PARAMS.showSummaryLabel,
+          updates.showSummaryLabel.toString()
+        );
+      }
+      if (updates.showChartLabel !== undefined) {
+        params.set(
+          URL_PARAMS.showChartLabel,
+          updates.showChartLabel.toString()
+        );
+      }
+      if (updates.showTableLabel !== undefined) {
+        params.set(
+          URL_PARAMS.showTableLabel,
+          updates.showTableLabel.toString()
+        );
+      }
+
       // Update the URL without navigation
       const newUrl = `${pathname}?${params.toString()}`;
       router.push(newUrl, { scroll: false });
@@ -518,6 +597,19 @@ export function useUrlState() {
       if (state.listGranularity) {
         params.set(URL_PARAMS.listGranularity, state.listGranularity);
       }
+
+      // Add component visibility params
+      params.set(URL_PARAMS.showSummary, state.showSummary.toString());
+      params.set(URL_PARAMS.showChart, state.showChart.toString());
+      params.set(URL_PARAMS.showTable, state.showTable.toString());
+
+      // Add component label visibility params
+      params.set(
+        URL_PARAMS.showSummaryLabel,
+        state.showSummaryLabel.toString()
+      );
+      params.set(URL_PARAMS.showChartLabel, state.showChartLabel.toString());
+      params.set(URL_PARAMS.showTableLabel, state.showTableLabel.toString());
 
       // Return full URL
       const baseUrl =

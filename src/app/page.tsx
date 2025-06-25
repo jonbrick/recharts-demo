@@ -4,7 +4,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { useUrlState } from "../hooks/useUrlState";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { RiArrowRightSLine } from "@remixicon/react";
+import { RiArrowRightSLine, RiArrowDownSLine } from "@remixicon/react";
 import {
   DataSourceSelector,
   MetricSelector,
@@ -48,6 +48,11 @@ import { DataTable } from "../components/DataTable";
 import { Switch } from "../components/Switch";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { useHasMounted } from "../hooks/useHasMounted";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@radix-ui/react-popover";
 
 // Reusable card components to reduce duplication
 const UnifiedCard = ({
@@ -283,6 +288,111 @@ function DashboardContent() {
   const searchParams = useSearchParams();
   const hasMounted = useHasMounted();
 
+  // Check if current state differs from default state
+  const isDefaultState = useMemo(() => {
+    const defaultState = {
+      selectedTable: "githubPR",
+      selectedMetric: "pullRequests",
+      groupBy: "org",
+      chartType: "line",
+      operator: "sum",
+      tableView: "day",
+      dateMode: "relative",
+      relativeDays: 7,
+      overlayActive: false,
+      overlayActiveTable: "",
+      overlayActiveMetric: "",
+      overlayActiveGroupBy: "org",
+      overlayActiveChartType: "line",
+      summaryGroupBy: "org",
+      summaryOverlayActive: false,
+      summaryOverlayGroupBy: "org",
+      summaryPreviousPeriod: true,
+      chartGroupBy: "org",
+      chartOverlayActive: false,
+      chartOverlayGroupBy: "org",
+      chartGranularity: "monthly",
+      listGroupBy: "org",
+      listOverlayActive: false,
+      listOverlayGroupBy: "org",
+      listGranularity: "monthly",
+      showSummary: true,
+      showChart: true,
+      showTable: true,
+      showSummaryLabel: true,
+      showChartLabel: true,
+      showTableLabel: true,
+    };
+
+    const currentState = {
+      selectedTable,
+      selectedMetric,
+      groupBy,
+      chartType,
+      operator,
+      tableView,
+      dateMode,
+      relativeDays,
+      overlayActive,
+      overlayActiveTable,
+      overlayActiveMetric,
+      overlayActiveGroupBy,
+      overlayActiveChartType,
+      summaryGroupBy,
+      summaryOverlayActive,
+      summaryOverlayGroupBy,
+      summaryPreviousPeriod,
+      chartGroupBy,
+      chartOverlayActive,
+      chartOverlayGroupBy,
+      chartGranularity,
+      listGroupBy,
+      listOverlayActive,
+      listOverlayGroupBy,
+      listGranularity,
+      showSummary,
+      showChart,
+      showTable,
+      showSummaryLabel,
+      showChartLabel,
+      showTableLabel,
+    };
+
+    return JSON.stringify(defaultState) === JSON.stringify(currentState);
+  }, [
+    selectedTable,
+    selectedMetric,
+    groupBy,
+    chartType,
+    operator,
+    tableView,
+    dateMode,
+    relativeDays,
+    overlayActive,
+    overlayActiveTable,
+    overlayActiveMetric,
+    overlayActiveGroupBy,
+    overlayActiveChartType,
+    summaryGroupBy,
+    summaryOverlayActive,
+    summaryOverlayGroupBy,
+    summaryPreviousPeriod,
+    chartGroupBy,
+    chartOverlayActive,
+    chartOverlayGroupBy,
+    chartGranularity,
+    listGroupBy,
+    listOverlayActive,
+    listOverlayGroupBy,
+    listGranularity,
+    showSummary,
+    showChart,
+    showTable,
+    showSummaryLabel,
+    showChartLabel,
+    showTableLabel,
+  ]);
+
   // Load state from URL on mount
   useEffect(() => {
     const state = getStateFromUrl();
@@ -330,6 +440,24 @@ function DashboardContent() {
       setListOverlayActive(state.listOverlayActive || false);
       setListOverlayGroupBy(state.listOverlayGroupBy || "org");
       setListGranularity(state.listGranularity || "monthly");
+
+      // Load component visibility state
+      setShowSummary(
+        state.showSummary !== undefined ? state.showSummary : true
+      );
+      setShowChart(state.showChart !== undefined ? state.showChart : true);
+      setShowTable(state.showTable !== undefined ? state.showTable : true);
+
+      // Load component label visibility state
+      setShowSummaryLabel(
+        state.showSummaryLabel !== undefined ? state.showSummaryLabel : true
+      );
+      setShowChartLabel(
+        state.showChartLabel !== undefined ? state.showChartLabel : true
+      );
+      setShowTableLabel(
+        state.showTableLabel !== undefined ? state.showTableLabel : true
+      );
     } else {
       // Set default state and update URL with ALL parameters
       updateUrl({
@@ -366,6 +494,14 @@ function DashboardContent() {
         listOverlayActive: false,
         listOverlayGroupBy: "org",
         listGranularity: "monthly",
+        // Include all component visibility parameters with defaults
+        showSummary: true,
+        showChart: true,
+        showTable: true,
+        // Include all component label visibility parameters with defaults
+        showSummaryLabel: true,
+        showChartLabel: true,
+        showTableLabel: true,
       });
     }
   }, [searchParams, getStateFromUrl, updateUrl]);
@@ -951,6 +1087,12 @@ function DashboardContent() {
       listOverlayActive,
       listOverlayGroupBy,
       listGranularity,
+      showSummary,
+      showChart,
+      showTable,
+      showSummaryLabel,
+      showChartLabel,
+      showTableLabel,
     };
 
     const shareUrl = getShareableUrl(currentState);
@@ -961,7 +1103,7 @@ function DashboardContent() {
       navigator.clipboard
         .writeText(shareUrl)
         .then(() => {
-          alert("Dashboard URL copied to clipboard!");
+          alert("Updated view saved for everyone!");
         })
         .catch((err) => {
           console.error("Failed to copy URL:", err);
@@ -991,7 +1133,7 @@ function DashboardContent() {
       document.body.removeChild(textArea);
 
       if (successful) {
-        alert("Dashboard URL copied to clipboard!");
+        alert("Updated view saved for everyone!");
       } else {
         alert("Failed to copy URL. Please copy manually: " + text);
       }
@@ -1058,6 +1200,38 @@ function DashboardContent() {
     updateUrl({ listGranularity: newGranularity });
   };
 
+  // Component visibility handlers
+  const handleShowSummaryChange = (newShow: boolean) => {
+    setShowSummary(newShow);
+    updateUrl({ showSummary: newShow });
+  };
+
+  const handleShowChartChange = (newShow: boolean) => {
+    setShowChart(newShow);
+    updateUrl({ showChart: newShow });
+  };
+
+  const handleShowTableChange = (newShow: boolean) => {
+    setShowTable(newShow);
+    updateUrl({ showTable: newShow });
+  };
+
+  // Component label visibility handlers
+  const handleShowSummaryLabelChange = (newShow: boolean) => {
+    setShowSummaryLabel(newShow);
+    updateUrl({ showSummaryLabel: newShow });
+  };
+
+  const handleShowChartLabelChange = (newShow: boolean) => {
+    setShowChartLabel(newShow);
+    updateUrl({ showChartLabel: newShow });
+  };
+
+  const handleShowTableLabelChange = (newShow: boolean) => {
+    setShowTableLabel(newShow);
+    updateUrl({ showTableLabel: newShow });
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col gap-6">
@@ -1070,17 +1244,44 @@ function DashboardContent() {
           <div className="flex gap-2">
             <Button
               variant="ghost"
+              disabled={isDefaultState}
               onClick={() => {
                 window.location.href =
-                  "http://localhost:3000/?source=githubPR&metric=pullRequests&group=org&chart=line&op=sum&table=day&from=2025-05-15&to=2025-05-30&dateMode=relative&days=7&s_prev=true&overlay=false&o_source=&o_metric=&o_group=org&o_chart=line&s_grp=org&s_overlay=false&s_o_grp=org&c_grp=org&c_overlay=false&c_o_grp=org&c_gran=monthly&l_grp=org&l_overlay=false&l_o_grp=org&l_gran=monthly";
+                  "http://localhost:3000/?source=githubPR&metric=pullRequests&group=org&chart=line&op=sum&table=day&from=2025-05-15&to=2025-05-30&dateMode=relative&days=7&s_prev=true&overlay=false&o_source=&o_metric=&o_group=org&o_chart=line&s_grp=org&s_overlay=false&s_o_grp=org&c_grp=org&c_overlay=false&c_o_grp=org&c_gran=monthly&l_grp=org&l_overlay=false&l_o_grp=org&l_gran=monthly&show_sum=true&show_chart=true&show_list=true&show_sum_label=true&show_chart_label=true&show_list_label=true";
               }}
               className="cursor-pointer"
             >
               Reset view
             </Button>
-            <Button variant="primary" onClick={handleShare}>
-              Save View
-            </Button>
+            <div className="flex">
+              <Button
+                variant="primary"
+                onClick={handleShare}
+                disabled={isDefaultState}
+                className="rounded-r-none border-r border-white/20"
+              >
+                Save for everyone
+              </Button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="primary"
+                    disabled={isDefaultState}
+                    className="rounded-l-none px-2"
+                  >
+                    <RiArrowDownSLine className="w-4 h-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-48 p-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-md shadow-lg mt-2">
+                  <button
+                    onClick={handleShare}
+                    className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-sm transition-colors"
+                  >
+                    Save as new view
+                  </button>
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
         </div>
 
@@ -1188,7 +1389,7 @@ function DashboardContent() {
             <Switch
               id="show-summary-toggle"
               checked={showSummary}
-              onCheckedChange={setShowSummary}
+              onCheckedChange={handleShowSummaryChange}
             />
             <label
               htmlFor="show-summary-toggle"
@@ -1201,7 +1402,7 @@ function DashboardContent() {
             <Switch
               id="show-chart-toggle"
               checked={showChart}
-              onCheckedChange={setShowChart}
+              onCheckedChange={handleShowChartChange}
             />
             <label
               htmlFor="show-chart-toggle"
@@ -1214,7 +1415,7 @@ function DashboardContent() {
             <Switch
               id="show-table-toggle"
               checked={showTable}
-              onCheckedChange={setShowTable}
+              onCheckedChange={handleShowTableChange}
             />
             <label
               htmlFor="show-table-toggle"
@@ -1238,7 +1439,7 @@ function DashboardContent() {
                   <Switch
                     id="summary-label-toggle"
                     checked={showSummaryLabel}
-                    onCheckedChange={setShowSummaryLabel}
+                    onCheckedChange={handleShowSummaryLabelChange}
                   />
                   <label
                     htmlFor="summary-label-toggle"
@@ -1333,7 +1534,7 @@ function DashboardContent() {
                   <Switch
                     id="chart-label-toggle"
                     checked={showChartLabel}
-                    onCheckedChange={setShowChartLabel}
+                    onCheckedChange={handleShowChartLabelChange}
                   />
                   <label
                     htmlFor="chart-label-toggle"
@@ -1410,7 +1611,7 @@ function DashboardContent() {
                   <Switch
                     id="list-label-toggle"
                     checked={showTableLabel}
-                    onCheckedChange={setShowTableLabel}
+                    onCheckedChange={handleShowTableLabelChange}
                   />
                   <label
                     htmlFor="list-label-toggle"
