@@ -15,7 +15,8 @@ interface DashboardState {
   selectedDateRange: DateRange;
   dateMode: string;
   relativeDays: number;
-  summaryComparisonMode: string;
+  summaryPreviousPeriod: boolean;
+  summaryCompareDatasets: boolean;
   chartComparisonMode: string;
   listComparisonMode: string;
   overlayActive: boolean;
@@ -50,7 +51,8 @@ const URL_PARAMS = {
   granularity: "gran",
   operator: "op",
   tableView: "table",
-  summaryComparisonMode: "s_comp",
+  summaryPreviousPeriod: "s_prev",
+  summaryCompareDatasets: "s_comp_ds",
   chartComparisonMode: "c_comp",
   listComparisonMode: "l_comp",
   overlayActive: "overlay",
@@ -154,11 +156,18 @@ export function useUrlState() {
     }
 
     // Read card-specific comparison modes
-    const summaryComparisonMode = searchParams.get(
-      URL_PARAMS.summaryComparisonMode
+    const summaryPreviousPeriod = searchParams.get(
+      URL_PARAMS.summaryPreviousPeriod
     );
-    if (summaryComparisonMode) {
-      state.summaryComparisonMode = summaryComparisonMode;
+    if (summaryPreviousPeriod) {
+      state.summaryPreviousPeriod = summaryPreviousPeriod === "true";
+    }
+
+    const summaryCompareDatasets = searchParams.get(
+      URL_PARAMS.summaryCompareDatasets
+    );
+    if (summaryCompareDatasets) {
+      state.summaryCompareDatasets = summaryCompareDatasets === "true";
     }
 
     const chartComparisonMode = searchParams.get(
@@ -312,10 +321,16 @@ export function useUrlState() {
       }
 
       // Update comparison mode
-      if (updates.summaryComparisonMode !== undefined) {
+      if (updates.summaryPreviousPeriod !== undefined) {
         params.set(
-          URL_PARAMS.summaryComparisonMode,
-          updates.summaryComparisonMode
+          URL_PARAMS.summaryPreviousPeriod,
+          updates.summaryPreviousPeriod.toString()
+        );
+      }
+      if (updates.summaryCompareDatasets !== undefined) {
+        params.set(
+          URL_PARAMS.summaryCompareDatasets,
+          updates.summaryCompareDatasets.toString()
         );
       }
       if (updates.chartComparisonMode !== undefined) {
@@ -427,7 +442,14 @@ export function useUrlState() {
       params.set(URL_PARAMS.granularity, state.granularity);
       params.set(URL_PARAMS.operator, state.operator);
       params.set(URL_PARAMS.tableView, state.tableView);
-      params.set(URL_PARAMS.summaryComparisonMode, state.summaryComparisonMode);
+      params.set(
+        URL_PARAMS.summaryPreviousPeriod,
+        state.summaryPreviousPeriod.toString()
+      );
+      params.set(
+        URL_PARAMS.summaryCompareDatasets,
+        state.summaryCompareDatasets.toString()
+      );
       params.set(URL_PARAMS.chartComparisonMode, state.chartComparisonMode);
       params.set(URL_PARAMS.listComparisonMode, state.listComparisonMode);
 

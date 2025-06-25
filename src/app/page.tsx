@@ -59,7 +59,6 @@ const MetricsSummaryCard = ({
   relativeDays,
   selectedDateRange,
   overlayActive,
-  overlayData,
   overlayActiveTable,
   overlayActiveMetric,
   overlayActiveGroupBy,
@@ -67,8 +66,12 @@ const MetricsSummaryCard = ({
   onGroupByChange,
   onOverlayActiveChange,
   onOverlayGroupByChange,
-  summaryComparisonMode,
-  setSummaryComparisonMode,
+  summaryPreviousPeriod,
+  setSummaryPreviousPeriod,
+  summaryCompareDatasets,
+  setSummaryCompareDatasets,
+  summaryPreviousPeriodData,
+  summaryOverlayCurrentData,
 }) => {
   return (
     <div className="flex flex-col gap-4 pb-8">
@@ -103,12 +106,32 @@ const MetricsSummaryCard = ({
           <>
             <div className="border-l border-gray-200 h-full pl-2">
               <div className="flex items-center gap-2 w-full">
-                <ComparisonModeSelector
-                  comparisonMode={summaryComparisonMode}
-                  onComparisonModeChange={(mode) =>
-                    setSummaryComparisonMode(mode)
-                  }
-                />
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="prev-period-toggle"
+                    checked={summaryPreviousPeriod}
+                    onCheckedChange={setSummaryPreviousPeriod}
+                  />
+                  <label
+                    htmlFor="prev-period-toggle"
+                    className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+                  >
+                    vs Previous Period
+                  </label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="compare-datasets-toggle"
+                    checked={summaryCompareDatasets}
+                    onCheckedChange={setSummaryCompareDatasets}
+                  />
+                  <label
+                    htmlFor="compare-datasets-toggle"
+                    className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer"
+                  >
+                    Compare Datasets
+                  </label>
+                </div>
                 <GroupBySelector
                   groupBy={overlayActiveGroupBy}
                   onGroupByChange={onOverlayGroupByChange}
@@ -120,24 +143,43 @@ const MetricsSummaryCard = ({
         )}
       </div>
       <Card className="flex flex-col gap-4">
-        <MetricsSummary
-          key={`${operator}-${selectedMetric}-${selectedTable}-${granularity}`}
-          selectedTable={selectedTable}
-          selectedMetric={selectedMetric}
-          operator={operator}
-          granularity={granularity}
-          data={chartData}
-          dateMode={dateMode}
-          relativeDays={relativeDays}
-          selectedDateRange={selectedDateRange}
-          comparisonData={overlayData}
-          comparisonMode={overlayActive ? summaryComparisonMode : null}
-          comparisonMetric={
-            summaryComparisonMode === "Compare Datasets"
-              ? overlayActiveMetric
-              : selectedMetric
-          }
-        />
+        <div className={summaryCompareDatasets ? "flex gap-4" : ""}>
+          <MetricsSummary
+            key={`${operator}-${selectedMetric}-${selectedTable}-${granularity}`}
+            selectedTable={selectedTable}
+            selectedMetric={selectedMetric}
+            operator={operator}
+            granularity={granularity}
+            data={chartData}
+            dateMode={dateMode}
+            relativeDays={relativeDays}
+            selectedDateRange={selectedDateRange}
+            comparisonData={summaryPreviousPeriodData}
+            comparisonMode={summaryPreviousPeriod ? "vs Previous Period" : null}
+            comparisonMetric={selectedMetric}
+          />
+
+          {summaryCompareDatasets && (
+            <MetricsSummary
+              key={`overlay-${operator}-${overlayActiveMetric}-${overlayActiveTable}-${granularity}`}
+              selectedTable={overlayActiveTable}
+              selectedMetric={overlayActiveMetric}
+              operator={operator}
+              granularity={granularity}
+              data={summaryOverlayCurrentData}
+              dateMode={dateMode}
+              relativeDays={relativeDays}
+              selectedDateRange={selectedDateRange}
+              comparisonData={
+                summaryPreviousPeriod ? summaryOverlayCurrentData : null
+              } // TODO: This should be overlay's previous period
+              comparisonMode={
+                summaryPreviousPeriod ? "vs Previous Period" : null
+              }
+              comparisonMetric={overlayActiveMetric}
+            />
+          )}
+        </div>
       </Card>
     </div>
   );
@@ -384,8 +426,8 @@ function DashboardContent() {
   const [listOverlayGroupBy, setListOverlayGroupBy] = useState("org");
 
   // Card-specific comparison mode states
-  const [summaryComparisonMode, setSummaryComparisonMode] =
-    useState("vs Previous Period");
+  const [summaryPreviousPeriod, setSummaryPreviousPeriod] = useState(false);
+  const [summaryCompareDatasets, setSummaryCompareDatasets] = useState(false);
   const [chartComparisonMode, _setChartComparisonMode] =
     useState("Compare Datasets");
   const [listComparisonMode, _setListComparisonMode] =
@@ -609,50 +651,6 @@ function DashboardContent() {
     selectedDateRange,
   ]);
 
-  // Process overlay data when active
-  // const overlayData = useMemo(() => {
-  //   if (!overlayActive || !overlayActiveTable) {
-  //     return null;
-  //   }
-
-  //   const overlayDataSource = dataTables[overlayActiveTable];
-  //   const startDate = selectedDateRange.from?.toISOString().split("T")[0];
-  //   const endDate = selectedDateRange.to?.toISOString().split("T")[0];
-
-  //   if (overlayActiveGroupBy === "org") {
-  //     return granularity === "monthly"
-  //       ? groupEventsByDate(
-  //           overlayDataSource,
-  //           overlayActiveTable,
-  //           startDate,
-  //           endDate
-  //         )
-  //       : operator === "average"
-  //       ? calculateAverageData(overlayDataSource, overlayActiveTable)
-  //       : calculateSumData(overlayDataSource, overlayActiveTable);
-  //   } else {
-  //     // For non-org views, always use monthly granularity
-  //     return groupEventsByType(
-  //       overlayDataSource,
-  //       overlayActiveTable,
-  //       overlayActiveGroupBy,
-  //       overlayActiveMetric,
-  //       granularity,
-  //       startDate,
-  //       endDate
-  //     );
-  //   }
-  // }, [
-  //   overlayActive,
-  //   overlayActiveTable,
-  //   overlayActiveMetric,
-  //   overlayActiveGroupBy,
-  //   dataTables,
-  //   selectedDateRange,
-  //   granularity,
-  //   operator,
-  // ]);
-
   // Chart-specific overlay data processing
   const chartOverlayData = useMemo(() => {
     if (!chartOverlayActive || !overlayActiveTable) {
@@ -728,85 +726,80 @@ function DashboardContent() {
     operator,
   ]);
 
-  // Process overlay data for Summary card
-  const summaryOverlayData = useMemo(() => {
-    if (!summaryOverlayActive) {
+  // Previous period data for first card comparison lines
+  const summaryPreviousPeriodData = useMemo(() => {
+    if (!summaryPreviousPeriod) {
       return null;
     }
 
-    // vs Previous Period mode
-    if (summaryComparisonMode === "vs Previous Period") {
-      const previousRange = getPreviousPeriodRange(selectedDateRange);
-      const prevStartDate = previousRange.from.toISOString().split("T")[0];
-      const prevEndDate = previousRange.to.toISOString().split("T")[0];
+    const previousRange = getPreviousPeriodRange(selectedDateRange);
+    const prevStartDate = previousRange.from.toISOString().split("T")[0];
+    const prevEndDate = previousRange.to.toISOString().split("T")[0];
 
-      // Filter data for previous period using same table as primary
-      const previousPeriodData = filterEventsByDate(
-        dataTables[selectedTable],
+    // Filter data for previous period using same table as primary
+    const previousPeriodData = filterEventsByDate(
+      dataTables[selectedTable],
+      prevStartDate,
+      prevEndDate,
+      selectedTable === "githubActions" ? "deployed_at" : "created_at"
+    );
+
+    if (summaryGroupBy === "org") {
+      return operator === "average"
+        ? calculateAverageData(previousPeriodData, selectedTable)
+        : calculateSumData(previousPeriodData, selectedTable);
+    } else {
+      return groupEventsByType(
+        previousPeriodData,
+        selectedTable,
+        summaryGroupBy,
+        selectedMetric,
+        "all-time",
         prevStartDate,
-        prevEndDate,
-        selectedTable === "githubActions" ? "deployed_at" : "created_at"
+        prevEndDate
       );
-
-      if (summaryGroupBy === "org") {
-        const result =
-          operator === "average"
-            ? calculateAverageData(previousPeriodData, selectedTable)
-            : calculateSumData(previousPeriodData, selectedTable);
-
-        return result;
-      } else {
-        return groupEventsByType(
-          previousPeriodData,
-          selectedTable,
-          summaryGroupBy,
-          selectedMetric,
-          "all-time",
-          prevStartDate,
-          prevEndDate
-        );
-      }
     }
-
-    // Compare Datasets mode (existing logic)
-    if (summaryComparisonMode === "Compare Datasets") {
-      if (!overlayActiveTable) {
-        return null;
-      }
-
-      const overlayDataSource = dataTables[overlayActiveTable];
-      const startDate = selectedDateRange.from?.toISOString().split("T")[0];
-      const endDate = selectedDateRange.to?.toISOString().split("T")[0];
-
-      if (summaryOverlayGroupBy === "org") {
-        return operator === "average"
-          ? calculateAverageData(overlayDataSource, overlayActiveTable)
-          : calculateSumData(overlayDataSource, overlayActiveTable);
-      } else {
-        return groupEventsByType(
-          overlayDataSource,
-          overlayActiveTable,
-          summaryOverlayGroupBy,
-          overlayActiveMetric,
-          "all-time",
-          startDate,
-          endDate
-        );
-      }
-    }
-
-    // No valid comparison mode
-    return null;
   }, [
-    summaryOverlayActive,
-    summaryComparisonMode,
-    overlayActiveTable,
-    overlayActiveMetric,
-    summaryOverlayGroupBy,
-    summaryGroupBy,
-    selectedTable,
-    selectedMetric,
+    summaryPreviousPeriod,
+    selectedDateRange,
     dataTables,
+    selectedTable,
+    summaryGroupBy,
+    selectedMetric,
+    operator,
+  ]);
+
+  // Current overlay data for second card
+  const summaryOverlayCurrentData = useMemo(() => {
+    if (!summaryCompareDatasets || !overlayActiveTable) {
+      return null;
+    }
+
+    const overlayDataSource = dataTables[overlayActiveTable];
+    const startDate = selectedDateRange.from?.toISOString().split("T")[0];
+    const endDate = selectedDateRange.to?.toISOString().split("T")[0];
+
+    if (summaryOverlayGroupBy === "org") {
+      return operator === "average"
+        ? calculateAverageData(overlayDataSource, overlayActiveTable)
+        : calculateSumData(overlayDataSource, overlayActiveTable);
+    } else {
+      return groupEventsByType(
+        overlayDataSource,
+        overlayActiveTable,
+        summaryOverlayGroupBy,
+        overlayActiveMetric,
+        "all-time",
+        startDate,
+        endDate
+      );
+    }
+  }, [
+    summaryCompareDatasets,
+    overlayActiveTable,
+    dataTables,
+    summaryOverlayGroupBy,
+    overlayActiveMetric,
     selectedDateRange,
     operator,
   ]);
@@ -1063,9 +1056,10 @@ function DashboardContent() {
       selectedDateRange,
       dateMode,
       relativeDays,
-      summaryComparisonMode: summaryComparisonMode,
-      chartComparisonMode: chartComparisonMode,
-      listComparisonMode: listComparisonMode,
+      summaryPreviousPeriod,
+      summaryCompareDatasets,
+      chartComparisonMode,
+      listComparisonMode,
       overlayActive,
       overlayActiveTable,
       overlayActiveMetric,
@@ -1143,11 +1137,6 @@ function DashboardContent() {
   const handleSummaryOverlayGroupByChange = (newGroupBy: string) => {
     setSummaryOverlayGroupBy(newGroupBy);
     updateUrl({ summaryOverlayGroupBy: newGroupBy });
-  };
-
-  const handleSummaryComparisonModeChange = (mode: string) => {
-    setSummaryComparisonMode(mode);
-    updateUrl({ summaryComparisonMode: mode });
   };
 
   // Chart card specific handlers
@@ -1323,7 +1312,6 @@ function DashboardContent() {
                 relativeDays={relativeDays}
                 selectedDateRange={selectedDateRange}
                 overlayActive={summaryOverlayActive}
-                overlayData={summaryOverlayData}
                 overlayActiveTable={overlayActiveTable}
                 overlayActiveMetric={overlayActiveMetric}
                 overlayActiveGroupBy={summaryOverlayGroupBy}
@@ -1331,8 +1319,12 @@ function DashboardContent() {
                 onGroupByChange={handleSummaryGroupByChange}
                 onOverlayActiveChange={handleSummaryOverlayActiveChange}
                 onOverlayGroupByChange={handleSummaryOverlayGroupByChange}
-                summaryComparisonMode={summaryComparisonMode}
-                setSummaryComparisonMode={handleSummaryComparisonModeChange}
+                summaryPreviousPeriod={summaryPreviousPeriod}
+                setSummaryPreviousPeriod={setSummaryPreviousPeriod}
+                summaryCompareDatasets={summaryCompareDatasets}
+                setSummaryCompareDatasets={setSummaryCompareDatasets}
+                summaryPreviousPeriodData={summaryPreviousPeriodData}
+                summaryOverlayCurrentData={summaryOverlayCurrentData}
               />
 
               {/* Chart Card */}
@@ -1399,7 +1391,6 @@ function DashboardContent() {
               relativeDays={relativeDays}
               selectedDateRange={selectedDateRange}
               overlayActive={summaryOverlayActive}
-              overlayData={summaryOverlayData}
               overlayActiveTable={overlayActiveTable}
               overlayActiveMetric={overlayActiveMetric}
               overlayActiveGroupBy={summaryOverlayGroupBy}
@@ -1407,8 +1398,12 @@ function DashboardContent() {
               onGroupByChange={handleSummaryGroupByChange}
               onOverlayActiveChange={handleSummaryOverlayActiveChange}
               onOverlayGroupByChange={handleSummaryOverlayGroupByChange}
-              summaryComparisonMode={summaryComparisonMode}
-              setSummaryComparisonMode={handleSummaryComparisonModeChange}
+              summaryPreviousPeriod={summaryPreviousPeriod}
+              setSummaryPreviousPeriod={setSummaryPreviousPeriod}
+              summaryCompareDatasets={summaryCompareDatasets}
+              setSummaryCompareDatasets={setSummaryCompareDatasets}
+              summaryPreviousPeriodData={summaryPreviousPeriodData}
+              summaryOverlayCurrentData={summaryOverlayCurrentData}
             />
           </TabsContent>
 
