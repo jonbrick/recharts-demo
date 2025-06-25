@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { useUrlState } from "../hooks/useUrlState";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { RiArrowRightSLine } from "@remixicon/react";
 import {
   DataSourceSelector,
   MetricSelector,
@@ -1062,24 +1063,36 @@ function DashboardContent() {
       <div className="flex flex-col gap-6">
         {/* Header row with title and date picker */}
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-            Module Building UX POC
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+            Modules <RiArrowRightSLine className="w-4 h-4 inline" /> PRs over
+            last 7 days
           </h1>
           <div className="flex gap-2">
-            <ThemeToggle />
-            {(dateMode !== "relative" || relativeDays !== 7) && (
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setDateMode("relative");
-                  setRelativeDays(7);
-                  updateUrl({ dateMode: "relative", relativeDays: 7 });
-                }}
-                className="cursor-pointer"
-              >
-                Reset range
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              onClick={() => {
+                window.location.href =
+                  "http://localhost:3000/?source=githubPR&metric=pullRequests&group=org&chart=line&op=sum&table=day&from=2025-05-15&to=2025-05-30&dateMode=relative&days=7&s_prev=true&overlay=false&o_source=&o_metric=&o_group=org&o_chart=line&s_grp=org&s_overlay=false&s_o_grp=org&c_grp=org&c_overlay=false&c_o_grp=org&c_gran=monthly&l_grp=org&l_overlay=false&l_o_grp=org&l_gran=monthly";
+              }}
+              className="cursor-pointer"
+            >
+              Reset view
+            </Button>
+            <Button variant="primary" onClick={handleShare}>
+              Save View
+            </Button>
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="border-b border-gray-200 dark:border-slate-700" />
+
+        {/* Filter and Date Picker Row */}
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <FilterSelector />
+          </div>
+          <div className="flex gap-2">
             <DateModeSelector
               dateMode={dateMode}
               onDateModeChange={handleDateModeChange}
@@ -1097,12 +1110,6 @@ function DashboardContent() {
                 onRelativeDaysChange={handleRelativeDaysChange}
               />
             )}
-            <div className="flex items-center gap-4">
-              <FilterSelector />
-            </div>
-            <Button variant="primary" onClick={handleShare}>
-              Save View
-            </Button>
           </div>
         </div>
 
@@ -1484,6 +1491,13 @@ function DashboardContent() {
             showChartLabel={showChartLabel}
             showTableLabel={showTableLabel}
           />
+        </div>
+
+        {/* Footer */}
+        <div className="border-t border-gray-200 dark:border-slate-700 mt-8 pt-6">
+          <div className="flex justify-center">
+            <ThemeToggle />
+          </div>
         </div>
       </div>
     </div>

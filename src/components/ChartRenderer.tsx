@@ -159,11 +159,15 @@ export function StackedAreaChartComponent({
 }: ChartComponentProps) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
-  const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0])
-        .filter((key) => key.endsWith("_display"))
-        .map((key) => key.replace("_display", ""))
-    : [selectedMetric];
+
+  // Calculate seriesKeys - moved outside useMemo to avoid dependency issues
+  const seriesKeys = useMemo(() => {
+    return isMultiSeries
+      ? Object.keys(currentData[0])
+          .filter((key) => key.endsWith("_display"))
+          .map((key) => key.replace("_display", ""))
+      : [selectedMetric];
+  }, [isMultiSeries, currentData, selectedMetric]);
 
   // Format Y-axis tick for MTTR
   const formatYTick = (value) => {
@@ -243,11 +247,15 @@ export function PercentAreaChartComponent({
 }: ChartComponentProps) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
-  const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0])
-        .filter((key) => key.endsWith("_display"))
-        .map((key) => key.replace("_display", ""))
-    : [selectedMetric];
+
+  // Calculate seriesKeys - moved outside useMemo to avoid dependency issues
+  const seriesKeys = useMemo(() => {
+    return isMultiSeries
+      ? Object.keys(currentData[0])
+          .filter((key) => key.endsWith("_display"))
+          .map((key) => key.replace("_display", ""))
+      : [selectedMetric];
+  }, [isMultiSeries, currentData, selectedMetric]);
 
   // Format Y-axis tick for percentages
   const formatYTick = (value) => {
@@ -345,11 +353,15 @@ export function PercentBarChartComponent({
 }: ChartComponentProps) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
-  const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0])
-        .filter((key) => key.endsWith("_display"))
-        .map((key) => key.replace("_display", ""))
-    : [selectedMetric];
+
+  // Calculate seriesKeys - moved outside useMemo to avoid dependency issues
+  const seriesKeys = useMemo(() => {
+    return isMultiSeries
+      ? Object.keys(currentData[0])
+          .filter((key) => key.endsWith("_display"))
+          .map((key) => key.replace("_display", ""))
+      : [selectedMetric];
+  }, [isMultiSeries, currentData, selectedMetric]);
 
   // Format Y-axis tick for percentages
   const formatYTick = (value) => {
@@ -437,14 +449,16 @@ export function DonutChartComponent({
 }: ChartComponentProps) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
-  const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0])
-        .filter((key) => key.endsWith("_display"))
-        .map((key) => key.replace("_display", ""))
-    : [selectedMetric];
 
   // For donut chart, we need to aggregate the data across all time periods
   const aggregatedData = useMemo(() => {
+    // Calculate seriesKeys inside useMemo to avoid dependency changes
+    const seriesKeys = isMultiSeries
+      ? Object.keys(currentData[0])
+          .filter((key) => key.endsWith("_display"))
+          .map((key) => key.replace("_display", ""))
+      : [selectedMetric];
+
     if (!isMultiSeries) {
       // Single series - sum all values
       const total = currentData.reduce((sum, point) => {
@@ -474,7 +488,7 @@ export function DonutChartComponent({
       value: seriesTotals[key],
       fill: CHART_COLORS[index % CHART_COLORS.length],
     }));
-  }, [currentData, selectedMetric, seriesKeys, isMultiSeries]);
+  }, [currentData, selectedMetric, isMultiSeries]);
 
   // Custom tooltip for pie chart
   const CustomPieTooltip = ({ active, payload }: any) => {
@@ -530,11 +544,15 @@ export function LineChartComponent({
 }: ChartComponentProps) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
-  const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0])
-        .filter((key) => key.endsWith("_display"))
-        .map((key) => key.replace("_display", ""))
-    : [selectedMetric];
+
+  // Calculate seriesKeys - moved outside useMemo to avoid dependency issues
+  const seriesKeys = useMemo(() => {
+    return isMultiSeries
+      ? Object.keys(currentData[0])
+          .filter((key) => key.endsWith("_display"))
+          .map((key) => key.replace("_display", ""))
+      : [selectedMetric];
+  }, [isMultiSeries, currentData, selectedMetric]);
 
   // Format Y-axis tick for MTTR
   const formatYTick = (value) => {
@@ -611,11 +629,15 @@ export function VerticalBarChartComponent({
 }: ChartComponentProps) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
-  const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0])
-        .filter((key) => key.endsWith("_display"))
-        .map((key) => key.replace("_display", ""))
-    : [selectedMetric];
+
+  // Calculate seriesKeys - moved outside useMemo to avoid dependency issues
+  const seriesKeys = useMemo(() => {
+    return isMultiSeries
+      ? Object.keys(currentData[0])
+          .filter((key) => key.endsWith("_display"))
+          .map((key) => key.replace("_display", ""))
+      : [selectedMetric];
+  }, [isMultiSeries, currentData, selectedMetric]);
 
   // Format Y-axis tick for MTTR
   const formatYTick = (value) => {
@@ -679,11 +701,15 @@ export function StackedVerticalBarChartComponent({
 }: ChartComponentProps) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
-  const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0])
-        .filter((key) => key.endsWith("_display"))
-        .map((key) => key.replace("_display", ""))
-    : [selectedMetric];
+
+  // Calculate seriesKeys - moved outside useMemo to avoid dependency issues
+  const seriesKeys = useMemo(() => {
+    return isMultiSeries
+      ? Object.keys(currentData[0])
+          .filter((key) => key.endsWith("_display"))
+          .map((key) => key.replace("_display", ""))
+      : [selectedMetric];
+  }, [isMultiSeries, currentData, selectedMetric]);
 
   // Format Y-axis tick for MTTR
   const formatYTick = (value) => {
@@ -745,11 +771,15 @@ export function HorizontalBarChartComponent({
 }: ChartComponentProps) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
-  const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0])
-        .filter((key) => key.endsWith("_display"))
-        .map((key) => key.replace("_display", ""))
-    : [selectedMetric];
+
+  // Calculate seriesKeys - moved outside useMemo to avoid dependency issues
+  const seriesKeys = useMemo(() => {
+    return isMultiSeries
+      ? Object.keys(currentData[0])
+          .filter((key) => key.endsWith("_display"))
+          .map((key) => key.replace("_display", ""))
+      : [selectedMetric];
+  }, [isMultiSeries, currentData, selectedMetric]);
 
   return (
     <ResponsiveContainer width="100%" height={400}>
@@ -806,11 +836,15 @@ export function StackedHorizontalBarChartComponent({
 }: ChartComponentProps) {
   // Check if this is multi-series data
   const isMultiSeries = groupBy !== "org" && currentData.length > 0;
-  const seriesKeys = isMultiSeries
-    ? Object.keys(currentData[0])
-        .filter((key) => key.endsWith("_display"))
-        .map((key) => key.replace("_display", ""))
-    : [selectedMetric];
+
+  // Calculate seriesKeys - moved outside useMemo to avoid dependency issues
+  const seriesKeys = useMemo(() => {
+    return isMultiSeries
+      ? Object.keys(currentData[0])
+          .filter((key) => key.endsWith("_display"))
+          .map((key) => key.replace("_display", ""))
+      : [selectedMetric];
+  }, [isMultiSeries, currentData, selectedMetric]);
 
   return (
     <ResponsiveContainer width="100%" height={400}>
@@ -907,13 +941,17 @@ function ComposedChartComponent({
 
   // Check if primary chart is multi-series
   const isMultiSeries = groupBy !== "org" && mergedData.length > 0;
-  const seriesKeys = isMultiSeries
-    ? Object.keys(mergedData[0])
-        .filter(
-          (key) => key.endsWith("_display") && !key.startsWith("overlay_")
-        )
-        .map((key) => key.replace("_display", "")) // Remove suffix for clean names
-    : [selectedMetric]; // Remove the _display here since we add it later
+
+  // Calculate seriesKeys - moved outside useMemo to avoid dependency issues
+  const seriesKeys = useMemo(() => {
+    return isMultiSeries
+      ? Object.keys(mergedData[0])
+          .filter(
+            (key) => key.endsWith("_display") && !key.startsWith("overlay_")
+          )
+          .map((key) => key.replace("_display", "")) // Remove suffix for clean names
+      : [selectedMetric]; // Remove the _display here since we add it later
+  }, [isMultiSeries, mergedData, selectedMetric]);
 
   // Detect overlay series
   const isOverlayMultiSeries =
