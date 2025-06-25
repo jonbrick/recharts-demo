@@ -1236,7 +1236,7 @@ function DashboardContent() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col gap-6">
         {/* Header row with title and date picker */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-2">
           <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
             Modules <RiArrowRightSLine className="w-4 h-4 inline" /> PRs over
             last 7 days
