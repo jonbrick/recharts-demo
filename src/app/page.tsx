@@ -50,7 +50,6 @@ import { Switch } from "../components/Switch";
 const UnifiedCard = ({
   // Summary props
   operator,
-  onOperatorChange, // eslint-disable-line @typescript-eslint/no-unused-vars
   selectedTable,
   selectedMetric,
   granularity,
@@ -58,46 +57,28 @@ const UnifiedCard = ({
   dateMode,
   relativeDays,
   selectedDateRange,
-  summaryOverlayActive, // eslint-disable-line @typescript-eslint/no-unused-vars
   overlayActiveTable,
   overlayActiveMetric,
-  summaryOverlayGroupBy, // eslint-disable-line @typescript-eslint/no-unused-vars
-  summaryGroupBy, // eslint-disable-line @typescript-eslint/no-unused-vars
-  onSummaryGroupByChange, // eslint-disable-line @typescript-eslint/no-unused-vars
-  onSummaryOverlayActiveChange, // eslint-disable-line @typescript-eslint/no-unused-vars
-  onSummaryOverlayGroupByChange, // eslint-disable-line @typescript-eslint/no-unused-vars
   summaryPreviousPeriod,
-  setSummaryPreviousPeriod, // eslint-disable-line @typescript-eslint/no-unused-vars
   summaryCompareDatasets,
-  setSummaryCompareDatasets, // eslint-disable-line @typescript-eslint/no-unused-vars
   summaryPreviousPeriodData,
   summaryOverlayCurrentData,
   // Chart props
-  onGranularityChange, // eslint-disable-line @typescript-eslint/no-unused-vars
   chartType,
-  onChartTypeChange, // eslint-disable-line @typescript-eslint/no-unused-vars
   overlayActiveChartType,
-  setOverlayActiveChartType, // eslint-disable-line @typescript-eslint/no-unused-vars
   chartData,
   chartGroupBy,
   chartOverlayData,
   chartOverlayGroupBy,
   chartOverlayActive,
-  onChartGroupByChange, // eslint-disable-line @typescript-eslint/no-unused-vars
-  onChartOverlayActiveChange, // eslint-disable-line @typescript-eslint/no-unused-vars
-  onChartOverlayGroupByChange, // eslint-disable-line @typescript-eslint/no-unused-vars
   // List props
   tableView,
-  onTableViewChange, // eslint-disable-line @typescript-eslint/no-unused-vars
   listChartData,
   listGroupBy,
   dataTables,
   listOverlayActive,
   listOverlayData,
   listOverlayGroupBy,
-  onListGroupByChange, // eslint-disable-line @typescript-eslint/no-unused-vars
-  onListOverlayActiveChange, // eslint-disable-line @typescript-eslint/no-unused-vars
-  onListOverlayGroupByChange, // eslint-disable-line @typescript-eslint/no-unused-vars
   // Visibility props
   showSummary,
   showChart,
@@ -1371,7 +1352,6 @@ function DashboardContent() {
           {/* Unified Card */}
           <UnifiedCard
             operator={operator}
-            onOperatorChange={handleOperatorChange}
             selectedTable={selectedTable}
             selectedMetric={selectedMetric}
             granularity={granularity}
@@ -1379,44 +1359,26 @@ function DashboardContent() {
             dateMode={dateMode}
             relativeDays={relativeDays}
             selectedDateRange={selectedDateRange}
-            summaryOverlayActive={summaryOverlayActive}
             overlayActiveTable={overlayActiveTable}
             overlayActiveMetric={overlayActiveMetric}
-            summaryOverlayGroupBy={summaryOverlayGroupBy}
-            summaryGroupBy={summaryGroupBy}
-            onSummaryGroupByChange={handleSummaryGroupByChange}
-            onSummaryOverlayActiveChange={handleSummaryOverlayActiveChange}
-            onSummaryOverlayGroupByChange={handleSummaryOverlayGroupByChange}
             summaryPreviousPeriod={summaryPreviousPeriod}
-            setSummaryPreviousPeriod={setSummaryPreviousPeriod}
             summaryCompareDatasets={summaryCompareDatasets}
-            setSummaryCompareDatasets={setSummaryCompareDatasets}
             summaryPreviousPeriodData={summaryPreviousPeriodData}
             summaryOverlayCurrentData={summaryOverlayCurrentData}
-            onGranularityChange={handleGranularityChange}
             chartType={chartType}
-            onChartTypeChange={handleChartTypeChange}
             overlayActiveChartType={overlayActiveChartType}
-            setOverlayActiveChartType={setOverlayActiveChartType}
             chartData={chartData}
             chartGroupBy={chartGroupBy}
             chartOverlayData={chartOverlayData}
             chartOverlayGroupBy={chartOverlayGroupBy}
             chartOverlayActive={chartOverlayActive}
-            onChartGroupByChange={handleChartGroupByChange}
-            onChartOverlayActiveChange={handleChartOverlayActiveChange}
-            onChartOverlayGroupByChange={handleChartOverlayGroupByChange}
             tableView={tableView}
-            onTableViewChange={handleTableViewChange}
             listChartData={listChartData}
             listGroupBy={listGroupBy}
             dataTables={dataTables}
             listOverlayActive={listOverlayActive}
             listOverlayData={listOverlayData}
             listOverlayGroupBy={listOverlayGroupBy}
-            onListGroupByChange={handleListGroupByChange}
-            onListOverlayActiveChange={handleListOverlayActiveChange}
-            onListOverlayGroupByChange={handleListOverlayGroupByChange}
             showSummary={showSummary}
             showChart={showChart}
             showTable={showTable}
