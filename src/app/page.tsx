@@ -247,6 +247,7 @@ function DashboardContent() {
   const [summaryGroupBy, setSummaryGroupBy] = useState("org");
   const [summaryOverlayActive, setSummaryOverlayActive] = useState(false);
   const [summaryOverlayGroupBy, setSummaryOverlayGroupBy] = useState("org");
+  const [summaryPreviousPeriod, setSummaryPreviousPeriod] = useState(true);
 
   // Chart card specific state
   const [chartGroupBy, setChartGroupBy] = useState("org");
@@ -259,7 +260,6 @@ function DashboardContent() {
   const [listOverlayGroupBy, setListOverlayGroupBy] = useState("org");
 
   // Card-specific comparison mode states
-  const [summaryPreviousPeriod, setSummaryPreviousPeriod] = useState(false);
   const [chartComparisonMode, _setChartComparisonMode] =
     useState("Compare Datasets");
   const [listComparisonMode, _setListComparisonMode] =
@@ -310,6 +310,11 @@ function DashboardContent() {
       setSummaryGroupBy(state.summaryGroupBy || "org");
       setSummaryOverlayActive(state.summaryOverlayActive || false);
       setSummaryOverlayGroupBy(state.summaryOverlayGroupBy || "org");
+      setSummaryPreviousPeriod(
+        state.summaryPreviousPeriod !== undefined
+          ? state.summaryPreviousPeriod
+          : true
+      );
 
       // Initialize chart-specific state from URL
       setChartGroupBy(state.chartGroupBy || "org");
@@ -346,6 +351,7 @@ function DashboardContent() {
         summaryGroupBy: "org",
         summaryOverlayActive: false,
         summaryOverlayGroupBy: "org",
+        summaryPreviousPeriod: true,
         // Include all chart card parameters with defaults
         chartGroupBy: "org",
         chartOverlayActive: false,
